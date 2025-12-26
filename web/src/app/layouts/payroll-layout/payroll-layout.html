@@ -1,0 +1,19 @@
+<div class="h-screen w-screen flex flex-col">
+  <app-navbar></app-navbar>
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Overlay para móvil -->
+    <div
+      [class.opacity-100]="sidebarStore.isOpen() && !sidebarStore.isDesktop()"
+      [class.opacity-0]="!sidebarStore.isOpen() || sidebarStore.isDesktop()"
+      [class.pointer-events-none]="!sidebarStore.isOpen()"
+      (click)="sidebarStore.closeSidebar()"
+      class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 sm:hidden">
+    </div>
+
+    <app-sidebar></app-sidebar>
+
+    <div class="flex-1 overflow-y-auto px-4 pt-2   bg-[url('/images/background.png')] bg-cover bg-center">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

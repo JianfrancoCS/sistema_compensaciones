@@ -1,0 +1,32 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Generar Códigos QR"
+  (onHide)="onModalHide()"
+  (onSubmit)="onSubmit()"
+  [isSubmitDisabled]="generateForm.invalid"
+>
+  <form [formGroup]="generateForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="quantity" class="font-semibold text-sm">Cantidad de Códigos a Generar</label>
+      <p-inputNumber
+        id="quantity"
+        formControlName="quantity"
+        mode="decimal"
+        [min]="1"
+        [max]="1000"
+        [invalid]="generateForm.get('quantity')?.invalid && (generateForm.get('quantity')?.dirty || generateForm.get('quantity')?.touched)"
+      ></p-inputNumber>
+      @if (generateForm.get('quantity')?.invalid && (generateForm.get('quantity')?.dirty || generateForm.get('quantity')?.touched)) {
+        @if (generateForm.get('quantity')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">La cantidad es requerida.</p-message>
+        }
+        @if (generateForm.get('quantity')?.errors?.['min']) {
+          <p-message severity="error" variant="simple" size="small">La cantidad mínima es 1.</p-message>
+        }
+        @if (generateForm.get('quantity')?.errors?.['max']) {
+          <p-message severity="error" variant="simple" size="small">La cantidad máxima es 1000.</p-message>
+        }
+      }
+    </div>
+  </form>
+</app-modal-template>

@@ -1,0 +1,64 @@
+import kotlin.Boolean;
+
+-- =============================================
+-- Tabla: Motivos de Tareo (solo lectura desde servidor)
+-- Basado en: tbl_tareo_motives del backend
+-- =============================================
+
+CREATE TABLE tareo_motives (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+
+    public_id TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+
+    -- Campo clave para cálculo de horas
+    is_paid INTEGER AS Boolean NOT NULL DEFAULT 1,
+
+    deleted_at INTEGER
+);
+
+-- Índices
+CREATE INDEX tareo_motives_public_id ON tareo_motives(public_id) WHERE deleted_at IS NULL;
+CREATE INDEX tareo_motives_name ON tareo_motives(name) WHERE deleted_at IS NULL;
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+-- Insertar/Actualizar motivo (desde servidor)
+insertOrReplace:
+INSERT OR REPLACE INTO tareo_motives (
+    public_id,
+    name,
+    description,
+    is_paid
+) VALUES (?, ?, ?, ?);
+
+-- Obtener motivo por ID
+getById:
+SELECT * FROM tareo_motives
+WHERE id = ? AND deleted_at IS NULL;
+
+-- Obtener motivo por public_id
+getByPublicId:
+SELECT * FROM tareo_motives
+WHERE public_id = ? AND deleted_at IS NULL;
+
+-- Listar todos los motivos activos
+getAllActive:
+SELECT * FROM tareo_motives
+WHERE deleted_at IS NULL
+ORDER BY name ASC;
+
+-- Listar motivos pagados (completan jornada)
+getPaidMotives:
+SELECT * FROM tareo_motives
+WHERE is_paid = 1 AND deleted_at IS NULL
+ORDER BY name ASC;
+
+-- Listar motivos no pagados (horas reales)
+getUnpaidMotives:
+SELECT * FROM tareo_motives
+WHERE is_paid = 0 AND deleted_at IS NULL
+ORDER BY name ASC;

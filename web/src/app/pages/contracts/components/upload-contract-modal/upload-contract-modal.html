@@ -1,0 +1,26 @@
+<app-modal-template
+  [visible]="visible"
+  [headerText]="'Cargar Contrato Firmado: ' + (contract?.contractNumber || '')"
+  (onHide)="hideModal()"
+  [showSubmitButton]="true"
+  submitButtonLabel="Subir Archivos"
+  cancelButtonLabel="Cancelar"
+  [isSubmitDisabled]="!selectedFile() || uploading()"
+  (onSubmit)="uploadFile()"
+  width="70vw"
+>
+  <p-fileUpload
+    name="contractFile"
+    (onSelect)="onFileSelect($event)"
+    [customUpload]="true"
+    [multiple]="false"
+    accept="application/pdf"
+    maxFileSize="10000000"
+    chooseLabel="Seleccionar PDF"
+    uploadLabel="Subir"
+    cancelLabel="Limpiar"
+    [showUploadButton]="false"
+    [showCancelButton]="true"
+  >
+  </p-fileUpload>
+</app-modal-template>

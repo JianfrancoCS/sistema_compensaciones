@@ -1,0 +1,208 @@
+<p-toast></p-toast>
+<app-modal-template
+  [visible]="visible"
+  [headerText]="'Asignar Responsable de Firma'"
+  [width]="'50rem'"
+  (onHide)="hideModal()"
+  (onSubmit)="assignSigner()"
+  [isSubmitDisabled]="isSubmitDisabled()"
+>
+  @if (isProcessing()) {
+    <div class="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 rounded-lg">
+      <div class="flex flex-col items-center gap-3">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+        <p class="text-sm text-gray-600 font-medium">
+          @if (uploadingImage()) {
+            Subiendo imagen...
+          } @else {
+            Guardando...
+          }
+        </p>
+      </div>
+    </div>
+  }
+  <form [formGroup]="signerForm" [class.opacity-50]="isProcessing()">
+    <div class="mb-4">
+      <p class="text-sm text-gray-600 mb-4">
+        <strong>Fundo:</strong> {{ subsidiary?.subsidiaryName }}
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="employeeDocumentNumber" class="font-semibold text-sm">Número de Documento</label>
+      <div class="p-inputgroup">
+        <input 
+          pInputText 
+          id="employeeDocumentNumber" 
+          formControlName="employeeDocumentNumber" 
+          class="flex-auto text-sm" 
+          autocomplete="off"
+          placeholder="Ingrese el número de documento del empleado (8 dígitos)"
+          maxlength="9"
+          [readonly]="!!foundEmployee()"
+        />
+        @if (!foundEmployee()) {
+        <button 
+          type="button" 
+          pButton 
+          icon="pi pi-search" 
+          class="h-10" 
+          (click)="onEmployeeSearch()" 
+            [disabled]="signerForm.get('employeeDocumentNumber')?.invalid || searchingEmployee()"
+            [loading]="searchingEmployee()"
+          ></button>
+        } @else {
+          <button 
+            type="button" 
+            pButton 
+            icon="pi pi-times" 
+            class="h-10" 
+            severity="secondary"
+            (click)="clearEmployeeSearch()"
+            pTooltip="Limpiar búsqueda"
+            tooltipPosition="top"
+        ></button>
+        }
+      </div>
+      @if (signerForm.get('employeeDocumentNumber')?.invalid && (signerForm.get('employeeDocumentNumber')?.dirty || signerForm.get('employeeDocumentNumber')?.touched)) {
+        @if (signerForm.get('employeeDocumentNumber')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">Número de documento requerido.</p-message>
+        }
+        @if (signerForm.get('employeeDocumentNumber')?.errors?.['pattern']) {
+          <p-message severity="error" variant="simple" size="small">El número de documento debe contener entre 8 y 9 dígitos numéricos.</p-message>
+        }
+      }
+      @if (foundEmployee()) {
+        <div class="p-4 bg-green-50 border border-green-300 rounded-lg shadow-sm">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <i class="pi pi-check-circle text-2xl text-green-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-green-900 mb-1">
+                {{ foundEmployee()?.fullName }}
+              </p>
+              <div class="space-y-1">
+                <p class="text-xs text-green-700">
+                  <span class="font-medium">Documento:</span> {{ foundEmployee()?.documentNumber }}
+                </p>
+                <p class="text-xs text-green-700">
+                  <span class="font-medium">Cargo:</span> {{ foundEmployee()?.position }}
+                </p>
+                @if (foundEmployee()?.subsidiaryName) {
+                  <p class="text-xs text-green-700">
+                    <span class="font-medium">Fundo:</span> {{ foundEmployee()?.subsidiaryName }}
+          </p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      @if (employeeSearchError() && !foundEmployee() && !searchingEmployee()) {
+        <div class="p-4 bg-red-50 border border-red-300 rounded-lg shadow-sm">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <i class="pi pi-times-circle text-2xl text-red-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-red-900">
+                No se encontró empleado con el número de documento {{ signerForm.get('employeeDocumentNumber')?.value }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="responsiblePosition" class="font-semibold text-sm">Responsable</label>
+      <input 
+        pInputText 
+        id="responsiblePosition" 
+        formControlName="responsiblePosition" 
+        class="flex-auto text-sm" 
+        autocomplete="off"
+        placeholder="Ej: JEFE DE RECURSOS HUMANOS"
+      />
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label class="font-semibold text-sm">Imagen de Firma</label>
+      
+      <!-- Mostrar imagen existente si hay URL (modo edición) -->
+      @if (signatureImageUrl() && !signatureImageFile()) {
+        <div class="border border-gray-300 rounded p-4 bg-gray-50 mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-semibold text-gray-700">Imagen actual:</p>
+            <p-badge value="Subido" severity="success"></p-badge>
+          </div>
+          <img [src]="signatureImageUrl()" alt="Firma actual" class="w-full max-h-32 object-contain border border-gray-200 rounded" />
+          <button 
+            type="button"
+            pButton 
+            label="Cambiar imagen" 
+            icon="pi pi-times" 
+            class="mt-2 w-full" 
+            severity="secondary"
+            (click)="clearExistingImage()"
+          ></button>
+        </div>
+      }
+      
+      <!-- Mostrar preview de archivo seleccionado localmente (reemplaza el input) -->
+      @if (signatureImagePreview() && signatureImageFile()) {
+        <div class="border border-gray-300 rounded p-4 bg-gray-50">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-semibold text-gray-700">Vista previa:</p>
+            <div class="flex gap-2">
+              <p-badge value="Listo para subir" severity="success"></p-badge>
+              <button 
+                type="button"
+                pButton 
+                icon="pi pi-times" 
+                class="h-8 w-8" 
+                severity="secondary"
+                (click)="clearSelectedImage()"
+                pTooltip="Eliminar imagen y volver a seleccionar"
+                tooltipPosition="top"
+              ></button>
+            </div>
+          </div>
+          <img [src]="signatureImagePreview()" alt="Vista previa" class="w-full max-h-32 object-contain border border-gray-200 rounded" />
+                  </div>
+      } @else {
+        <!-- Input nativo para seleccionar imagen (solo se muestra si no hay preview) -->
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:border-gray-400 transition-colors">
+          <input 
+            type="file" 
+            id="signatureImageInput"
+            accept="image/*" 
+            class="hidden"
+            (change)="onFileSelected($event)"
+          />
+          <label 
+            for="signatureImageInput" 
+            class="flex flex-col items-center justify-center cursor-pointer"
+          >
+            <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-3"></i>
+            <p class="text-sm text-gray-600 mb-2">Haga clic para seleccionar una imagen</p>
+            <p class="text-xs text-gray-500">Tamaño máximo: 1MB</p>
+          </label>
+                </div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="notes" class="font-semibold text-sm">Notas</label>
+      <textarea 
+        pInputTextarea 
+        id="notes" 
+        formControlName="notes" 
+        rows="3"
+        class="w-full text-sm"
+        placeholder="Notas adicionales sobre el responsable de firma"
+      ></textarea>
+    </div>
+  </form>
+</app-modal-template>

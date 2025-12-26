@@ -1,0 +1,95 @@
+<p-dialog
+  [visible]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3"
+  (onHide)="onDialogHide()"
+  (visibleChange)="onVisibilityChange($event)"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-shield text-blue-500 text-xl"></i>
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">{{ getModalTitle() }}</h2>
+        <p class="text-sm text-gray-600">{{ getCurrentStepTitle() }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  @if (!loading()) {
+    <div class="p-6">
+      <!-- Información de la variable -->
+      @if (selectedVariable) {
+        <div class="mb-6">
+          <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-info-circle text-blue-600"></i>
+              <span class="font-medium text-blue-800">Variable:</span>
+              <span class="text-blue-700">{{ selectedVariable.name }} ({{ selectedVariable.code }})</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Selector de variable (solo cuando no está preseleccionada) -->
+      @if (!selectedVariable) {
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Seleccionar Variable
+          </label>
+          <app-variable-selector
+            [selectedVariables]="[]"
+            [allowMultiple]="false"
+            placeholder="Buscar variable para configurar validación..."
+            (selectionChange)="onVariableSelected($event)"
+          ></app-variable-selector>
+        </div>
+      }
+
+      <!-- Formulario de validación -->
+      @if (selectedVariable) {
+        <app-variable-validation-form
+          [variableId]="selectedVariable.publicId"
+          [fullValidationData]="variableStore.currentVariableValidation()"
+          (validationChange)="onValidationChange($event)"
+          (previewChange)="onPreviewChange($event)"
+        ></app-variable-validation-form>
+      }
+    </div>
+  }
+
+  <!-- Loading state -->
+  @if (loading()) {
+    <div class="text-center py-8">
+      <i class="pi pi-spin pi-spinner text-3xl text-blue-500 mb-4"></i>
+      <p class="text-gray-600">Cargando validación...</p>
+    </div>
+  }
+
+  <!-- Footer con acciones -->
+  <ng-template #footer>
+    <div class="flex justify-end gap-3">
+      <button
+        type="button"
+        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
+        (click)="close()"
+        [disabled]="saving()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2 transition-colors"
+        (click)="save()"
+        [disabled]="!canSave() || saving() || loading()"
+      >
+        <i [class]="saving() ? 'pi pi-spin pi-spinner' : 'pi pi-save'"></i>
+        {{ saving() ? 'Guardando...' : (mode === 'edit' ? 'Actualizar' : 'Guardar') }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+

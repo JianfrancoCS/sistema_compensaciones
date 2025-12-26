@@ -1,0 +1,138 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Contratos</h1>
+    <button pButton type="button" label="Crear" icon="pi pi-plus" class="p-button-success h-10" (click)="navigateToCreate()"></button>
+  </div>
+
+  <app-view-contract-content-modal [visible]="isViewModalVisible()" [contract]="selectedContract()" (onHide)="hideViewModal()"></app-view-contract-content-modal>
+  <app-upload-contract-modal [visible]="isUploadModalVisible()" [contract]="selectedContract()" (onHide)="hideUploadModal()"></app-upload-contract-modal>
+  <app-view-contract-details-modal [visible]="isDetailsModalVisible()" [contract]="selectedContract()" (onHide)="hideDetailsModal()"></app-view-contract-details-modal>
+  @if (selectedContract() && isSignModalVisible()) {
+    <app-sign-contract-modal
+      [visible]="isSignModalVisible()"
+      [contract]="selectedContract()!"
+      (onHide)="hideSignModal()"
+      (onSigned)="onContractSigned()">
+    </app-sign-contract-modal>
+  }
+
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="contracts()"
+               dataKey="publicId"
+               [rows]="10"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="loading()"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadContracts($event)"
+               [totalRecords]="totalRecords()"
+               [first]="0"
+               sortField="updatedAt"
+               [sortOrder]="-1"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex flex-col md:flex-row gap-2 justify-end">
+            <p-select
+              placeholder="Filtrar por tipo"
+              optionLabel="name"
+              optionValue="publicId"
+              [options]="contractTypes()"
+              [showClear]="true"
+              (onChange)="onFilterByContractType($event.value)"
+              class="w-full md:w-48">
+            </p-select>
+            <p-select
+              placeholder="Filtrar por estado"
+              optionLabel="name"
+              optionValue="publicId"
+              [options]="states()"
+              [showClear]="true"
+              (onChange)="onFilterByState($event.value)"
+              class="w-full md:w-48">
+            </p-select>
+            <p-inputgroup class="w-full md:max-w-sm">
+                <p-inputgroup-addon>
+                    <i class="pi pi-search"></i>
+                </p-inputgroup-addon>
+                <input pInputText type="text" [value]="contractStore.filters().contractNumber" (input)="onSearch($event)" placeholder="Buscar por número" class="text-sm"/>
+                <p-inputgroup-addon>
+                    <p-button icon="pi pi-times" severity="secondary" (click)="contractStore.clearSearch()"></p-button>
+                </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:12rem" pSortableColumn="contractNumber">Número de contrato <p-sortIcon field="contractNumber"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="personDocumentNumber">Documento <p-sortIcon field="personDocumentNumber"></p-sortIcon></th>
+            <th style="min-width:12rem" >Tipo </th>
+            <th style="min-width:10rem" >Fecha Inicio </th>
+            <th style="min-width:10rem" >Fecha Fin </th>
+            <th style="min-width:8rem" >Estado</th>
+            <th style="min-width:6rem" >Firmado</th>
+            <th style="width: 14rem">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-contract>
+          <tr>
+            <td class="text-sm px-3">{{ contract.contractNumber }}</td>
+            <td class="text-sm px-3">{{ contract.personDocumentNumber }}</td>
+            <td class="text-sm px-3">{{ contract.contractTypeName }}</td>
+            <td class="text-sm px-3">{{ contract.startDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-sm px-3">{{ contract.endDate ? (contract.endDate | date: 'dd/MM/yyyy') : 'Indefinido' }}</td>
+            <td class="text-sm px-3">
+              <span [class]="contract.isSigned ? 'text-green-600 font-medium' : 'text-red-600'">
+                {{ contract.stateName }}
+              </span>
+            </td>
+            <td class="text-sm px-3 text-center">
+              <i [class]="contract.isSigned ? 'pi pi-check text-green-600' : 'pi pi-times text-red-600'"></i>
+            </td>
+            <td>
+              <div class="flex justify-center gap-1">
+                <button pButton type="button" pTooltip="Ver Contrato" tooltipPosition="top" icon="pi pi-eye" class="p-button-info h-8 w-8" (click)="viewContract(contract)"></button>
+
+                <button 
+                  pButton 
+                  type="button" 
+                  pTooltip="Firmar Contrato" 
+                  tooltipPosition="top" 
+                  icon="pi pi-pencil" 
+                  class="p-button-success h-8 w-8" 
+                  [disabled]="contract.isSigned || isCancelled(contract)"
+                  (click)="showSignModal(contract)">
+                </button>
+
+                <button 
+                  pButton 
+                  type="button" 
+                  pTooltip="Anular Contrato" 
+                  tooltipPosition="top" 
+                  icon="pi pi-ban" 
+                  class="p-button-danger h-8 w-8" 
+                  [disabled]="isCancelled(contract)"
+                  (click)="cancelContract(contract)">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center text-sm p-4">No se encontraron contratos.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

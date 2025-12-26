@@ -1,0 +1,66 @@
+<app-modal-template
+  [visible]="visible"
+  [headerText]="'Crear Nuevo Rol'"
+  [width]="'min(500px, 90vw)'"
+  (onHide)="hideModal()"
+  (onSubmit)="createRole()"
+  [isSubmitDisabled]="!roleForm.valid || roleStore.loading()"
+>
+  <form [formGroup]="roleForm" class="p-6 space-y-4">
+    <!-- Nombre del Rol -->
+    <div class="flex flex-col gap-2">
+      <label for="name" class="font-medium text-gray-700">
+        Nombre del Rol <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="name"
+        formControlName="name"
+        placeholder="Ingrese el nombre del rol"
+        class="w-full"
+        [class.ng-invalid]="roleForm.get('name')?.invalid && roleForm.get('name')?.touched"
+      />
+      @if (roleForm.get('name')?.invalid && roleForm.get('name')?.touched) {
+        <small class="text-red-500">
+          @if (roleForm.get('name')?.errors?.['required']) {
+            El nombre es requerido
+          }
+          @if (roleForm.get('name')?.errors?.['minlength']) {
+            El nombre debe tener al menos 3 caracteres
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Permisos -->
+    <div class="flex flex-col gap-2">
+      <label for="permissionIds" class="font-medium text-gray-700">
+        Permisos <span class="text-red-500">*</span>
+      </label>
+      @if (loadingPermissions) {
+        <div class="flex items-center gap-2 p-2 text-gray-500">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Cargando permisos...</span>
+        </div>
+      } @else {
+        <p-multiSelect
+          formControlName="permissionIds"
+          [options]="availablePermissions"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Seleccione permisos"
+          [filter]="true"
+          filterPlaceHolder="Buscar permiso"
+          [style]="{'width': '100%'}"
+          [class.ng-invalid]="roleForm.get('permissionIds')?.invalid && roleForm.get('permissionIds')?.touched"
+        >
+        </p-multiSelect>
+        @if (roleForm.get('permissionIds')?.invalid && roleForm.get('permissionIds')?.touched) {
+          <small class="text-red-500">
+            Debe seleccionar al menos un permiso
+          </small>
+        }
+      }
+    </div>
+  </form>
+</app-modal-template>

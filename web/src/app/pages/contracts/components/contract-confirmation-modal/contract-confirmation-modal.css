@@ -1,0 +1,19 @@
+::ng-deep .p-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 6px 6px 0 0;
+}
+
+::ng-deep .p-dialog .p-dialog-header .p-dialog-title {
+  color: white;
+  font-weight: 600;
+}
+
+::ng-deep .p-dialog .p-dialog-header .p-dialog-header-icon {
+  color: white;
+}
+
+::ng-deep .p-dialog .p-dialog-header .p-dialog-header-icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+

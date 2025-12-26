@@ -1,0 +1,28 @@
+# Perfil de TESTING
+# Para usar este perfil: SPRING_PROFILES_ACTIVE=test
+
+server:
+  port: ${SERVER_PORT:10001} # Puerto diferente para no conflictos
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=agropay_test;trustServerCertificate=true}
+    username: ${DB_USERNAME:agropay_user}
+    password: ${DB_PASSWORD:227480@AGROPAy2025}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+external-services:
+  reniec:
+    peru-devs:
+      base-url: ${RENIEC_BASE_URL:https://api.perudevs.com/api}
+      api-key: ${PERU_DEVS_API_KEY:test-api-key}
+  sunat:
+    peru-devs:
+      base-url: ${SUNAT_BASE_URL:https://api.perudevs.com/api}
+      api-key: ${PERU_DEVS_API_KEY:test-api-key}
+
+cloudinary:
+  cloud_name: ${CLOUDINARY_CLOUD_NAME:test-cloud}
+  api_key: ${CLOUDINARY_API_KEY:test-key}
+  api_secret: ${CLOUDINARY_API_SECRET:test-secret}
+

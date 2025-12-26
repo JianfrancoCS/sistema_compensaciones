@@ -1,0 +1,91 @@
+<div class="p-4">
+  <h2 class="text-xl font-semibold mb-6 text-gray-600">Configuración de Planilla</h2>
+
+  @if (store.isLoading()) {
+    <div class="flex items-center justify-center h-32 text-gray-600">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i> Cargando configuración...
+    </div>
+  }
+
+  @if (!store.isLoading() && store.activeConfiguration()) {
+    <div class="p-6 mb-6 bg-white/50 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100">
+      <!-- Datos de Configuración -->
+      <div class="mb-6">
+        <h3 class="text-3xl font-bold text-gray-800 mb-4">{{ store.activeConfiguration()?.code }}</h3>
+        <div class="flex items-center gap-3">
+          <app-date-display [date]="store.activeConfiguration()?.createdAt ?? ''" [type]="'created'" [variant]="'full'"></app-date-display>
+          <app-date-display [date]="store.activeConfiguration()?.updatedAt ?? ''" [type]="'updated'" [variant]="'full'"></app-date-display>
+        </div>
+      </div>
+
+      <!-- Conceptos Asignados -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Conceptos Asignados:</h3>
+        @if (assignedConcepts().length > 0) {
+          <div class="flex flex-wrap gap-2">
+            @for (concept of assignedConcepts(); track concept.conceptPublicId) {
+              <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ concept.name }}</span>
+            }
+          </div>
+        } @else {
+          <p class="text-gray-500 italic">No hay conceptos asignados a esta configuración.</p>
+        }
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex justify-end gap-2 mt-6 pt-6 border-t border-gray-200">
+        <p-button
+          label="Editar Conceptos"
+          icon="pi pi-pencil"
+          styleClass="p-button-secondary p-button-text"
+          (onClick)="navigateToEditConcepts()"
+        ></p-button>
+        <p-button
+          label="Eliminar Configuración Activa"
+          icon="pi pi-trash"
+          styleClass="p-button-danger p-button-text"
+          (onClick)="showDeleteConfirm()"
+          [loading]="store.isLoading()"
+        ></p-button>
+      </div>
+    </div>
+  } @else if (!store.isLoading() && !store.activeConfiguration() && !store.error()) {
+    <div class="text-center text-gray-600 mt-8 p-8 bg-white/50 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100">
+      <p class="mb-6 text-lg">No se encontró ninguna configuración de planilla activa.</p>
+      <p-button
+        label="Crear Nueva Configuración"
+        icon="pi pi-plus"
+        [routerLink]="['/system/payroll-configurations/create']"
+        styleClass="p-button-primary"
+      ></p-button>
+    </div>
+  }
+
+  <!-- Diálogo de Confirmación para Eliminar (este sí se mantiene como modal) -->
+  <p-dialog
+    header="Confirmar Eliminación"
+    [(visible)]="displayDeleteConfirm"
+    [modal]="true"
+    [style]="{ width: '30vw' }"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="p-dialog-transparent-custom"
+  >
+    <div class="flex items-center p-4">
+      <i class="pi pi-exclamation-triangle text-yellow-500 text-2xl mr-4"></i>
+      <span class="text-gray-700">¿Estás seguro de que quieres eliminar la configuración de planilla activa? Esta acción no se puede deshacer.</span>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
+        <p-button label="No" icon="pi pi-times" styleClass="p-button-text p-button-secondary" (onClick)="hideDeleteConfirm()"></p-button>
+        <p-button
+          label="Sí"
+          icon="pi pi-check"
+          styleClass="p-button-danger"
+          (onClick)="deleteConfiguration()"
+          [loading]="store.isLoading()"
+        ></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

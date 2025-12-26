@@ -1,0 +1,322 @@
+<div class="p-4">
+  <p-toast></p-toast>
+
+  <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-700">Gestión de Usuarios</h1>
+      <p class="text-gray-500">Administra los usuarios del sistema</p>
+    </div>
+    <p-button type="button" label="Crear" icon="pi pi-plus" (click)="openCreateUser()"></p-button>
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <p-table
+      #dt1
+      [value]="userStore.users()"
+      dataKey="publicId"
+      [rows]="userStore.filters().pageSize"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [loading]="userStore.loading()"
+      [paginator]="true"
+      [lazy]="true"
+      (onLazyLoad)="loadUsers($event)"
+      [totalRecords]="userStore.totalElements()"
+      [first]="0"
+      showGridlines
+      [scrollable]="true"
+      scrollHeight="flex">
+
+      <ng-template pTemplate="caption">
+        <div class="flex flex-col md:flex-row gap-4 p-4 items-end justify-end bg-transparent">
+          <div class="w-full md:max-w-sm">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar por número de documento</label>
+            <p-inputgroup class="w-full">
+              <p-inputgroup-addon>
+                <i class="pi pi-search"></i>
+              </p-inputgroup-addon>
+              <input 
+                pInputText 
+                type="text" 
+                [value]="searchValue()" 
+                (input)="onSearch($event)" 
+                placeholder="Número de documento" 
+                class="text-sm"/>
+              <p-inputgroup-addon>
+                <p-button icon="pi pi-times" severity="secondary" (click)="clearSearch()"></p-button>
+              </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+          <div class="w-full md:max-w-sm">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por cargo</label>
+            <p-select 
+              [options]="positionSelectOptions()" 
+              optionLabel="label" 
+              optionValue="value"
+              [(ngModel)]="selectedPositionId"
+              (ngModelChange)="onPositionFilterChange($event)"
+              placeholder="Todos los cargos"
+              [showClear]="true"
+              styleClass="w-full">
+            </p-select>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="min-width:12rem" pSortableColumn="username" class="text-sm">Número de documento <p-sortIcon field="username"></p-sortIcon></th>
+          <th style="min-width:12rem" class="text-sm">Cargo</th>
+          <th style="min-width:10rem" class="text-sm">Estado</th>
+          <th style="min-width:12rem" pSortableColumn="lastLoginAt" class="text-sm">Último Login <p-sortIcon field="lastLoginAt"></p-sortIcon></th>
+          <th style="min-width:12rem" pSortableColumn="createdAt" class="text-sm">Creado <p-sortIcon field="createdAt"></p-sortIcon></th>
+          <th style="min-width:12rem" pSortableColumn="updatedAt" class="text-sm">Actualizado <p-sortIcon field="updatedAt"></p-sortIcon></th>
+          <th style="width: 12rem" class="text-sm">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.username }}</td>
+          <td>
+            <span class="text-gray-700">
+              {{ user.positionName || 'Sin cargo' }}
+            </span>
+          </td>
+          <td>
+            @if (user.isActive) {
+              <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                Activo
+              </span>
+            } @else {
+              <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                Inactivo
+              </span>
+            }
+          </td>
+          <td>
+            @if (user.lastLoginAt) {
+              <app-date-display
+                [date]="user.lastLoginAt"
+                type="updated"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            } @else {
+              <span class="text-gray-400 text-xs">Nunca</span>
+            }
+          </td>
+          <td>
+            @if (user.createdAt) {
+              <app-date-display
+                [date]="user.createdAt"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            } @else {
+              <span class="text-gray-400 text-xs">-</span>
+            }
+          </td>
+          <td>
+            @if (user.updatedAt) {
+              <app-date-display
+                [date]="user.updatedAt"
+                type="updated"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            } @else {
+              <span class="text-gray-400 text-xs">-</span>
+            }
+          </td>
+          <td>
+            <div class="flex justify-center gap-2">
+              <button 
+                pButton 
+                type="button" 
+                [icon]="user.isActive ? 'pi pi-times' : 'pi pi-check'" 
+                [class]="user.isActive ? 'p-button-warning h-8 w-8' : 'p-button-success h-8 w-8'" 
+                [pTooltip]="user.isActive ? 'Desactivar' : 'Activar'" 
+                tooltipPosition="top" 
+                (click)="toggleUserStatus(user)">
+              </button>
+              <button pButton type="button" icon="pi pi-id-card" class="p-button-info h-8 w-8" [pTooltip]="'Asignar Perfiles'" tooltipPosition="top" (click)="openAssignProfiles(user)"></button>
+              <button pButton type="button" icon="pi pi-info-circle" class="p-button-secondary h-8 w-8" [pTooltip]="'Ver Detalles'" tooltipPosition="top" (click)="openUserDetails(user)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center text-gray-500 py-4">
+            No se encontraron usuarios
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog 
+    [visible]="isDetailsModalVisible()" 
+    (visibleChange)="isDetailsModalVisible.set($event)"
+    [modal]="true" 
+    [style]="{width: '50rem'}" 
+    [closable]="true"
+    (onHide)="closeDetailsModal()"
+    header="Detalles del Usuario">
+    
+    @if (userStore.loadingUserDetails()) {
+      <div class="flex justify-center items-center py-8">
+        <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
+      </div>
+    } @else if (userStore.userDetails()) {
+      @let details = userStore.userDetails()!;
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-3">Información del Usuario</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-1">Usuario</label>
+              <p class="text-gray-900">{{ details.username }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-1">Estado</label>
+              @if (details.isActive) {
+                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  Activo
+                </span>
+              } @else {
+                <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  Inactivo
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (details.employee) {
+          @let employee = details.employee;
+          <div>
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Información del Empleado</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Nombres</label>
+                <p class="text-gray-900">{{ employee.names || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Apellidos</label>
+                <p class="text-gray-900">
+                  {{ (employee.paternalLastname || '') + ' ' + (employee.maternalLastname || '') }}
+                </p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Número de Documento</label>
+                <p class="text-gray-900">{{ employee.documentNumber }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Cargo</label>
+                <p class="text-gray-900">{{ employee.positionName || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Sueldo del Cargo</label>
+                <p class="text-gray-900">{{ employee.positionSalary ? (employee.positionSalary | number:'1.2-2') : '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Sueldo Personalizado</label>
+                <p class="text-gray-900">{{ employee.customSalary ? (employee.customSalary | number:'1.2-2') : '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Sueldo Diario Básico</label>
+                <p class="text-gray-900">{{ employee.dailyBasicSalary ? (employee.dailyBasicSalary | number:'1.2-2') : '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Fecha de Contratación</label>
+                <p class="text-gray-900">{{ employee.hireDate ? (employee.hireDate | date:'dd/MM/yyyy') : '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Sucursal</label>
+                <p class="text-gray-900">{{ employee.subsidiaryName || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Estado</label>
+                <p class="text-gray-900">{{ employee.stateName || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Número AFP</label>
+                <p class="text-gray-900">{{ employee.afpAffiliationNumber || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Cuenta Bancaria</label>
+                <p class="text-gray-900">{{ employee.bankAccountNumber || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Banco</label>
+                <p class="text-gray-900">{{ employee.bankName || '-' }}</p>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p class="text-yellow-800 text-sm">
+              <i class="pi pi-exclamation-triangle mr-2"></i>
+              Este usuario no tiene un empleado asociado.
+            </p>
+          </div>
+        }
+
+        @if (details.contract) {
+          @let contract = details.contract;
+          <div>
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Información del Contrato</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Número de Contrato</label>
+                <p class="text-gray-900">{{ contract.contractNumber }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Tipo de Contrato</label>
+                <p class="text-gray-900">{{ contract.contractTypeName || '-' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Fecha de Inicio</label>
+                <p class="text-gray-900">{{ contract.startDate | date:'dd/MM/yyyy' }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Fecha de Fin</label>
+                <p class="text-gray-900">{{ contract.endDate ? (contract.endDate | date:'dd/MM/yyyy') : 'Indefinido' }}</p>
+              </div>
+              @if (contract.extendedEndDate) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Fecha de Extensión</label>
+                  <p class="text-gray-900">{{ contract.extendedEndDate | date:'dd/MM/yyyy' }}</p>
+                </div>
+              }
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1">Estado</label>
+                <p class="text-gray-900">{{ contract.stateName || '-' }}</p>
+              </div>
+            </div>
+          </div>
+        } @else if (details.employee) {
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-blue-800 text-sm">
+              <i class="pi pi-info-circle mr-2"></i>
+              Este empleado no tiene un contrato activo asociado.
+            </p>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center text-gray-500 py-4">
+        No se pudieron cargar los detalles del usuario.
+      </div>
+    }
+  </p-dialog>
+
+  <app-create-user-modal 
+    [visible]="isCreateUserModalVisible()"
+    (onHide)="closeCreateUserModal()">
+  </app-create-user-modal>
+
+</div>

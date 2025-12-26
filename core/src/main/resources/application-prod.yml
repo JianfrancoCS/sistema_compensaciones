@@ -1,0 +1,29 @@
+# Perfil de PRODUCCIÓN
+# Para usar este perfil: SPRING_PROFILES_ACTIVE=prod
+# IMPORTANTE: Todas las credenciales deben venir de variables de entorno
+
+server:
+  port: ${SERVER_PORT:10000}
+
+spring:
+  datasource:
+    url: ${DB_URL} # OBLIGATORIO: Debe estar definido en variables de entorno
+    username: ${DB_USERNAME} # OBLIGATORIO
+    password: ${DB_PASSWORD} # OBLIGATORIO
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+external-services:
+  reniec:
+    peru-devs:
+      base-url: ${RENIEC_BASE_URL:https://api.perudevs.com/api}
+      api-key: ${PERU_DEVS_API_KEY} # OBLIGATORIO en producción
+  sunat:
+    peru-devs:
+      base-url: ${SUNAT_BASE_URL:https://api.perudevs.com/api}
+      api-key: ${PERU_DEVS_API_KEY} # OBLIGATORIO en producción
+
+cloudinary:
+  cloud_name: ${CLOUDINARY_CLOUD_NAME} # OBLIGATORIO en producción
+  api_key: ${CLOUDINARY_API_KEY} # OBLIGATORIO en producción
+  api_secret: ${CLOUDINARY_API_SECRET} # OBLIGATORIO en producción
+

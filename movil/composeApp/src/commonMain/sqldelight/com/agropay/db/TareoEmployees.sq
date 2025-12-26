@@ -1,0 +1,47 @@
+import kotlin.Boolean;
+
+CREATE TABLE tareo_employees (
+    id TEXT PRIMARY KEY NOT NULL, -- UUID generado en el móvil
+    tareo_id TEXT NOT NULL,
+    employee_document_number TEXT NOT NULL,
+
+    start_time TEXT,
+    end_time TEXT,
+    entry_motive_id TEXT, -- UUID del motivo de entrada
+    exit_motive_id TEXT,  -- UUID del motivo de salida
+    actual_hours REAL,
+    paid_hours REAL,
+
+    is_synced INTEGER AS Boolean NOT NULL DEFAULT 0,
+
+    FOREIGN KEY (tareo_id) REFERENCES tareos(id) ON DELETE CASCADE,
+    FOREIGN KEY (employee_document_number) REFERENCES employees_cache(document_number),
+    FOREIGN KEY (entry_motive_id) REFERENCES tareo_motives_cache(id),
+    FOREIGN KEY (exit_motive_id) REFERENCES tareo_motives_cache(id)
+);
+
+-- La combinación tareo-empleado debe ser única
+CREATE UNIQUE INDEX tareo_employees_tareo_employee_unique ON tareo_employees(tareo_id, employee_document_number);
+
+-- QUERIES
+
+insert:
+INSERT INTO tareo_employees(id, tareo_id, employee_document_number, start_time, end_time, entry_motive_id, exit_motive_id, actual_hours, paid_hours, is_synced)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);
+
+getByTareoId:
+SELECT * FROM tareo_employees WHERE tareo_id = ?;
+
+getNotSyncedByTareoId:
+SELECT * FROM tareo_employees WHERE tareo_id = ? AND is_synced = 0;
+
+markAsSynced:
+UPDATE tareo_employees SET is_synced = 1 WHERE id = ?;
+
+markAllAsSyncedByTareoId:
+UPDATE tareo_employees SET is_synced = 1 WHERE tareo_id = ?;
+
+updateEmployeeExit:
+UPDATE tareo_employees 
+SET end_time = ?, exit_motive_id = ? 
+WHERE tareo_id = ? AND employee_document_number = ? AND end_time IS NULL;

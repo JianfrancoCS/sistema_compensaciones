@@ -1,0 +1,296 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Empleado"
+  (onHide)="hideModal()"
+  (onSubmit)="createEmployee()"
+  [isSubmitDisabled]="employeeForm.invalid"
+>
+  <form [formGroup]="employeeForm">
+    <!-- Sección: Información del Documento -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">Información del Documento</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="isNational" class="font-semibold text-sm">Tipo de Documento</label>
+        <p-select
+          id="isNational"
+          formControlName="isNational"
+          [options]="[
+            { label: 'Peruano (DNI)', value: true },
+            { label: 'Extranjero (CE)', value: false }
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          appendTo="body"
+          [invalid]="employeeForm.get('isNational')?.invalid && employeeForm.get('isNational')?.touched"
+        ></p-select>
+        @if (employeeForm.get('isNational')?.invalid && employeeForm.get('isNational')?.touched) {
+          <p-message severity="error" variant="simple" size="small">Tipo de documento requerido.</p-message>
+        }
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="documentNumber" class="font-semibold text-sm">
+          {{ employeeForm.get('isNational')?.value ? 'DNI' : 'Carnet de Extranjería' }}
+        </label>
+        <div class="p-inputgroup">
+          <input 
+            pInputText 
+            id="documentNumber" 
+            formControlName="documentNumber" 
+            class="flex-auto text-sm" 
+            autocomplete="off"
+            placeholder="{{ employeeForm.get('isNational')?.value ? 'Ingrese 8 dígitos' : 'Ingrese 9 dígitos' }}"
+            [maxlength]="employeeForm.get('isNational')?.value ? 8 : 9"
+            [invalid]="employeeForm.get('documentNumber')?.invalid && (employeeForm.get('documentNumber')?.dirty || employeeForm.get('documentNumber')?.touched)"
+          />
+          <button type="button" pButton icon="pi pi-search" class="h-10" (click)="onDniLookup()" [disabled]="employeeForm.get('documentNumber')?.invalid"></button>
+        </div>
+        @if (employeeForm.get('documentNumber')?.invalid && (employeeForm.get('documentNumber')?.dirty || employeeForm.get('documentNumber')?.touched)) {
+          @if (employeeForm.get('documentNumber')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">
+              {{ employeeForm.get('isNational')?.value ? 'DNI requerido (8 dígitos).' : 'Carnet de Extranjería requerido (9 dígitos).' }}
+            </p-message>
+          }
+          @if (employeeForm.get('documentNumber')?.errors?.['pattern']) {
+            <p-message severity="error" variant="simple" size="small">
+              {{ employeeForm.get('isNational')?.value ? 'El DNI debe contener exactamente 8 dígitos numéricos.' : 'El Carnet de Extranjería debe contener exactamente 9 dígitos numéricos.' }}
+            </p-message>
+          }
+        }
+      </div>
+
+      @if (!employeeForm.get('isNational')?.value) {
+        <div class="flex flex-col gap-4 mb-4">
+          <label for="birthdateForSearch" class="font-semibold text-sm">
+            Fecha de Nacimiento (para búsqueda en API)
+            <span class="text-xs text-gray-500 font-normal">(Opcional)</span>
+          </label>
+          <p-datepicker 
+            id="birthdateForSearch" 
+            formControlName="birthdateForSearch" 
+            dateFormat="dd/mm/yy" 
+            [showIcon]="true" 
+            inputId="birthdate-search" 
+            styleClass="w-full"
+            appendTo="body"
+            [maxDate]="maxDate"
+            placeholder="Ingrese fecha de nacimiento para buscar en Verifica.id"
+          ></p-datepicker>
+          <small class="text-xs text-gray-500">
+            Si ingresa la fecha de nacimiento, se buscará en la API de Verifica.id. Si no, solo se buscará en la base de datos local.
+          </small>
+        </div>
+      }
+      </div>
+    </div>
+
+    <!-- Sección: Información Personal -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">Información Personal</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="names" class="font-semibold text-sm">
+          Nombres
+          <span class="text-xs text-gray-500 font-normal">(Se completa al buscar documento)</span>
+        </label>
+        <input 
+          pInputText 
+          id="names" 
+          formControlName="names" 
+          class="flex-auto text-sm" 
+          autocomplete="off"
+          placeholder="Busque el documento para completar automáticamente"
+          [disabled]="employeeForm.get('names')?.disabled ?? false"
+          [invalid]="employeeForm.get('names')?.invalid && (employeeForm.get('names')?.dirty || employeeForm.get('names')?.touched)"
+        />
+        @if (employeeForm.get('names')?.invalid && (employeeForm.get('names')?.dirty || employeeForm.get('names')?.touched)) {
+          @if (employeeForm.get('names')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">Nombres requeridos.</p-message>
+          }
+        }
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="paternalLastname" class="font-semibold text-sm">
+          Apellido Paterno
+          <span class="text-xs text-gray-500 font-normal">(Se completa al buscar documento)</span>
+        </label>
+        <input 
+          pInputText 
+          id="paternalLastname" 
+          formControlName="paternalLastname" 
+          class="flex-auto text-sm" 
+          autocomplete="off"
+          placeholder="Busque el documento para completar automáticamente"
+          [disabled]="employeeForm.get('paternalLastname')?.disabled ?? false"
+          [invalid]="employeeForm.get('paternalLastname')?.invalid && (employeeForm.get('paternalLastname')?.dirty || employeeForm.get('paternalLastname')?.touched)"
+        />
+        @if (employeeForm.get('paternalLastname')?.invalid && (employeeForm.get('paternalLastname')?.dirty || employeeForm.get('paternalLastname')?.touched)) {
+          @if (employeeForm.get('paternalLastname')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">Apellido Paterno requerido.</p-message>
+          }
+        }
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="maternalLastname" class="font-semibold text-sm">
+          Apellido Materno
+          <span class="text-xs text-gray-500 font-normal">(Se completa al buscar documento)</span>
+        </label>
+        <input 
+          pInputText 
+          id="maternalLastname" 
+          formControlName="maternalLastname" 
+          class="flex-auto text-sm" 
+          autocomplete="off"
+          placeholder="Busque el documento para completar automáticamente"
+          [disabled]="employeeForm.get('maternalLastname')?.disabled ?? false"
+          [invalid]="employeeForm.get('maternalLastname')?.invalid && (employeeForm.get('maternalLastname')?.dirty || employeeForm.get('maternalLastname')?.touched)"
+        />
+        @if (employeeForm.get('maternalLastname')?.invalid && (employeeForm.get('maternalLastname')?.dirty || employeeForm.get('maternalLastname')?.touched)) {
+          @if (employeeForm.get('maternalLastname')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">Apellido Materno requerido.</p-message>
+          }
+        }
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="dob" class="font-semibold text-sm">
+          Fecha de Nacimiento
+          <span class="text-xs text-gray-500 font-normal">(Se completa al buscar documento)</span>
+        </label>
+        <p-datepicker 
+          id="dob" 
+          formControlName="dob" 
+          dateFormat="dd/mm/yy" 
+          [showIcon]="true" 
+          inputId="dob-input" 
+          styleClass="w-full"
+          appendTo="body"
+          placeholder="Busque el documento para completar automáticamente"
+          [disabled]="employeeForm.get('dob')?.disabled ?? false"
+          [invalid]="employeeForm.get('dob')?.invalid && (employeeForm.get('dob')?.dirty || employeeForm.get('dob')?.touched)"
+        ></p-datepicker>
+        @if (employeeForm.get('dob')?.invalid && (employeeForm.get('dob')?.dirty || employeeForm.get('dob')?.touched)) {
+          @if (employeeForm.get('dob')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">Fecha de nacimiento requerida.</p-message>
+          }
+        }
+      </div>
+      </div>
+    </div>
+
+    <!-- Sección: Información Laboral -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">Información Laboral</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="subsidiary" class="font-semibold text-sm">Filial</label>
+        <p-autocomplete
+          id="subsidiary"
+          formControlName="subsidiaryPublicId"
+          [suggestions]="subsidiaryOptions()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una filial"
+          [dropdown]="true"
+          styleClass="w-full"
+          [invalid]="employeeForm.get('subsidiaryPublicId')?.invalid && (employeeForm.get('subsidiaryPublicId')?.dirty || employeeForm.get('subsidiaryPublicId')?.touched)"
+        ></p-autocomplete>
+        @if (employeeForm.get('subsidiaryPublicId')?.invalid && (employeeForm.get('subsidiaryPublicId')?.dirty || employeeForm.get('subsidiaryPublicId')?.touched)) {
+          <p-message severity="error" variant="simple" size="small">Filial requerida.</p-message>
+        }
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="position" class="font-semibold text-sm">Posición</label>
+        <p-autocomplete
+          id="position"
+          formControlName="positionPublicId"
+          [suggestions]="positionOptions()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una posición"
+          [dropdown]="true"
+          styleClass="w-full"
+          [invalid]="employeeForm.get('positionPublicId')?.invalid && (employeeForm.get('positionPublicId')?.dirty || employeeForm.get('positionPublicId')?.touched)"
+        ></p-autocomplete>
+        @if (employeeForm.get('positionPublicId')?.invalid && (employeeForm.get('positionPublicId')?.dirty || employeeForm.get('positionPublicId')?.touched)) {
+          <p-message severity="error" variant="simple" size="small">Posición requerida.</p-message>
+        }
+      </div>
+      </div>
+    </div>
+
+    <!-- Sección: Información de Ubicación (Opcional) -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">
+        Información de Ubicación
+        <span class="text-xs text-gray-500 font-normal">(Opcional)</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="department" class="font-semibold text-sm">
+          Departamento
+          <span class="text-xs text-gray-500 font-normal">(Opcional)</span>
+        </label>
+        <p-autocomplete
+          id="department"
+          formControlName="departmentPublicId"
+          [suggestions]="departments()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona un departamento"
+          [dropdown]="true"
+          styleClass="w-full"
+          (onSelect)="onDepartmentChange()"
+        ></p-autocomplete>
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="province" class="font-semibold text-sm">
+          Provincia
+          <span class="text-xs text-gray-500 font-normal">(Opcional)</span>
+        </label>
+        <p-autocomplete
+          id="province"
+          formControlName="provincePublicId"
+          [suggestions]="provinces()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una provincia"
+          [dropdown]="true"
+          styleClass="w-full"
+          (onSelect)="onProvinceChange()"
+          [disabled]="provinces().length === 0"
+        ></p-autocomplete>
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="district" class="font-semibold text-sm">
+          Distrito
+          <span class="text-xs text-gray-500 font-normal">(Opcional)</span>
+        </label>
+        <p-autocomplete
+          id="district"
+          formControlName="districtPublicId"
+          [suggestions]="districts()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona un distrito"
+          [dropdown]="true"
+          styleClass="w-full"
+          [disabled]="districts().length === 0"
+        ></p-autocomplete>
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="managerCode" class="font-semibold text-sm">Código de Gerente</label>
+        <input pInputText id="managerCode" formControlName="managerCode" class="flex-auto text-sm" autocomplete="off" placeholder="Opcional" />
+      </div>
+      </div>
+    </div>
+  </form>
+</app-modal-template>

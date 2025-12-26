@@ -1,0 +1,9 @@
+nav {
+  background-color: transparent !important;
+}
+
+nav.bg-transparent {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+

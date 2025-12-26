@@ -1,0 +1,79 @@
+<div class="fotocheck-container">
+  @if (loading()) {
+    <div class="flex justify-center items-center h-full min-h-[600px]">
+      <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
+    </div>
+  } @else if (userInfo()) {
+    <!-- Botón de imprimir (solo visible en pantalla) -->
+    <div class="print-button-container">
+      <button 
+        pButton 
+        type="button" 
+        label="Imprimir Fotocheck" 
+        icon="pi pi-print" 
+        class="p-button-primary"
+        (click)="printFotocheck()">
+      </button>
+    </div>
+
+    <div class="fotocheck-card" id="fotocheck-card" #fotocheckCard>
+      <!-- Logo de la empresa -->
+      @if (companyLogoUrl(); as logoUrl) {
+        <div class="logo-container">
+          <img 
+            [src]="logoUrl" 
+            alt="Logo de la empresa" 
+            class="company-logo"
+            (error)="onLogoError($event)" />
+        </div>
+      }
+
+      <!-- Foto del empleado -->
+      <div class="photo-container">
+        @if (photoUrl(); as photo) {
+          @if (!photoError()) {
+            <img 
+              [src]="photo" 
+              [alt]="fullName" 
+              class="employee-photo"
+              (error)="onPhotoError($event)" />
+          } @else {
+            <div class="employee-photo-placeholder">
+              {{ getInitials() }}
+            </div>
+          }
+        } @else {
+          <div class="employee-photo-placeholder">
+            {{ getInitials() }}
+          </div>
+        }
+      </div>
+
+      <!-- Nombre completo (solo si no es admin) -->
+      @if (!isAdmin) {
+        <div class="name-container">
+          <h2 class="employee-name">{{ fullName }}</h2>
+        </div>
+
+        <!-- QR Code (solo si no es admin y tiene documento) -->
+        @if (qrValue && qrValue.length > 0) {
+          <div class="qr-container">
+            <qr-code [value]="qrValue" [size]="120" [errorCorrectionLevel]="'M'" class="qr-code"></qr-code>
+          </div>
+        }
+
+        <!-- Número de documento -->
+        @if (documentNumber) {
+          <div class="document-container">
+            <p class="document-number">{{ documentNumber }}</p>
+          </div>
+        }
+      }
+    </div>
+  } @else {
+    <div class="flex justify-center items-center h-full min-h-[600px]">
+      <p class="text-gray-500">No se pudo cargar la información del usuario</p>
+    </div>
+  }
+</div>
+

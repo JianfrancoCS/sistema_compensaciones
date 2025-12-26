@@ -1,0 +1,52 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Justificación"
+  (onHide)="onHide.emit()"
+  (onSubmit)="onSubmit()"
+  [isSubmitDisabled]="form.invalid"
+>
+  <form [formGroup]="form">
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="name" class="font-semibold text-sm">Nombre</label>
+      <input
+        pInputText
+        id="name"
+        formControlName="name"
+        class="flex-auto text-sm"
+        autocomplete="off"
+        placeholder="Ej: Justificación por enfermedad"
+        [invalid]="form.get('name')?.invalid && (form.get('name')?.dirty || form.get('name')?.touched)"
+      />
+      @if (form.get('name')?.invalid && (form.get('name')?.dirty || form.get('name')?.touched)) {
+        @if (form.get('name')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+        }
+        @if (form.get('name')?.errors?.['maxlength']) {
+          <p-message severity="error" variant="simple" size="small">El nombre debe tener máximo 100 caracteres.</p-message>
+        }
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="description" class="font-semibold text-sm">Descripción</label>
+      <textarea
+        pInputTextarea
+        id="description"
+        formControlName="description"
+        rows="3"
+        class="flex-auto text-sm"
+        [invalid]="form.get('description')?.invalid && (form.get('description')?.dirty || form.get('description')?.touched)"
+      ></textarea>
+      @if (form.get('description')?.invalid && (form.get('description')?.dirty || form.get('description')?.touched)) {
+        @if (form.get('description')?.errors?.['maxlength']) {
+          <p-message severity="error" variant="simple" size="small">La descripción debe tener máximo 500 caracteres.</p-message>
+        }
+      }
+    </div>
+
+    <div class="flex items-center gap-2 mb-4">
+      <p-toggleswitch id="isPaid" formControlName="isPaid"></p-toggleswitch>
+      <label for="isPaid" class="font-semibold text-sm">Es Pagado</label>
+    </div>
+  </form>
+</app-modal-template>

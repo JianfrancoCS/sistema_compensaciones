@@ -1,0 +1,31 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Unidad de Labor"
+  (onHide)="onHide.emit()"
+  (onSubmit)="updateLaborUnit()"
+  [isSubmitDisabled]="laborUnitForm.invalid"
+>
+  <form [formGroup]="laborUnitForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="name" class="font-semibold text-sm">Nombre</label>
+      <input pInputText id="name" formControlName="name" class="flex-auto text-sm" autocomplete="off" placeholder="Ej: Unidad de Producción" [invalid]="laborUnitForm.get('name')?.invalid && (laborUnitForm.get('name')?.dirty || laborUnitForm.get('name')?.touched)" />
+      @if (laborUnitForm.get('name')?.invalid && (laborUnitForm.get('name')?.dirty || laborUnitForm.get('name')?.touched)) {
+        @if (laborUnitForm.get('name')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+        }
+        @if (laborUnitForm.get('name')?.errors?.['pattern']) {
+          <p-message severity="error" variant="simple" size="small">El nombre solo debe contener letras y espacios.</p-message>
+        }
+      }
+    </div>
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="description" class="font-semibold text-sm">Descripción</label>
+      <textarea pTextarea id="description" formControlName="description" class="flex-auto text-sm" autocomplete="off" placeholder="Ej: Descripción de la unidad de producción"></textarea>
+      @if (laborUnitForm.get('description')?.invalid && (laborUnitForm.get('description')?.dirty || laborUnitForm.get('description')?.touched)) {
+        @if (laborUnitForm.get('description')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">La descripción es requerida.</p-message>
+        }
+      }
+    </div>
+  </form>
+</app-modal-template>

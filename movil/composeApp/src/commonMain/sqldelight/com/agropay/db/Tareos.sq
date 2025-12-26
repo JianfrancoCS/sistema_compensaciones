@@ -1,0 +1,52 @@
+import kotlin.Boolean;
+
+CREATE TABLE tareos (
+    id TEXT PRIMARY KEY NOT NULL,
+    supervisor_employee_document_number TEXT NOT NULL,
+    labor_id TEXT NOT NULL,
+    lote_id TEXT, -- NULL para tareos administrativos
+    scanner_employee_document_number TEXT,
+    is_synced INTEGER AS Boolean NOT NULL DEFAULT 0,
+    is_closing INTEGER AS Boolean NOT NULL DEFAULT 0, -- Flag para indicar si es cierre de tareo
+    closing_motive_id TEXT, -- Motivo de cierre (UUID del motivo)
+    created_at INTEGER NOT NULL,
+
+    FOREIGN KEY (labor_id) REFERENCES labors_cache(id),
+    FOREIGN KEY (lote_id) REFERENCES lotes_cache(id),
+    FOREIGN KEY (supervisor_employee_document_number) REFERENCES employees_cache(document_number),
+    FOREIGN KEY (scanner_employee_document_number) REFERENCES employees_cache(document_number)
+);
+
+-- QUERIES
+
+-- CORREGIDO: El nombre de la consulta debe ser 'getAll'
+getAll:
+SELECT id, supervisor_employee_document_number, labor_id, lote_id, scanner_employee_document_number, is_synced, is_closing, closing_motive_id, created_at FROM tareos;
+
+insert:
+INSERT INTO tareos(id, supervisor_employee_document_number, labor_id, lote_id, scanner_employee_document_number, is_synced, is_closing, closing_motive_id, created_at)
+VALUES (?, ?, ?, ?, ?, 0, ?, NULL, ?);
+
+getById:
+SELECT id, supervisor_employee_document_number, labor_id, lote_id, scanner_employee_document_number, is_synced, is_closing, closing_motive_id, created_at FROM tareos WHERE id = ?;
+
+getNotSynced:
+SELECT id, supervisor_employee_document_number, labor_id, lote_id, scanner_employee_document_number, is_synced, is_closing, closing_motive_id, created_at FROM tareos WHERE is_synced = 0;
+
+markAsSynced:
+UPDATE tareos SET is_synced = 1 WHERE id = ?;
+
+deleteById:
+DELETE FROM tareos WHERE id = ?;
+
+markAsClosing:
+UPDATE tareos SET is_closing = 1, closing_motive_id = ? WHERE id = ?;
+
+update:
+UPDATE tareos
+SET supervisor_employee_document_number = ?,
+    labor_id = ?,
+    lote_id = ?,
+    scanner_employee_document_number = ?,
+    is_closing = ?
+WHERE id = ?;

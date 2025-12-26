@@ -1,0 +1,97 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Lotes</h1>
+    <p-button  type="button" label="Crear" icon="pi pi-plus"  (click)="showCreateModal()"></p-button>
+  </div>
+
+  <!-- Modals -->
+  <app-batch-create-modal [visible]="store.isCreateModalVisible()" (onHide)="hideCreateModal()"></app-batch-create-modal>
+  <app-batch-update-modal [visible]="store.isUpdateModalVisible()" [batch]="store.selectedBatch()!" (onHide)="hideUpdateModal()"></app-batch-update-modal>
+
+  <!-- Tabla -->
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="store.batches()"
+               dataKey="publicId"
+               [rows]="store.filters().pageSize"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="store.loading()"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadBatches($event)"
+               [totalRecords]="store.totalElements()"
+               [first]="store.filters().page * store.filters().pageSize"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex p-0 justify-end">
+            <p-inputgroup class="max-w-sm">
+                <p-inputgroup-addon>
+                    <i class="pi pi-search"></i>
+                </p-inputgroup-addon>
+                <input pInputText type="text" [value]="store.filters().name"  (input)="onSearch($event)" placeholder="Buscar por nombre" class="text-sm"/>
+                <p-inputgroup-addon>
+                    <p-button icon="pi pi-times" severity="secondary" (click)="store.clearSearch()"></p-button>
+                </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:15rem" pSortableColumn="name" class="text-sm">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="hectareage" class="text-sm">Hectáreas <p-sortIcon field="hectareage"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="subsidiaryName" class="text-sm">Sucursal <p-sortIcon field="subsidiaryName"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="createdAt" class="text-sm">Fecha de Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="updatedAt" class="text-sm">Fecha de Actualización <p-sortIcon field="updatedAt"></p-sortIcon></th>
+            <th style="width: 8rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-batch>
+          <tr>
+            <td class="text-sm px-3">{{ batch.name }}</td>
+            <td class="text-sm px-3">{{ batch.hectareage }}</td>
+            <td class="text-sm px-3">{{ batch.subsidiaryName }}</td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="batch.createdAt"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="batch.updatedAt"
+                type="updated"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button pButton type="button" icon="pi pi-eye" class="p-button-info h-8 w-8"></button>
+                <button pButton type="button" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="showUpdateModal(batch)"></button>
+                <button pButton type="button" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(batch)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr class="">
+            <td colspan="6" class="text-center text-sm   p-4">No se encontraron lotes.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

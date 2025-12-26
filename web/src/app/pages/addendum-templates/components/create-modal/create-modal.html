@@ -1,0 +1,37 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Plantilla de Adenda"
+  (onHide)="hideModal()"
+  (onSubmit)="createTemplate()"
+  [isSubmitDisabled]="templateForm.invalid"
+  [styleClass]="'w-11/12 md:w-8/12 lg:w-6/12'"
+>
+  <form [formGroup]="templateForm" class="flex flex-col gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-2">
+        <label for="name" class="font-semibold text-sm">Nombre</label>
+        <input pInputText id="name" formControlName="name" class="flex-auto text-sm" autocomplete="off" />
+        <small *ngIf="templateForm.get('name')?.invalid && templateForm.get('name')?.touched" class="p-error">El nombre es requerido.</small>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="addendumType" class="font-semibold text-sm">Tipo de Adenda</label>
+        <p-select id="addendumType" formControlName="addendumTypePublicId" [options]="addendumTypes()" optionLabel="name" optionValue="publicId" placeholder="Seleccione un tipo" styleClass="w-full"></p-select>
+        <small *ngIf="templateForm.get('addendumTypePublicId')?.invalid && templateForm.get('addendumTypePublicId')?.touched" class="p-error">El tipo de adenda es requerido.</small>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="state" class="font-semibold text-sm">Estado</label>
+        <p-select id="state" formControlName="statePublicId" [options]="states()" optionLabel="name" optionValue="publicId" placeholder="Seleccione un estado" styleClass="w-full"></p-select>
+        <small *ngIf="templateForm.get('statePublicId')?.invalid && templateForm.get('statePublicId')?.touched" class="p-error">El estado es requerido.</small>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-sm">Contenido de la Plantilla</label>
+      <app-editor [initialContent]="templateForm.get('templateContent')?.value || ''" (contentChange)="onContentChange($event)" [availableVariables]="variables()"></app-editor>
+      <small *ngIf="templateForm.get('templateContent')?.invalid && templateForm.get('templateContent')?.touched" class="p-error">El contenido es requerido.</small>
+    </div>
+
+  </form>
+</app-modal-template>

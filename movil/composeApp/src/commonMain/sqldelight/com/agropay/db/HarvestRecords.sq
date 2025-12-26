@@ -1,0 +1,102 @@
+-- =============================================
+-- Tabla: Registros de Cosecha/Producción (LOCAL)
+-- Se crea localmente y se sube con: POST /v1/assignment/harvest-records/batch-sync
+-- Basado en: tbl_harvest_records del backend
+-- =============================================
+
+CREATE TABLE harvest_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+
+    -- IDs
+    local_id TEXT NOT NULL UNIQUE, -- UUID generado en móvil
+    public_id TEXT UNIQUE, -- UUID asignado por servidor después de sync
+
+    -- Relaciones
+    qr_code_public_id TEXT NOT NULL, -- UUID del QR code escaneado
+    qr_roll_employee_id TEXT NOT NULL, -- UUID de qr_roll_employees
+    tareo_employee_id TEXT NOT NULL, -- UUID de tareo_employees
+
+    -- Datos de cosecha
+    quantity REAL NOT NULL,
+    scanned_at INTEGER NOT NULL, -- Timestamp epoch
+
+    -- Sincronización
+    sync_status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, SYNCED, ERROR
+    sync_error TEXT,
+
+    -- Auditoría
+    created_at INTEGER NOT NULL,
+    created_by TEXT NOT NULL DEFAULT 'MOBILE_APP',
+    deleted_at INTEGER,
+
+    FOREIGN KEY (qr_code_public_id) REFERENCES qr_codes(public_id),
+    FOREIGN KEY (qr_roll_employee_id) REFERENCES qr_roll_employees(id),
+    FOREIGN KEY (tareo_employee_id) REFERENCES tareo_employees(id)
+);
+
+-- Índices
+CREATE INDEX harvest_records_public_id ON harvest_records(public_id) WHERE deleted_at IS NULL;
+CREATE INDEX harvest_records_tareo_employee ON harvest_records(tareo_employee_id);
+CREATE UNIQUE INDEX harvest_records_qr_code ON harvest_records(qr_code_public_id) WHERE deleted_at IS NULL;
+CREATE INDEX harvest_records_sync_status ON harvest_records(sync_status);
+CREATE INDEX harvest_records_scanned_at ON harvest_records(scanned_at);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+-- Insertar registro de cosecha
+insertHarvestRecord:
+INSERT INTO harvest_records (
+    local_id,
+    qr_code_public_id,
+    qr_roll_employee_id,
+    tareo_employee_id,
+    quantity,
+    scanned_at,
+    created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Obtener por local_id
+getByLocalId:
+SELECT * FROM harvest_records
+WHERE local_id = ? AND deleted_at IS NULL;
+
+-- Obtener registros de un empleado en tareo
+getRecordsByTareoEmployee:
+SELECT * FROM harvest_records
+WHERE tareo_employee_id = ? AND deleted_at IS NULL
+ORDER BY scanned_at DESC;
+
+-- Obtener registros pendientes de sincronización
+getPendingSync:
+SELECT * FROM harvest_records
+WHERE sync_status IN ('PENDING', 'ERROR')
+AND deleted_at IS NULL
+ORDER BY scanned_at ASC;
+
+-- Actualizar sincronización exitosa
+updateSyncSuccess:
+UPDATE harvest_records
+SET sync_status = 'SYNCED',
+    public_id = ?,
+    sync_error = NULL
+WHERE local_id = ?;
+
+-- Actualizar sincronización con error
+updateSyncError:
+UPDATE harvest_records
+SET sync_status = 'ERROR',
+    sync_error = ?
+WHERE local_id = ?;
+
+-- Obtener total de cantidad por empleado
+getTotalQuantityByEmployee:
+SELECT SUM(quantity) FROM harvest_records
+WHERE tareo_employee_id = ? AND deleted_at IS NULL;
+
+-- Contar registros pendientes
+countPendingSync:
+SELECT COUNT(*) FROM harvest_records
+WHERE sync_status IN ('PENDING', 'ERROR')
+AND deleted_at IS NULL;

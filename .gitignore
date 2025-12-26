@@ -1,0 +1,78 @@
+# Compiled output
+web/dist/
+web/tmp/
+web/out-tsc/
+web/bazel-out/
+
+# Node
+web/node_modules/
+npm-debug.log
+yarn-error.log
+web/.angular/cache
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Maven
+core/target/
+core/.mvn/
+core/mvnw
+core/mvnw.cmd
+
+# Gradle
+movil/.gradle/
+movil/build/
+movil/composeApp/build/
+movil/iosApp/build/
+movil/local.properties
+movil/.idea/
+movil/*.iml
+movil/.DS_Store
+
+# iOS
+movil/iosApp/Pods/
+movil/iosApp/*.xcworkspace
+movil/iosApp/*.xcuserdata
+movil/iosApp/DerivedData/
+
+# Android
+movil/composeApp/src/androidMain/res/values/local.properties
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Coverage
+coverage/
+*.lcov
+
+# Miscellaneous
+web/.sass-cache/
+web/connect.lock
+web/testem.log
+web/typings/
+

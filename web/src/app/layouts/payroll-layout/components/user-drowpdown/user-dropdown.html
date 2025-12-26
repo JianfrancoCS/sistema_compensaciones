@@ -1,0 +1,60 @@
+<div class="relative">
+  <!-- Botón principal del dropdown -->
+  <button
+    (click)="toggleDropdown()"
+    class="flex items-center gap-3 rounded-lg hover:bg-gray-50 transition-colors ">
+
+    <!-- Avatar -->
+      <p-avatar
+        icon="pi pi-user"
+        class="h-10 w-10"
+        size="normal"
+        style="background-color: #ece9fc; color: #2a1261" />
+
+
+    <!-- Información del usuario (oculto en móvil) -->
+    <div class="hidden sm:flex flex-col items-start text-left">
+      <span class="text-sm font-medium text-gray-900">{{ userInfo().fullName }}</span>
+      <span class="text-xs text-gray-500">{{ userInfo().positionName }}</span>
+    </div>
+
+    <!-- Flecha -->
+    <i class="pi pi-chevron-down text-gray-500 transition-transform duration-200"
+       [class.rotate-180]="isOpen()"></i>
+  </button>
+
+  <!-- Dropdown Menu -->
+  @if (isOpen()) {
+      <div class="absolute right-0 mt-3 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+
+      <!-- Opciones del menú -->
+      <div class="">
+        @for (item of menuItems; track item.label) {
+          @if (item.separator) {
+            <div class="border-t border-gray-100 my-1"></div>
+          } @else {
+            <button
+              (click)="item.command?.()"
+              [class.text-red-600]="item.label === 'Salir'"
+              [class.hover:bg-red-50]="item.label === 'Salir'"
+              [class.hover:bg-gray-50]="item.label !== 'Salir'"
+              class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors">
+              @if (item.icon) {
+                <i [class]="item.icon" [class.text-red-500]="item.label === 'Salir'"></i>
+              }
+              {{ item.label }}
+            </button>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Overlay para cerrar el dropdown al hacer click fuera -->
+@if (isOpen()) {
+  <div
+    (click)="closeDropdown()"
+    class="fixed inset-0 z-40">
+  </div>
+}

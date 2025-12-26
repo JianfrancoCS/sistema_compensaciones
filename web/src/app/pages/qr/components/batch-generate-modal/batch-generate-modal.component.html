@@ -1,0 +1,62 @@
+<app-modal-template
+  [visible]="visible"
+  [headerText]="'Generar Lote de Rollos QR'"
+  [isSubmitDisabled]="qrRollStore.loading()"
+  (onHide)="hideModal()"
+  (onSubmit)="generateBatch()"
+>
+  <form [formGroup]="batchForm">
+    <div class="flex flex-col gap-4">
+      <!-- Rollos Necesarios -->
+      <div class="flex flex-col gap-2">
+        <label for="rollsNeeded" class="font-medium text-sm">
+          Cantidad de Rollos <span class="text-red-500">*</span>
+        </label>
+        <p-inputnumber
+          id="rollsNeeded"
+          formControlName="rollsNeeded"
+          [min]="1"
+          [showButtons]="true"
+          placeholder="Ingrese la cantidad de rollos"
+          class="w-full"
+        />
+        @if (batchForm.get('rollsNeeded')?.invalid && batchForm.get('rollsNeeded')?.touched) {
+          <small class="text-red-500">
+            La cantidad de rollos es requerida y debe ser mayor a 0
+          </small>
+        }
+      </div>
+
+      <!-- Códigos por Rollo -->
+      <div class="flex flex-col gap-2">
+        <label for="codesPerRoll" class="font-medium text-sm">
+          Códigos por Rollo <span class="text-red-500">*</span>
+        </label>
+        <p-inputnumber
+          id="codesPerRoll"
+          formControlName="codesPerRoll"
+          [min]="1"
+          [max]="1000"
+          [showButtons]="true"
+          placeholder="Ingrese la cantidad de códigos por rollo"
+          class="w-full"
+        />
+        @if (batchForm.get('codesPerRoll')?.invalid && batchForm.get('codesPerRoll')?.touched) {
+          <small class="text-red-500">
+            La cantidad de códigos es requerida y debe estar entre 1 y 1000
+          </small>
+        }
+      </div>
+
+      <!-- Info Message -->
+      <p-message
+        severity="info" >
+        Se generarán múltiples rollos con la cantidad especificada de códigos QR en cada uno.
+     </p-message>
+
+      @if (qrRollStore.error()) {
+        <p-message severity="error">{{ qrRollStore.error() }}</p-message>
+      }
+    </div>
+  </form>
+</app-modal-template>

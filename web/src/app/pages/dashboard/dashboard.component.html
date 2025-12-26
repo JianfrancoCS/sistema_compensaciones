@@ -1,0 +1,190 @@
+<div class="p-4">
+  <p-toast></p-toast>
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-700">Dashboard</h1>
+    <p class="text-gray-500 mt-1">Visualiza estadísticas y métricas del sistema</p>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg shadow mb-6 p-4 border border-gray-200">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div>
+        <label for="subsidiaryFilter" class="block text-sm font-medium text-gray-700 mb-2">Subsidiaria</label>
+        <p-select
+          inputId="subsidiaryFilter"
+          [options]="subsidiaryOptions()"
+          [(ngModel)]="selectedSubsidiary"
+          (onChange)="onSubsidiaryChange()"
+          placeholder="Todas las subsidiarias"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="periodFilter" class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+        <p-select
+          inputId="periodFilter"
+          [options]="periodOptions()"
+          [(ngModel)]="selectedPeriod"
+          (onChange)="onPeriodChange()"
+          placeholder="Todos los períodos"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="dateFromFilter" class="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
+        <p-datepicker
+          inputId="dateFromFilter"
+          [(ngModel)]="dateFrom"
+          (onSelect)="onDateFromChange()"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [showClear]="true"
+          placeholder="Seleccionar fecha"
+          appendTo="body"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+
+      <div>
+        <label for="dateToFilter" class="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
+        <p-datepicker
+          inputId="dateToFilter"
+          [(ngModel)]="dateTo"
+          (onSelect)="onDateToChange()"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [showClear]="true"
+          placeholder="Seleccionar fecha"
+          appendTo="body"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button
+        pButton
+        label="Limpiar Filtros"
+        icon="pi pi-filter-slash"
+        class="p-button-outlined"
+        (click)="clearFilters()">
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-12">
+      <p-progressSpinner></p-progressSpinner>
+    </div>
+  } @else if (stats()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <p-card class="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-blue-100 text-sm font-medium mb-1">Total Empleados</p>
+            <p class="text-3xl font-bold">{{ stats()!.totalEmployees }}</p>
+          </div>
+          <i class="pi pi-users text-4xl opacity-80"></i>
+        </div>
+      </p-card>
+
+      <p-card class="bg-gradient-to-br from-green-500 to-green-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-green-100 text-sm font-medium mb-1">Total Planillas</p>
+            <p class="text-3xl font-bold">{{ stats()!.totalPayrolls }}</p>
+          </div>
+          <i class="pi pi-file-excel text-4xl opacity-80"></i>
+        </div>
+      </p-card>
+
+      <p-card class="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-purple-100 text-sm font-medium mb-1">Monto Total</p>
+            <p class="text-2xl font-bold">{{ formatCurrency(stats()!.totalPayrollsAmount) }}</p>
+          </div>
+          <i class="pi pi-wallet text-4xl opacity-80"></i>
+        </div>
+      </p-card>
+
+      <p-card class="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-orange-100 text-sm font-medium mb-1">Tareos Procesados</p>
+            <p class="text-3xl font-bold">{{ stats()!.processedTareos }} / {{ stats()!.totalTareos }}</p>
+          </div>
+          <i class="pi pi-list-check text-4xl opacity-80"></i>
+        </div>
+      </p-card>
+    </div>
+  }
+
+  <!-- Charts -->
+  @if (loadingCharts()) {
+    <div class="flex justify-center items-center py-12">
+      <p-progressSpinner></p-progressSpinner>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- Planillas por Estado -->
+      <p-card header="Planillas por Estado">
+        @if (payrollsByStatusData) {
+          <p-chart type="pie" [data]="payrollsByStatusData" [options]="payrollsByStatusOptions" class="h-[300px]"></p-chart>
+        } @else {
+          <div class="text-center text-gray-500 py-8">No hay datos disponibles</div>
+        }
+      </p-card>
+
+      <!-- Empleados por Subsidiaria -->
+      <p-card header="Empleados por Subsidiaria">
+        @if (employeesBySubsidiaryData) {
+          <p-chart type="bar" [data]="employeesBySubsidiaryData" [options]="employeesBySubsidiaryOptions" class="h-[300px]"></p-chart>
+        } @else {
+          <div class="text-center text-gray-500 py-8">No hay datos disponibles</div>
+        }
+      </p-card>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 mb-6">
+      <!-- Planillas por Período -->
+      <p-card header="Planillas por Período">
+        @if (payrollsByPeriodData) {
+          <p-chart type="bar" [data]="payrollsByPeriodData" [options]="payrollsByPeriodOptions" class="h-[300px]"></p-chart>
+        } @else {
+          <div class="text-center text-gray-500 py-8">No hay datos disponibles</div>
+        }
+      </p-card>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Tareos por Labor -->
+      <p-card header="Tareos por Labor">
+        @if (tareosByLaborData) {
+          <p-chart type="bar" [data]="tareosByLaborData" [options]="tareosByLaborOptions" class="h-[300px]"></p-chart>
+        } @else {
+          <div class="text-center text-gray-500 py-8">No hay datos disponibles</div>
+        }
+      </p-card>
+
+      <!-- Tendencia de Asistencia -->
+      <p-card header="Tendencia de Asistencia">
+        @if (attendanceTrendData) {
+          <p-chart type="line" [data]="attendanceTrendData" [options]="attendanceTrendOptions" class="h-[300px]"></p-chart>
+        } @else {
+          <div class="text-center text-gray-500 py-8">No hay datos disponibles</div>
+        }
+      </p-card>
+    </div>
+  }
+</div>
+

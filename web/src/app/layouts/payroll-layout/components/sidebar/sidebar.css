@@ -1,0 +1,163 @@
+:host ::ng-deep {
+  --p-accordion-header-padding: 0.75rem 1rem;
+  --p-accordion-header-background: white;
+  --p-accordion-header-hover-background: #f9fafb;
+  --p-accordion-header-active-background: #f3f4f6;
+  --p-accordion-header-border-radius: 0;
+  --p-accordion-content-padding: 0;
+  --p-accordion-content-background: #fafafa;
+  --p-accordion-header-toggle-icon-color: #6b7280;
+  --p-accordion-transition-duration: 200ms;
+}
+
+::ng-deep .p-accordion {
+  border: none;
+  background: transparent;
+}
+
+::ng-deep .p-accordionpanel {
+  border: none;
+  margin: 0;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+::ng-deep .p-accordionheader {
+  border: none;
+  border-radius: 0 !important;
+  margin: 0;
+}
+
+::ng-deep .p-accordionheader button {
+  border: none;
+  border-radius: 0 !important;
+  padding: 0.75rem 1rem;
+  background: white;
+  transition: all 0.2s ease;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+::ng-deep .p-accordionheader:not(.p-disabled) button:hover {
+  background: #f9fafb !important;
+  color: #111827;
+}
+
+::ng-deep .p-accordionpanel-active .p-accordionheader button {
+  background: #f3f4f6 !important;
+  color: #111827;
+  border-left: 3px solid #6b7280;
+}
+
+::ng-deep .p-accordionheader-toggle-icon {
+  color: #6b7280 !important;
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  margin-left: auto;
+  order: 999;
+}
+
+::ng-deep .p-accordionpanel-active .p-accordionheader-toggle-icon {
+  transform: rotate(180deg);
+}
+
+::ng-deep .p-accordioncontent {
+  border: none;
+  border-radius: 0 !important;
+  padding: 0;
+  background: #fafafa;
+}
+
+::ng-deep .p-accordioncontent-content {
+  padding: 0 !important;
+  background: #fafafa;
+}
+
+.child-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding-left: 2.5rem;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  position: relative;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.child-link:hover {
+  background: #f3f4f6;
+  color: #374151;
+  padding-left: 2.75rem;
+}
+
+.child-link.active {
+  background: #e5e7eb;
+  color: #111827;
+  font-weight: 500;
+  border-left: 3px solid #6b7280;
+}
+
+.direct-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.direct-link:hover {
+  background: #f9fafb;
+  color: #111827;
+  padding-left: 1.25rem;
+}
+
+.direct-link.active {
+  background: #e5e7eb;
+  color: #111827;
+  border-left: 3px solid #6b7280;
+}
+
+::ng-deep .p-accordioncontent .p-accordion {
+  background: #fafafa;
+}
+
+::ng-deep .p-accordioncontent .p-accordionheader button {
+  padding-left: 2.5rem;
+  background: #fafafa !important;
+  font-size: 0.875rem;
+}
+
+::ng-deep .p-accordioncontent .p-accordionheader:hover button {
+  background: #f3f4f6 !important;
+}
+
+::ng-deep .p-accordioncontent .p-accordioncontent {
+  background: #f5f5f5;
+}
+
+::ng-deep .p-accordion *,
+::ng-deep .p-accordionpanel *,
+::ng-deep .p-accordionheader *,
+::ng-deep .p-accordioncontent * {
+  border-radius: 0 !important;
+}

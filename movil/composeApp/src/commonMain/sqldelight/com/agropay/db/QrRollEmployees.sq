@@ -1,0 +1,54 @@
+import kotlin.Boolean;
+
+-- =============================================
+-- Tabla: Relación N:N entre QR Rolls y Empleados
+-- Se carga desde: GET /v1/tareos/{tareoPublicId}/employees/sync
+-- Un empleado puede tener múltiples QR rolls en diferentes fechas
+-- Un QR roll puede ser asignado a múltiples empleados en diferentes fechas
+-- =============================================
+
+CREATE TABLE qr_roll_employees (
+    id TEXT PRIMARY KEY NOT NULL, -- UUID de la asignación (qrRollEmployeeId)
+    qr_roll_id TEXT NOT NULL,
+    employee_document_number TEXT NOT NULL, -- DNI del empleado (referencia a employees_cache)
+    assigned_date INTEGER NOT NULL, -- Timestamp del día de asignación
+    cached_at INTEGER NOT NULL,
+
+    FOREIGN KEY (qr_roll_id) REFERENCES qr_rolls_cache(id),
+    FOREIGN KEY (employee_document_number) REFERENCES employees_cache(document_number)
+);
+
+-- Índices para búsquedas eficientes
+CREATE INDEX qr_roll_employees_employee_date
+    ON qr_roll_employees(employee_document_number, assigned_date);
+
+CREATE INDEX qr_roll_employees_roll
+    ON qr_roll_employees(qr_roll_id);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+insertOrReplace:
+INSERT OR REPLACE INTO qr_roll_employees(
+    id, qr_roll_id, employee_document_number, assigned_date, cached_at
+)
+VALUES (?, ?, ?, ?, ?);
+
+getByEmployeeDocumentNumber:
+SELECT * FROM qr_roll_employees
+WHERE employee_document_number = ?;
+
+getByEmployeeAndDate:
+SELECT * FROM qr_roll_employees
+WHERE employee_document_number = ? AND assigned_date = ?;
+
+getByQrRoll:
+SELECT * FROM qr_roll_employees
+WHERE qr_roll_id = ?;
+
+getById:
+SELECT * FROM qr_roll_employees WHERE id = ?;
+
+deleteOlderThan:
+DELETE FROM qr_roll_employees WHERE cached_at < ?;

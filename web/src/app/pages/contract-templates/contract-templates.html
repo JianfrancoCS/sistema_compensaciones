@@ -1,0 +1,125 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Plantillas de Contrato</h1>
+    <button pButton type="button" label="Crear" icon="pi pi-plus" class="p-button-success h-10" (click)="navigateToCreate()"></button>
+  </div>
+
+
+  <!-- Tabla -->
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="contractTemplates()"
+               dataKey="publicId"
+               [rows]="10"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="loading()"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadContractTemplates($event)"
+               [totalRecords]="totalRecords()"
+               [first]="0"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex flex-col md:flex-row gap-2 justify-end">
+            <p-select [options]="contractTypes()"
+                      placeholder="Filtrar por tipo"
+                      optionLabel="name"
+                      optionValue="publicId"
+                      [showClear]="true"
+                      [ngModel]="store.state().filter.contractTypePublicId"
+                      (ngModelChange)="onContractTypeSelectChange($event)"
+                      class="w-full md:w-48"></p-select>
+            <p-select [options]="states()"
+                      placeholder="Filtrar por estado"
+                      optionLabel="label"
+                      optionValue="value"
+                      [showClear]="true"
+                      [ngModel]="store.state().filter.statePublicId"
+                      (ngModelChange)="onStateSelectChange($event)"
+                      class="w-full md:w-48"></p-select>
+            <p-inputgroup class="w-full md:max-w-sm">
+              <p-inputgroup-addon>
+                <i class="pi pi-search"></i>
+              </p-inputgroup-addon>
+              <input pInputText type="text" [value]="store.state().filter.name" (input)="onSearch($event)" placeholder="Buscar por nombre de plantilla" class="text-sm"/>
+              <p-inputgroup-addon>
+                <p-button icon="pi pi-times" severity="secondary" (click)="store.clearSearch()"></p-button>
+              </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:15rem" pSortableColumn="name" class="text-sm">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="contractTypeName" class="text-sm">Tipo de Contrato <p-sortIcon field="contractTypeName"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="stateName" class="text-sm">Estado <p-sortIcon field="stateName"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="createdAt" class="text-sm">Fecha de Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="width: 12rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-template>
+          <tr>
+            <td class="text-sm px-3">{{ template.name }}</td>
+            <td class="text-sm px-3">{{ template.contractTypeName }}</td>
+            <td class="text-sm px-3">{{ template.stateName }}</td>
+            <td class="text-sm px-3">{{ template.createdAt | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button pButton type="button" pTooltip="Ver Plantilla" tooltipPosition="top" icon="pi pi-eye" class="p-button-info h-8 w-8" (click)="showTemplateDetails(template)"></button>
+                <button pButton type="button" pTooltip="Editar" tooltipPosition="top" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="navigateToEdit(template)"></button>
+                <button pButton type="button" pTooltip="Eliminar" tooltipPosition="top" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(template)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center text-sm p-4">No se encontraron plantillas de contrato.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <!-- Modal de Detalles -->
+  <p-dialog
+    header="Previsualización de Contrato"
+    [(visible)]="displayDetailsModal"
+    (onHide)="hideDetailsModal()"
+    [modal]="true"
+    [style]="{ width: '80vw', height: '90vh' }"
+    [draggable]="false"
+    [resizable]="false">
+
+    <div style="height: 70vh; width: 100%;">
+      @if (loadingPdf()) {
+        <div class="flex flex-col items-center justify-center h-full">
+          <p-progressSpinner></p-progressSpinner>
+          <p class="mt-2">Generando PDF...</p>
+        </div>
+      } @else if (pdfSrc()) {
+        <iframe [src]="pdfSrc()" style="width: 100%; height: 100%; border: none;"></iframe>
+      } @else {
+        <div class="text-center p-4">
+          <p>No se pudo cargar el contenido.</p>
+        </div>
+      }
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Descargar" icon="pi pi-download" (click)="downloadPdf()" [disabled]="!pdfSrc() || loadingPdf()"></button>
+      <button pButton type="button" label="Cerrar" icon="pi pi-times" class="p-button-text" (click)="hideDetailsModal()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

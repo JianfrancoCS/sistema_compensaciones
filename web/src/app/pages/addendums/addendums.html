@@ -1,0 +1,82 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Adendas</h1>
+    <button pButton type="button" label="Crear" icon="pi pi-plus" class="p-button-success h-10" (click)="showCreateModal()"></button>
+  </div>
+
+  <!-- Modals -->
+  <app-addendum-create-modal [visible]="isCreateModalVisible()" (onHide)="hideCreateModal()"></app-addendum-create-modal>
+  <app-update-addendum-modal [visible]="isUpdateModalVisible()" [addendum]="selectedAddendum()" (onHide)="hideUpdateModal()"></app-update-addendum-modal>
+
+  <!-- Tabla -->
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="addendums().addendums"
+               dataKey="publicId"
+               [rows]="10"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="addendums().loading"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadAddendums($event)"
+               [totalRecords]="totalRecords()"
+               [first]="0"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex">
+            <p-iconfield iconPosition="left" class="ml-auto">
+              <p-inputicon>
+                <i class="pi pi-search"></i>
+              </p-inputicon>
+              <input pInputText type="text" (input)="onSearch($event)" placeholder="Buscar por número" class="text-sm"/>
+            </p-iconfield>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:12rem" pSortableColumn="addendumNumber" class="text-sm">Número <p-sortIcon field="addendumNumber"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="contractNumber" class="text-sm">Contrato <p-sortIcon field="contractNumber"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="addendumTypeName" class="text-sm">Tipo de Adenda <p-sortIcon field="addendumTypeName"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="startDate" class="text-sm">Fecha Inicio <p-sortIcon field="startDate"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="stateName" class="text-sm">Estado <p-sortIcon field="stateName"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="createdAt" class="text-sm">Fecha de Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="width: 8rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-addendum>
+          <tr>
+            <td class="text-sm px-3">{{ addendum.addendumNumber }}</td>
+            <td class="text-sm px-3">{{ addendum.contractNumber }}</td>
+            <td class="text-sm px-3">{{ addendum.addendumTypeName }}</td>
+            <td class="text-sm px-3">{{ addendum.startDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-sm px-3">{{ addendum.stateName }}</td>
+            <td class="text-sm px-3">{{ addendum.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button pButton type="button" icon="pi pi-eye" class="p-button-info h-8 w-8"></button>
+                <button pButton type="button" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="showUpdateModal(addendum)"></button>
+                <button pButton type="button" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(addendum)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr class="">
+            <td colspan="7" class="text-center text-sm p-4">No se encontraron adendas.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

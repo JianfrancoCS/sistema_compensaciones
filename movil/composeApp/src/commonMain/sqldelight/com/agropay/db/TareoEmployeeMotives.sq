@@ -1,0 +1,30 @@
+import kotlin.Boolean;
+
+CREATE TABLE tareo_employee_motives (
+    id TEXT PRIMARY KEY NOT NULL, -- UUID generado en el móvil
+    tareo_employee_id TEXT NOT NULL,
+    motive_id TEXT NOT NULL,
+
+    applied_at TEXT,
+    observations TEXT,
+
+    is_synced INTEGER AS Boolean NOT NULL DEFAULT 0,
+
+    FOREIGN KEY (tareo_employee_id) REFERENCES tareo_employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (motive_id) REFERENCES tareo_motives_cache(id)
+);
+
+-- QUERIES
+
+insert:
+INSERT INTO tareo_employee_motives(id, tareo_employee_id, motive_id, applied_at, observations, is_synced)
+VALUES (?, ?, ?, ?, ?, 0);
+
+getByTareoEmployeeId:
+SELECT * FROM tareo_employee_motives WHERE tareo_employee_id = ?;
+
+getNotSyncedByTareoEmployeeId:
+SELECT * FROM tareo_employee_motives WHERE tareo_employee_id = ? AND is_synced = 0;
+
+markAsSynced:
+UPDATE tareo_employee_motives SET is_synced = 1 WHERE id = ?;

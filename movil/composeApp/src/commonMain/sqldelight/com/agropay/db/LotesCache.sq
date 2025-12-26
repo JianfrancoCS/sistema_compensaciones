@@ -1,0 +1,50 @@
+-- =============================================
+-- Tabla: Cache de Lotes (CACHE - SOLO LECTURA)
+-- Datos precargados desde: GET /v1/lotes/sync
+-- El API retorna todos los lotes activos del sistema
+-- =============================================
+
+CREATE TABLE lotes_cache (
+    id TEXT PRIMARY KEY NOT NULL, -- publicId del servidor (UUID)
+    name TEXT NOT NULL,
+    hectareage REAL, -- Extensión en hectáreas
+    subsidiary_id TEXT NOT NULL,
+    cached_at INTEGER NOT NULL,
+
+    FOREIGN KEY (subsidiary_id) REFERENCES subsidiaries_cache(id)
+);
+
+-- Índices para búsquedas eficientes
+CREATE INDEX lotes_cache_subsidiary ON lotes_cache(subsidiary_id);
+CREATE INDEX lotes_cache_name ON lotes_cache(name);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+-- Insertar o reemplazar lote en cache
+insertOrReplace:
+INSERT OR REPLACE INTO lotes_cache(
+    id, name, hectareage, subsidiary_id, cached_at
+)
+VALUES (?, ?, ?, ?, ?);
+
+-- Obtener todos los lotes
+getAll:
+SELECT * FROM lotes_cache ORDER BY name;
+
+-- Obtener lotes por sucursal
+getBySubsidiary:
+SELECT * FROM lotes_cache WHERE subsidiary_id = ? ORDER BY name;
+
+-- Buscar por ID
+getById:
+SELECT * FROM lotes_cache WHERE id = ?;
+
+-- Limpiar cache antiguo (más de X días)
+deleteOlderThan:
+DELETE FROM lotes_cache WHERE cached_at < ?;
+
+-- Contar lotes en cache
+countCached:
+SELECT COUNT(*) FROM lotes_cache;

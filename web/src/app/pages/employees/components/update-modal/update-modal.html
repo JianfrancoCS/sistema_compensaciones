@@ -1,0 +1,147 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Empleado"
+  (onHide)="hideModal()"
+  (onSubmit)="updateEmployee()"
+  [isSubmitDisabled]="employeeForm.invalid"
+>
+  <form [formGroup]="employeeForm">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="flex flex-col">
+        <label for="dni" class="font-semibold text-sm">DNI</label>
+        <input pInputText id="dni" formControlName="dni" class="flex-auto text-sm" autocomplete="off" />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="names" class="font-semibold text-sm">Nombres</label>
+        <input pInputText id="names" formControlName="names" class="flex-auto text-sm" autocomplete="off" />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="paternalLastname" class="font-semibold text-sm">Apellido Paterno</label>
+        <input pInputText id="paternalLastname" formControlName="paternalLastname" class="flex-auto text-sm" autocomplete="off" />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="maternalLastname" class="font-semibold text-sm">Apellido Materno</label>
+        <input pInputText id="maternalLastname" formControlName="maternalLastname" class="flex-auto text-sm" autocomplete="off" />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="dob" class="font-semibold text-sm">Fecha de Nacimiento</label>
+        <p-datepicker id="dob" formControlName="dob" dateFormat="dd/mm/yy" [showIcon]="true" inputId="icon" class="w-full"></p-datepicker>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="state" class="font-semibold text-sm">Estado</label>
+        <p-autocomplete
+          id="state"
+          formControlName="statePublicId"
+          [suggestions]="employeeStates()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona un estado"
+          [dropdown]="true"
+          class="w-full"
+        ></p-autocomplete>
+        @if (employeeForm.get('statePublicId')?.invalid && employeeForm.get('statePublicId')?.dirty) {
+          <small class="p-error">Estado requerido.</small>
+        }
+      </div>
+
+      <div class="flex flex-col">
+        <label for="subsidiary" class="font-semibold text-sm">Filial</label>
+        <p-autocomplete
+          id="subsidiary"
+          formControlName="subsidiaryPublicId"
+          [suggestions]="subsidiaryOptions()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una filial"
+          [dropdown]="true"
+          class="w-full"
+        ></p-autocomplete>
+        @if (employeeForm.get('subsidiaryPublicId')?.invalid && employeeForm.get('subsidiaryPublicId')?.dirty) {
+          <small class="p-error">Filial requerida.</small>
+        }
+      </div>
+
+      <div class="flex flex-col">
+        <label for="position" class="font-semibold text-sm">Posición</label>
+        <p-autocomplete
+          id="position"
+          formControlName="positionPublicId"
+          [suggestions]="positionOptions()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una posición"
+          [dropdown]="true"
+          class="w-full"
+        ></p-autocomplete>
+        @if (employeeForm.get('positionPublicId')?.invalid && employeeForm.get('positionPublicId')?.dirty) {
+          <small class="p-error">Posición requerida.</small>
+        }
+      </div>
+
+      <div class="flex flex-col">
+        <label for="department" class="font-semibold text-sm">Departamento</label>
+        <p-autocomplete
+          id="department"
+          formControlName="departmentPublicId"
+          [suggestions]="departments()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona un departamento"
+          [dropdown]="true"
+          class="w-full"
+          (onSelect)="onDepartmentChange()"
+        ></p-autocomplete>
+        @if (employeeForm.get('departmentPublicId')?.invalid && employeeForm.get('departmentPublicId')?.dirty) {
+          <small class="p-error">Departamento requerido.</small>
+        }
+      </div>
+
+      <div class="flex flex-col">
+        <label for="province" class="font-semibold text-sm">Provincia</label>
+        <p-autocomplete
+          id="province"
+          formControlName="provincePublicId"
+          [suggestions]="provinces()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una provincia"
+          [dropdown]="true"
+          class="w-full"
+          (onSelect)="onProvinceChange()"
+          [disabled]="provinces().length === 0"
+        ></p-autocomplete>
+        @if (employeeForm.get('provincePublicId')?.invalid && employeeForm.get('provincePublicId')?.dirty) {
+          <small class="p-error">Provincia requerida.</small>
+        }
+      </div>
+
+      <div class="flex flex-col">
+        <label for="district" class="font-semibold text-sm">Distrito</label>
+        <p-autocomplete
+          id="district"
+          formControlName="districtPublicId"
+          [suggestions]="districts()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona un distrito"
+          [dropdown]="true"
+          class="w-full"
+          [disabled]="districts().length === 0"
+        ></p-autocomplete>
+        @if (employeeForm.get('districtPublicId')?.invalid && employeeForm.get('districtPublicId')?.dirty) {
+          <small class="p-error">Distrito requerido.</small>
+        }
+      </div>
+
+      <div class="flex flex-col">
+        <label for="managerCode" class="font-semibold text-sm">Código de Gerente (Opcional)</label>
+        <input pInputText id="managerCode" formControlName="managerCode" class="flex-auto text-sm" autocomplete="off" />
+      </div>
+    </div>
+  </form>
+</app-modal-template>

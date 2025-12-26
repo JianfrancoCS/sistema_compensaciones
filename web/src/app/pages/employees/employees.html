@@ -1,0 +1,138 @@
+<app-employee-create-modal [visible]="showCreateModal()" (onHide)="hideCreateModal()"></app-employee-create-modal>
+
+@if (!showCreateModal()) {
+  <div  class="card">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div class="flex justify-between align-items-center mb-4">
+      <h2 class="text-lg font-semibold">Gestión de Empleados</h2>
+      <p-button  icon="pi pi-plus" label="Nuevo Empleado" (click)="showCreatePage()"></p-button>
+    </div>
+
+    <p-table
+      [value]="employees()"
+      [lazy]="true"
+      (onLazyLoad)="loadEmployees($event)"
+      [paginator]="true"
+      [rows]="10"
+      [totalRecords]="totalRecords()"
+      [loading]="loading()"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      dataKey="publicId"
+      [tableStyle]="{'min-width': '50rem'}"
+    >
+      <ng-template pTemplate="caption">
+          <div class="flex flex-wrap justify-end gap-3">
+              <!-- Filtro de Sucursal -->
+              <p-select
+                [options]="subsidiaryOptions()"
+                placeholder="Filtrar por sucursal"
+                [showClear]="true"
+                (onChange)="onSubsidiaryFilter($event.value)"
+                class="w-52"
+                appendTo="body"
+              ></p-select>
+
+              <!-- Filtro de Posición -->
+              <p-select
+                [options]="positionOptions()"
+                placeholder="Filtrar por posición"
+                [showClear]="true"
+                (onChange)="onPositionFilter($event.value)"
+                class="w-52"
+                appendTo="body"
+              ></p-select>
+
+              <!-- Filtro de Nacionalidad -->
+              <p-select
+                [options]="nationalityOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Filtrar por nacionalidad"
+                [showClear]="true"
+                (onChange)="onNationalityFilter($event.value)"
+                class="w-56"
+                appendTo="body"
+              ></p-select>
+
+              <!-- Búsqueda -->
+              <p-inputgroup class="w-72">
+                <p-inputgroup-addon>
+                    <i class="pi pi-search"></i>
+                </p-inputgroup-addon>
+                <input pInputText type="text" [value]="store.filters().documentNumber"  (input)="onSearch($event)" placeholder="Buscar por numero de documento" class="text-sm"/>
+                <p-inputgroup-addon>
+                    <p-button icon="pi pi-times" severity="secondary" (click)="store.clearSearch()"></p-button>
+                </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Foto</th>
+          <th pSortableColumn="documentNumber">Documento <p-sortIcon field="documentNumber"></p-sortIcon></th>
+          <th>Nombre Completo</th>
+          <th>Nacionalidad</th>
+          <th pSortableColumn="subsidiaryName">Sucursal <p-sortIcon field="subsidiaryName"></p-sortIcon></th>
+          <th pSortableColumn="positionName">Posición <p-sortIcon field="positionName"></p-sortIcon></th>
+          <th pSortableColumn="createdAt">Fecha Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+          <th pSortableColumn="updatedAt">Fecha Actualización <p-sortIcon field="updatedAt"></p-sortIcon></th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-employee>
+        <tr>
+          <td>
+            @if (employee.photoUrl) {
+              <img [src]="employee.photoUrl" 
+                   [alt]="employee.names + ' ' + employee.paternalLastname"
+                   class="w-10 h-10 rounded-full object-cover border border-gray-300" />
+            } @else {
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs border border-gray-300">
+                {{ (employee.names || '?')[0] }}{{ (employee.paternalLastname || '?')[0] }}
+              </div>
+            }
+          </td>
+          <td>{{ employee.documentNumber }}</td>
+          <td class="employee-name-cell">{{ employee.names }} {{ employee.paternalLastname }} {{ employee.maternalLastname }}</td>
+          <td>
+            <span [class]="employee.isNational ? 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium' : 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium'">
+              {{ employee.isNational ? 'Peruano' : 'Extranjero' }}
+            </span>
+          </td>
+          <td>{{ employee.subsidiaryName }}</td>
+          <td>{{ employee.positionName }}</td>
+          <td>
+            <app-date-display
+              [date]="employee.createdAt"
+              type="created"
+              variant="table"
+              size="sm">
+            </app-date-display>
+          </td>
+          <td>
+            <app-date-display
+              [date]="employee.updatedAt"
+              type="updated"
+              variant="table"
+              size="sm">
+            </app-date-display>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <!-- Edit functionality can be added later if needed -->
+              <button pButton icon="pi pi-trash" class="p-button-sm p-button-danger" (click)="confirmDelete(employee)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="text-center">No se encontraron empleados.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+}

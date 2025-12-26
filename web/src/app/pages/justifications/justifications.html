@@ -1,0 +1,103 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Justificaciones</h1>
+    <button pButton class="p-button-success h-10" (click)="showCreateModal()">
+      <i class="pi pi-plus" pButtonIcon></i>
+      <span pButtonLabel>Save</span>
+    </button>
+  </div>
+
+  <app-create-justification-modal [visible]="isCreateModalVisible()" (onHide)="hideCreateModal()"></app-create-justification-modal>
+  <app-update-justification-modal [visible]="isUpdateModalVisible()" [justification]="selectedJustification()!" (onHide)="hideUpdateModal()"></app-update-justification-modal>
+
+  <!-- Tabla -->
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="justifications()"
+               dataKey="publicId"
+               [rows]="10"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="loading()"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadJustifications($event)"
+               [totalRecords]="totalRecords()"
+               [first]="0"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex p-0 justify-end">
+            <p-inputgroup class="max-w-sm">
+                <p-inputgroup-addon>
+                    <i class="pi pi-search"></i>
+                </p-inputgroup-addon>
+                <input pInputText type="text" [value]="store.filters().name"  (input)="onSearch($event)" placeholder="Buscar por nombre" class="text-sm"/>
+                <p-inputgroup-addon>
+                    <p-button icon="pi pi-times" severity="secondary" (click)="store.clearSearch()"></p-button>
+                </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:15rem" pSortableColumn="name" class="text-sm">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th style="min-width:20rem" pSortableColumn="description" class="text-sm">Descripción <p-sortIcon field="description"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="isPaid" class="text-sm">Pagado <p-sortIcon field="isPaid"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="createdAt" class="text-sm">Fecha de Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="updatedAt" class="text-sm">Fecha de Actualización <p-sortIcon field="updatedAt"></p-sortIcon></th>
+            <th style="width: 8rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-justification>
+          <tr>
+            <td class="text-sm px-3">{{ justification.name }}</td>
+            <td class="text-sm px-3">{{ justification.description }}</td>
+            <td class="text-sm px-3">
+              <p-tag [value]="justification.isPaid ? 'Sí' : 'No'" [severity]="justification.isPaid ? 'success' : 'danger'"></p-tag>
+            </td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="justification.createdAt"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="justification.updatedAt"
+                type="updated"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <p-button pButton severity="info" icon="pi pi-eye" class="p-button-info h-8 w-8"></p-button>
+                <p-button pButton severity="success" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="showUpdateModal(justification)"></p-button>
+                <p-button pButton severity="danger" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(justification)"></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          @if (isEmpty()) {
+            <tr>
+              <td colspan="6" class="text-center text-sm p-4">No se encontraron justificaciones.</td>
+            </tr>
+          }
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

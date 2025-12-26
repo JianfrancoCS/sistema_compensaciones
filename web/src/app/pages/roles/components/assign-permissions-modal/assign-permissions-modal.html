@@ -1,0 +1,40 @@
+<app-modal-template
+  [visible]="visible"
+  [headerText]="'Asignar Permisos - ' + roleName"
+  [width]="'min(500px, 90vw)'"
+  (onHide)="onHide.emit()"
+  (onSubmit)="savePermissions()"
+  [isSubmitDisabled]="loading()"
+>
+  <div class="p-6">
+    @if (loading()) {
+      <div class="flex justify-center items-center py-8">
+        <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (permission of permissionsStatus(); track permission.id) {
+          <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+               (click)="togglePermission(permission.id)">
+            <p-checkbox
+              [binary]="true"
+              [(ngModel)]="permission.assigned"
+              [inputId]="permission.id"
+              (onChange)="togglePermission(permission.id)">
+            </p-checkbox>
+            <label [for]="permission.id" class="ml-3 cursor-pointer flex-1">
+              <span class="font-medium text-gray-700">{{ permission.name }}</span>
+            </label>
+          </div>
+        }
+
+        @if (permissionsStatus().length === 0) {
+          <div class="text-center py-8 text-gray-500">
+            <i class="pi pi-inbox text-4xl mb-2 block"></i>
+            <p>No hay permisos disponibles</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</app-modal-template>

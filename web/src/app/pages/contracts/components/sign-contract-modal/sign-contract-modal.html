@@ -1,0 +1,121 @@
+<p-dialog 
+  [visible]="visible" 
+  [modal]="true" 
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', maxWidth: '700px' }"
+  header="Firmar Contrato"
+  (onHide)="hideModal()"
+>
+  <div class="flex flex-col gap-4">
+    <!-- Selector de modo: Dibujar o Subir -->
+    <div class="flex gap-2 mb-4">
+      <button 
+        pButton 
+        type="button" 
+        label="Dibujar Firma" 
+        [class.p-button-outlined]="signatureMode() !== 'draw'"
+        [class.p-button-primary]="signatureMode() === 'draw'"
+        (click)="switchMode('draw')"
+        class="flex-1">
+      </button>
+      <button 
+        pButton 
+        type="button" 
+        label="Subir Archivo Firmado" 
+        [class.p-button-outlined]="signatureMode() !== 'upload'"
+        [class.p-button-primary]="signatureMode() === 'upload'"
+        (click)="switchMode('upload')"
+        class="flex-1">
+      </button>
+    </div>
+
+    <!-- Modo Dibujar -->
+    @if (signatureMode() === 'draw') {
+      <div class="flex flex-col gap-3">
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+          <canvas 
+            #signatureCanvas
+            width="600" 
+            height="300"
+            class="w-full border border-gray-400 rounded bg-white cursor-crosshair"
+            style="touch-action: none;">
+          </canvas>
+        </div>
+        <div class="flex justify-between items-center">
+          <button 
+            pButton 
+            type="button" 
+            label="Limpiar" 
+            icon="pi pi-eraser" 
+            class="p-button-secondary"
+            (click)="clearCanvas()"
+            [disabled]="!hasSignature()">
+          </button>
+          <small class="text-gray-500">
+            Dibuja tu firma en el área de arriba
+          </small>
+        </div>
+      </div>
+    }
+
+    <!-- Modo Subir Archivo -->
+    @if (signatureMode() === 'upload') {
+      <div class="flex flex-col gap-3">
+        <p-fileUpload
+          mode="basic"
+          chooseLabel="Seleccionar Archivo Firmado"
+          accept="image/*,.pdf"
+          [maxFileSize]="5000000"
+          (onSelect)="onFileSelected($event)"
+          [auto]="false"
+          [customUpload]="true"
+          [showUploadButton]="false"
+          [showCancelButton]="false"
+          class="w-full">
+        </p-fileUpload>
+        <small class="text-gray-500">
+          Selecciona un archivo de imagen (PNG, JPG) o PDF con el documento firmado
+        </small>
+      </div>
+    }
+
+    <!-- Información del contrato -->
+    @if (contract) {
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <p class="text-sm text-gray-700">
+          <strong>Contrato:</strong> {{ contract.contractNumber }}
+        </p>
+        <p class="text-sm text-gray-700">
+          <strong>Documento:</strong> {{ contract.personDocumentNumber }}
+        </p>
+      </div>
+    }
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button 
+        pButton 
+        type="button" 
+        label="Cancelar" 
+        icon="pi pi-times" 
+        class="p-button-secondary"
+        (click)="hideModal()"
+        [disabled]="signing()">
+      </button>
+      <button 
+        pButton 
+        type="button" 
+        label="Firmar Contrato" 
+        icon="pi pi-check" 
+        class="p-button-success"
+        (click)="signContract()"
+        [disabled]="!hasSignature() || signing()"
+        [loading]="signing()">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+

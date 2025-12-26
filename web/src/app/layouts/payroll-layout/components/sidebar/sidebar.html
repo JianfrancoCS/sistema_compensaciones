@@ -1,0 +1,117 @@
+<div
+  [class.translate-x-0]="sidebarStore.isOpen()"
+  [class.-translate-x-full]="!sidebarStore.isOpen()"
+  class="fixed sm:static sm:translate-x-0 left-0 top-0 z-50 bg-white w-60 sm:w-64 h-full border-r border-gray-200 overflow-y-auto transform transition-transform duration-300 ease-in-out shadow-lg sm:shadow-none">
+
+  <div class="flex justify-between   h-14 items-center pl-4 pr-1 sm:hidden">
+
+    <div class="flex items-center gap-2">
+      <img src="/images/logo.svg" alt="logo" class="h-8 w-auto" />
+      <h2 class="text-lg font-semibold">AgroPay</h2>
+    </div>
+    <button
+      (click)="sidebarStore.closeSidebar()"
+      class="p-2 rounded-lg hover:bg-gray-100 sm:hidden ">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700"  viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <nav>
+    <!-- Un solo accordion general -->
+    <p-accordion [multiple]="false" class="w-full border-none!">
+      @for (item of navigationItems(); track item.id) {
+        <!-- Si tiene hijos => Panel -->
+        @if (hasChildren(item)) {
+          <p-accordion-panel [value]="item.id" class=" w-full">
+            <p-accordion-header
+              class="  py-0! px-4! h-10! hover:bg-gray-50 hover:text-blue-600 transition-colors">
+              <div class="flex items-center gap-2 text-gray-700 text-sm font-medium">
+                @if (item.iconUrl) {
+                  <img [src]="item.iconUrl" [alt]="item.displayName" class="w-4 h-4 object-contain" />
+                } @else if (item.icon) {
+                  <i [class]="getPrimeIcon(item.icon)"></i>
+                } @else {
+                  <i class="pi pi-circle"></i>
+                }
+                @if (item.route) {
+                  <a [routerLink]="item.route" (click)="onMenuItemClick(); $event.stopPropagation();"
+                     [class.text-blue-600]="isActiveRoute(item.route)"
+                     class="hover:underline">
+                    <span>{{ item.displayName }}</span>
+                  </a>
+                } @else {
+                  <span>{{ item.displayName }}</span>
+                }
+              </div>
+            </p-accordion-header>
+
+            <p-accordion-content class="[&>div]:p-0">
+              <div class="w-full">
+                @for (child of item.children; track child.id) {
+                  @if (child.route) {
+                    <a
+                      [routerLink]="child.route"
+                      (click)="onMenuItemClick()"
+                      class="child-link"
+                      [class.active]="isActiveRoute(child.route)">
+                      @if (child.iconUrl) {
+                        <img [src]="child.iconUrl" [alt]="child.displayName" class="w-4 h-4 object-contain" />
+                      } @else if (child.icon) {
+                        <i [class]="getPrimeIcon(child.icon)"></i>
+                      } @else {
+                        <i class="pi pi-circle"></i>
+                      }
+                      <span>{{ child.displayName }}</span>
+                    </a>
+                  } @else {
+                    <div class="child-link">
+                      @if (child.iconUrl) {
+                        <img [src]="child.iconUrl" [alt]="child.displayName" class="w-4 h-4 object-contain" />
+                      } @else if (child.icon) {
+                        <i [class]="getPrimeIcon(child.icon)"></i>
+                      } @else {
+                        <i class="pi pi-circle"></i>
+                      }
+                      <span>{{ child.displayName }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+        }
+        @else {
+          @if (item.route) {
+            <a
+              [routerLink]="item.route"
+              (click)="onMenuItemClick()"
+              class="direct-link"
+              [class.active]="isActiveRoute(item.route)">
+              @if (item.iconUrl) {
+                <img [src]="item.iconUrl" [alt]="item.displayName" class="w-4 h-4 object-contain" />
+              } @else if (item.icon) {
+                <i [class]="getPrimeIcon(item.icon)"></i>
+              } @else {
+                <i class="pi pi-circle"></i>
+              }
+              <span>{{ item.displayName }}</span>
+            </a>
+          } @else {
+            <div class="direct-link">
+              @if (item.iconUrl) {
+                <img [src]="item.iconUrl" [alt]="item.displayName" class="w-4 h-4 object-contain" />
+              } @else if (item.icon) {
+                <i [class]="getPrimeIcon(item.icon)"></i>
+              } @else {
+                <i class="pi pi-circle"></i>
+              }
+              <span>{{ item.displayName }}</span>
+            </div>
+          }
+        }
+      }
+    </p-accordion>
+  </nav>
+</div>

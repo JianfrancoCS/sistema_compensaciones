@@ -1,0 +1,94 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+
+  <!-- Header -->
+  <div class="flex items-center gap-4 mb-6">
+    <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true"  (click)="goBack()"/>
+    <h1 class="text-2xl font-semibold">{{ isEditMode() ? 'Editar' : 'Crear' }} Plantilla de Contrato</h1>
+  </div>
+
+  <form [formGroup]="templateForm" (ngSubmit)="saveTemplate()" class="contract-form">
+
+    <div class="form-row">
+      <div class="form-field flex-grow-2">
+        <label for="name">Nombre de la Plantilla</label>
+        <input pInputText id="name" formControlName="name" placeholder="Nombre de la plantilla" class="w-full" />
+        @if (templateForm.get('name')?.invalid && templateForm.get('name')?.touched) {
+          <small class="p-error">El nombre es requerido.</small>
+        }
+      </div>
+
+      <div class="form-field flex-grow-1">
+        <label for="contractType">Tipo de Contrato</label>
+        <p-select id="contractType" formControlName="contractTypePublicId" [options]="contractTypes()" optionLabel="name" optionValue="publicId" placeholder="Seleccionar tipo" class="w-full"></p-select>
+        @if (templateForm.get('contractTypePublicId')?.invalid && templateForm.get('contractTypePublicId')?.touched) {
+          <small class="p-error">El tipo de contrato es requerido.</small>
+        }
+      </div>
+      <div class="form-field flex-grow-1">
+        <label for="state">Estado</label>
+        <p-select id="state" formControlName="statePublicId" [options]="states()" optionLabel="name" optionValue="publicId" placeholder="Seleccionar estado" class="w-full"></p-select>
+        @if (templateForm.get('statePublicId')?.invalid && templateForm.get('statePublicId')?.touched) {
+          <small class="p-error">El estado es requerido.</small>
+        }
+      </div>
+    </div>
+
+    <div class="variables-section ">
+      <label>Variables Disponibles</label>
+      <div class="variables-toolbar">
+        <p-inputGroup>
+          <p-inputGroupAddon>
+            <i class="pi pi-search"></i>
+          </p-inputGroupAddon>
+          <input pInputText [(ngModel)]="variableSearchTerm" [ngModelOptions]="{standalone: true}" placeholder="Buscar por nombre o código..." />
+        </p-inputGroup>
+        <div class="variables-scroll-container  ">
+          @for (variable of filteredVariables(); track variable.publicId) {
+            <div class="source-variable-chip" draggable="true" (dragstart)="onVariableDragStart($event, variable)">
+              <span>{{ variable.name }}</span>
+              <span class="variable-code">{{variable.code}}</span>
+            </div>
+          }
+          @if (filteredVariables().length === 0 && !isLoading()) {
+            <div class="no-variables-message">No se encontraron variables.</div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-area ">
+      <label for="templateContent">Contenido de la Plantilla</label>
+      <div class="flex  gap-2 ">
+        <div class="box-content w-150 px-15 bg-white shadow-lg">
+          <app-editor
+            [initialContent]="templateForm.get('templateContent')?.value"
+            [availableVariables]="variables()"
+            (contentChange)="onEditorContentChange($event)"
+            (usedVariablesChange)="onEditorUsedVariablesChange($event)"
+          ></app-editor>
+        </div>
+        <div class="flex-1 flex flex-col bg-black/30 backdrop-blur-md   overflow-hidden relative">
+          @if (pdfPreviewUrl()) {
+            <iframe [src]="pdfPreviewUrl()" class="w-full h-full border-none"></iframe>
+          } @else {
+            <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm p-5 text-center">
+              <p class="text-gray-300 text-lg mb-2">El PDF se previsualizará aquí.</p>
+              <i class="pi pi-file-pdf text-gray-400 text-5xl"></i>
+            </div>
+          }
+        </div>
+      </div>
+       @if (templateForm.get('templateContent')?.invalid && templateForm.get('templateContent')?.touched) {
+          <small class="p-error">El contenido de la plantilla es requerido.</small>
+        }
+    </div>
+
+    <!-- Botones Finales -->
+    <div class="flex justify-end gap-2 pb-3 ">
+      <p-button label="Cancelar" icon="pi pi-times" (click)="goBack()" styleClass="p-button-secondary"></p-button>
+      <p-button type="submit" [label]="isEditMode() ? 'Actualizar Plantilla' : 'Guardar Plantilla'" icon="pi pi-check" [loading]="isLoading()" [disabled]="templateForm.invalid"></p-button>
+    </div>
+
+  </form>
+</div>

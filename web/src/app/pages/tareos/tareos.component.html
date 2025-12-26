@@ -1,0 +1,373 @@
+<div class="p-4">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="mb-4 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-700">Gestión de Tareos</h1>
+      <p class="text-gray-500">Administra los tareos del sistema</p>
+    </div>
+  </div>
+
+  <p-tabs [(value)]="activeTabIndex" (onChange)="onTabChange()">
+    <!-- Tab 1: Vista Normal -->
+    <p-tabpanel value="0" header="Tareos">
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg shadow mb-6 p-4 border border-gray-200">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div>
+        <label for="laborFilter" class="block text-sm font-medium text-gray-700 mb-2">Labor</label>
+        <p-select
+          inputId="laborFilter"
+          [options]="laborOptions()"
+          [(ngModel)]="selectedLabor"
+          (onChange)="onLaborFilterChange($event.value)"
+          placeholder="Todas las labores"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="subsidiaryFilter" class="block text-sm font-medium text-gray-700 mb-2">Subsidiaria/Fundo</label>
+        <p-select
+          inputId="subsidiaryFilter"
+          [options]="subsidiaryOptions()"
+          [(ngModel)]="selectedSubsidiary"
+          (onChange)="onSubsidiaryFilterChange($event.value)"
+          placeholder="Todas las subsidiarias"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="createdByFilter" class="block text-sm font-medium text-gray-700 mb-2">Creado Por</label>
+        <input
+          pInputText
+          id="createdByFilter"
+          [(ngModel)]="createdBySearch"
+          (input)="onCreatedByChange()"
+          placeholder="Buscar por creador..."
+          class="w-full">
+      </div>
+
+      <div>
+        <label for="isProcessedFilter" class="block text-sm font-medium text-gray-700 mb-2">Estado de Procesado</label>
+        <p-select
+          inputId="isProcessedFilter"
+          [options]="isProcessedOptions"
+          [(ngModel)]="selectedIsProcessed"
+          (onChange)="onIsProcessedChange($event.value)"
+          placeholder="Todos"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="dateFromFilter" class="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
+        <p-datepicker
+          inputId="dateFromFilter"
+          [(ngModel)]="dateFrom"
+          (onSelect)="onDateFromChange()"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [showClear]="true"
+          placeholder="Seleccionar fecha"
+          appendTo="body"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+
+      <div>
+        <label for="dateToFilter" class="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
+        <p-datepicker
+          inputId="dateToFilter"
+          [(ngModel)]="dateTo"
+          (onSelect)="onDateToChange()"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [showClear]="true"
+          placeholder="Seleccionar fecha"
+          appendTo="body"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button
+        pButton
+        label="Limpiar Filtros"
+        icon="pi pi-filter-slash"
+        class="p-button-outlined"
+        (click)="clearFilters()">
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-lg shadow">
+    <p-table
+      #dt1
+      [value]="tareoStore.tareos()"
+      dataKey="publicId"
+      [rows]="tareoStore.size()"
+      [rowsPerPageOptions]="[10, 25, 50, 100]"
+      [loading]="tareoStore.isLoading()"
+      [paginator]="true"
+      [lazy]="true"
+      (onLazyLoad)="loadTareos($event)"
+      [totalRecords]="tareoStore.totalItems()"
+      [first]="tareoStore.page() * tareoStore.size()"
+      showGridlines
+      [scrollable]="true"
+      scrollHeight="flex">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="min-width:12rem" pSortableColumn="laborName" class="text-sm">Labor <p-sortIcon field="laborName"></p-sortIcon></th>
+          <th style="min-width:12rem" pSortableColumn="loteName" class="text-sm">Lote <p-sortIcon field="loteName"></p-sortIcon></th>
+          <th style="min-width:12rem" pSortableColumn="loteSubsidiaryName" class="text-sm">Subsidiaria/Fundo <p-sortIcon field="loteSubsidiaryName"></p-sortIcon></th>
+          <th style="min-width:10rem" class="text-sm text-center">Empleados</th>
+          <th style="min-width:10rem" class="text-sm text-center">Procesado</th>
+          <th style="min-width:12rem" pSortableColumn="createdAt" class="text-sm">Fecha <p-sortIcon field="createdAt"></p-sortIcon></th>
+          <th style="width: 12rem" class="text-sm">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-tareo>
+        <tr>
+          <td>{{ tareo.laborName || '-' }}</td>
+          <td>{{ tareo.loteName || 'Sin lote' }}</td>
+          <td>{{ tareo.loteSubsidiaryName || '-' }}</td>
+          <td class="text-center">
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+              {{ tareo.employeeCount }}
+            </span>
+          </td>
+          <td class="text-center">
+            @if (tareo.isProcessed) {
+              <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                Sí
+              </span>
+            } @else {
+              <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                No
+              </span>
+            }
+          </td>
+          <td>
+            <app-date-display
+              [date]="tareo.createdAt"
+              type="created"
+              variant="table"
+              size="sm">
+            </app-date-display>
+          </td>
+          <td>
+            <div class="flex justify-center gap-2">
+              <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                class="p-button-info h-8 w-8"
+                [pTooltip]="'Ver detalle'"
+                tooltipPosition="top"
+                (click)="viewTareoDetail(tareo)">
+              </button>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-trash"
+                class="p-button-danger h-8 w-8"
+                [pTooltip]="'Eliminar'"
+                tooltipPosition="top"
+                (click)="confirmDelete(tareo)">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center text-gray-500 py-4">
+            No se encontraron tareos
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+    </p-tabpanel>
+
+    <!-- Tab 2: Vista Día a Día -->
+    <p-tabpanel value="1" header="Tareos Día a Día">
+      <!-- Filtros Día a Día -->
+      <div class="bg-white rounded-lg shadow mb-6 p-4 border border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div>
+            <label for="dailyLaborFilter" class="block text-sm font-medium text-gray-700 mb-2">Labor</label>
+            <p-select
+              inputId="dailyLaborFilter"
+              [options]="laborOptions()"
+              [(ngModel)]="dailySelectedLabor"
+              (onChange)="onDailyLaborFilterChange($event.value)"
+              placeholder="Todas las labores"
+              [showClear]="true"
+              [fluid]="true"
+              appendTo="body">
+            </p-select>
+          </div>
+
+          <div>
+            <label for="dailySubsidiaryFilter" class="block text-sm font-medium text-gray-700 mb-2">Subsidiaria/Fundo</label>
+            <p-select
+              inputId="dailySubsidiaryFilter"
+              [options]="subsidiaryOptions()"
+              [(ngModel)]="dailySelectedSubsidiary"
+              (onChange)="onDailySubsidiaryFilterChange($event.value)"
+              placeholder="Todas las subsidiarias"
+              [showClear]="true"
+              [fluid]="true"
+              appendTo="body">
+            </p-select>
+          </div>
+
+          <div>
+            <label for="dailyIsCalculatedFilter" class="block text-sm font-medium text-gray-700 mb-2">Estado de Calculado</label>
+            <p-select
+              inputId="dailyIsCalculatedFilter"
+              [options]="isCalculatedOptions"
+              [(ngModel)]="selectedIsCalculated"
+              (onChange)="onIsCalculatedChange($event.value)"
+              placeholder="Todos"
+              [fluid]="true"
+              appendTo="body">
+            </p-select>
+          </div>
+
+          <div>
+            <label for="dailyDateFromFilter" class="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
+            <p-datepicker
+              inputId="dailyDateFromFilter"
+              [(ngModel)]="dailyDateFrom"
+              (onSelect)="onDailyDateFromChange()"
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+              [showClear]="true"
+              placeholder="Seleccionar fecha"
+              appendTo="body"
+              styleClass="w-full">
+            </p-datepicker>
+          </div>
+
+          <div>
+            <label for="dailyDateToFilter" class="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
+            <p-datepicker
+              inputId="dailyDateToFilter"
+              [(ngModel)]="dailyDateTo"
+              (onSelect)="onDailyDateToChange()"
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+              [showClear]="true"
+              placeholder="Seleccionar fecha"
+              appendTo="body"
+              styleClass="w-full">
+            </p-datepicker>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button
+            pButton
+            label="Limpiar Filtros"
+            icon="pi pi-filter-slash"
+            class="p-button-outlined"
+            (click)="clearDailyFilters()">
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla Día a Día -->
+      <div class="bg-white rounded-lg shadow">
+        <p-table
+          #dt2
+          [value]="tareoStore.dailyTareos()"
+          dataKey="publicId"
+          [rows]="tareoStore.dailySize()"
+          [rowsPerPageOptions]="[10, 25, 50, 100]"
+          [loading]="tareoStore.isLoadingDaily()"
+          [paginator]="true"
+          [lazy]="true"
+          (onLazyLoad)="loadDailyTareos($event)"
+          [totalRecords]="tareoStore.dailyTotalItems()"
+          [first]="tareoStore.dailyPage() * tareoStore.dailySize()"
+          showGridlines
+          [scrollable]="true"
+          scrollHeight="flex">
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="min-width:10rem" pSortableColumn="tareoDate" class="text-sm">Fecha <p-sortIcon field="tareoDate"></p-sortIcon></th>
+              <th style="min-width:12rem" class="text-sm">Labor</th>
+              <th style="min-width:12rem" class="text-sm">Lote</th>
+              <th style="min-width:12rem" class="text-sm">Subsidiaria/Fundo</th>
+              <th style="min-width:12rem" class="text-sm">Supervisor</th>
+              <th style="min-width:12rem" class="text-sm">Scanner</th>
+              <th style="min-width:10rem" class="text-sm text-center">Empleados</th>
+              <th style="min-width:10rem" class="text-sm text-center">Calculado</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-tareo>
+            <tr>
+              <td>
+                <app-date-display
+                  [date]="tareo.tareoDate"
+                  type="created"
+                  variant="table"
+                  size="sm">
+                </app-date-display>
+              </td>
+              <td>{{ tareo.laborName || '-' }}</td>
+              <td>{{ tareo.loteName || 'Sin lote' }}</td>
+              <td>{{ tareo.subsidiaryName || '-' }}</td>
+              <td>{{ tareo.supervisorName || tareo.supervisorDocumentNumber }}</td>
+              <td>{{ tareo.scannerName || (tareo.scannerDocumentNumber || '-') }}</td>
+              <td class="text-center">
+                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  {{ tareo.employeeCount }}
+                </span>
+              </td>
+              <td class="text-center">
+                @if (tareo.isCalculated) {
+                  <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                    Sí
+                  </span>
+                } @else {
+                  <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                    No
+                  </span>
+                }
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="8" class="text-center text-gray-500 py-4">
+                No se encontraron tareos día a día
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabpanel>
+  </p-tabs>
+</div>
+

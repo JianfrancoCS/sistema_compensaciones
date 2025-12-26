@@ -1,0 +1,313 @@
+<div class="p-4">
+  <p-toast></p-toast>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-700">Resumen de Planilla</h1>
+      <p class="text-sm text-gray-500 mt-1">Detalle completo de la planilla de pago</p>
+    </div>
+    <button
+      pButton
+      label="Volver"
+      icon="pi pi-arrow-left"
+      class="p-button-secondary"
+      (click)="goBack()">
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (payrollStore.isLoadingSummary()) {
+    <div class="bg-white rounded-lg shadow p-12 text-center">
+      <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-16 h-16"></p-progressSpinner>
+      <p class="text-gray-500 mt-4 text-lg">Cargando resumen...</p>
+    </div>
+  }
+
+  <!-- Summary Content -->
+  @else if (payrollStore.summary()) {
+    @let s = payrollStore.summary()!;
+
+    <!-- Información General y Resumen Compacto -->
+    <div class="bg-white rounded-lg shadow mb-4 p-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="text-xs font-medium text-gray-500">Código</label>
+          <p class="text-sm font-semibold text-gray-800 mt-1">{{ s.code }}</p>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-500">Subsidiaria/Fundo</label>
+          <p class="text-sm font-semibold text-gray-800 mt-1">{{ s.subsidiaryName }}</p>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-500">Período</label>
+          <p class="text-sm font-semibold text-gray-800 mt-1">{{ s.periodLabel }}</p>
+        </div>
+      </div>
+      
+      <!-- Resumen Compacto -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 pt-3 border-t border-gray-200">
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Salud</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalHealth) }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Jubilación</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalRetirement) }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Remuneración</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalRemuneration) }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Bonos</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalBonus) }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Empleados</p>
+          <p class="text-sm font-semibold text-gray-800">{{ s.totalEmployees }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Descuentos</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalDeductions) }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Aport. Empleador</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalEmployerContributions) }}</p>
+        </div>
+        <div class="bg-gray-50 rounded p-2">
+          <p class="text-xs text-gray-600">Neto a Pagar</p>
+          <p class="text-sm font-semibold text-gray-800">{{ formatCurrency(s.totalNet) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desglose por Conceptos -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+      <!-- Remuneraciones -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="bg-gray-100 px-3 py-2 border-b border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-700">Remuneraciones</h3>
+        </div>
+        <div class="p-3">
+          @if (s.incomeConcepts && s.incomeConcepts.length > 0) {
+            <p-table
+              [value]="s.incomeConcepts"
+              [showGridlines]="true"
+              styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-xs font-semibold text-gray-700">Concepto</th>
+                  <th class="text-xs font-semibold text-gray-700 text-right">Monto</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-concept>
+                <tr>
+                  <td class="text-xs text-gray-700">{{ concept.conceptName }}</td>
+                  <td class="text-xs font-semibold text-gray-800 text-right">{{ formatCurrency(concept.totalAmount) }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+            <div class="mt-2 pt-2 border-t border-gray-200">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-gray-700">Total</span>
+                <span class="text-sm font-bold text-gray-800">{{ formatCurrency(s.totalIncome) }}</span>
+              </div>
+            </div>
+          } @else {
+            <p class="text-xs text-gray-500 text-center py-2">No hay conceptos</p>
+          }
+        </div>
+      </div>
+
+      <!-- Descuentos -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="bg-gray-100 px-3 py-2 border-b border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-700">Descuentos</h3>
+        </div>
+        <div class="p-3">
+          @if (s.deductionConcepts && s.deductionConcepts.length > 0) {
+            <p-table
+              [value]="s.deductionConcepts"
+              [showGridlines]="true"
+              styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-xs font-semibold text-gray-700">Concepto</th>
+                  <th class="text-xs font-semibold text-gray-700 text-right">Monto</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-concept>
+                <tr>
+                  <td class="text-xs text-gray-700">{{ concept.conceptName }}</td>
+                  <td class="text-xs font-semibold text-gray-800 text-right">{{ formatCurrency(concept.totalAmount) }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+            <div class="mt-2 pt-2 border-t border-gray-200">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-gray-700">Total</span>
+                <span class="text-sm font-bold text-gray-800">{{ formatCurrency(s.totalDeductions) }}</span>
+              </div>
+            </div>
+          } @else {
+            <p class="text-xs text-gray-500 text-center py-2">No hay conceptos</p>
+          }
+        </div>
+      </div>
+
+      <!-- Aportaciones del Empleador -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="bg-gray-100 px-3 py-2 border-b border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-700">Aportaciones del Empleador</h3>
+        </div>
+        <div class="p-3">
+          @if (s.employerContributionConcepts && s.employerContributionConcepts.length > 0) {
+            <p-table
+              [value]="s.employerContributionConcepts"
+              [showGridlines]="true"
+              styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-xs font-semibold text-gray-700">Concepto</th>
+                  <th class="text-xs font-semibold text-gray-700 text-right">Monto</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-concept>
+                <tr>
+                  <td class="text-xs text-gray-700">{{ concept.conceptName }}</td>
+                  <td class="text-xs font-semibold text-gray-800 text-right">{{ formatCurrency(concept.totalAmount) }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+            <div class="mt-2 pt-2 border-t border-gray-200">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-gray-700">Total</span>
+                <span class="text-sm font-bold text-gray-800">{{ formatCurrency(s.totalEmployerContributions) }}</span>
+              </div>
+            </div>
+          } @else {
+            <p class="text-xs text-gray-500 text-center py-2">No hay aportaciones</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Empleados -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-4 py-3 border-b border-gray-200">
+        <h2 class="text-sm font-semibold text-gray-700">Empleados</h2>
+      </div>
+      
+      <!-- Filtros -->
+      <div class="px-4 py-3 border-b border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <label for="laborFilter" class="block text-sm font-medium text-gray-700 mb-2">Labor</label>
+            <p-select
+              inputId="laborFilter"
+              [options]="laborOptions()"
+              optionLabel="name"
+              optionValue="publicId"
+              [(ngModel)]="selectedLabor"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Todas las labores"
+              [showClear]="true"
+              [fluid]="true"
+              appendTo="body">
+            </p-select>
+          </div>
+
+          <div>
+            <label for="dniFilter" class="block text-sm font-medium text-gray-700 mb-2">DNI</label>
+            <input
+              pInputText
+              id="dniFilter"
+              [(ngModel)]="employeeDocumentNumber"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Buscar por DNI"
+              class="w-full"
+              autocomplete="off">
+          </div>
+
+          <div class="flex items-end">
+            <button
+              pButton
+              type="button"
+              label="Limpiar Filtros"
+              icon="pi pi-filter-slash"
+              class="p-button-outlined w-full"
+              (click)="clearFilters()">
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Empleados -->
+      <div class="p-4">
+        @if (payrollStore.isLoadingEmployees()) {
+          <div class="text-center py-8">
+            <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-12 h-12"></p-progressSpinner>
+            <p class="text-gray-500 mt-4">Cargando empleados...</p>
+          </div>
+        } @else {
+          @let employeesList = payrollStore.employees();
+          @if (employeesList.length > 0) {
+            <p-table
+              [value]="employeesList"
+              [showGridlines]="true"
+              styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-sm font-semibold text-gray-700">DNI</th>
+                  <th class="text-sm font-semibold text-gray-700">Nombre</th>
+                  <th class="text-sm font-semibold text-gray-700">Cargo</th>
+                  <th class="text-sm font-semibold text-gray-700 text-right">Ingresos</th>
+                  <th class="text-sm font-semibold text-gray-700 text-right">Descuentos</th>
+                  <th class="text-sm font-semibold text-gray-700 text-right">Neto a Pagar</th>
+                  <th class="text-sm font-semibold text-gray-700 text-center">Días</th>
+                  <th class="text-sm font-semibold text-gray-700 text-center">Acciones</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-employee>
+                <tr class="hover:bg-gray-50 cursor-pointer" (click)="viewEmployeeDetail(employee)">
+                  <td class="text-sm text-gray-700">{{ employee.employeeDocumentNumber }}</td>
+                  <td class="text-sm text-gray-700">{{ employee.employeeFullName }}</td>
+                  <td class="text-sm text-gray-700">{{ employee.positionName }}</td>
+                  <td class="text-sm font-semibold text-gray-800 text-right">{{ formatCurrency(employee.totalIncome) }}</td>
+                  <td class="text-sm font-semibold text-gray-800 text-right">{{ formatCurrency(employee.totalDeductions) }}</td>
+                  <td class="text-sm font-bold text-gray-900 text-right">{{ formatCurrency(employee.netToPay) }}</td>
+                  <td class="text-sm text-gray-700 text-center">{{ employee.daysWorked }}</td>
+                  <td class="text-center">
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-eye"
+                      class="p-button-text p-button-sm"
+                      [pTooltip]="'Ver Detalle'"
+                      tooltipPosition="top"
+                      (click)="viewEmployeeDetail(employee); $event.stopPropagation()">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="8" class="text-center text-gray-500 py-8">
+                    No se encontraron empleados con el filtro aplicado.
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          } @else {
+            <div class="text-center text-gray-500 py-8">
+              <p>No se encontraron empleados con el filtro aplicado.</p>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  }
+</div>
+

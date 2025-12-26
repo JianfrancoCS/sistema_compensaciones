@@ -1,0 +1,87 @@
+<div class="p-4">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-semibold text-gray-600">
+      Asignar Elementos al Usuario: {{ username() }}
+    </h2>
+    @if (selectedElementPublicIds().length > 0) {
+      <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+        {{ selectedElementPublicIds().length }} seleccionado{{ selectedElementPublicIds().length > 1 ? 's' : '' }}
+      </span>
+    }
+  </div>
+
+  @if (userStore.loadingElements()) {
+    <div class="flex items-center justify-center h-32 text-gray-600">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i>
+      Cargando elementos...
+    </div>
+  }
+
+  @if (!userStore.loadingElements() && containers.length > 0) {
+    <div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (container of containers; track container.containerPublicId || 'no-container') {
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:border-gray-300 transition-all">
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 px-5 py-3 border-b border-gray-200">
+              <div class="flex items-center">
+                @if (container.containerIcon) {
+                  <i [class]="container.containerIcon" class="text-gray-600 text-base mr-2"></i>
+                } @else {
+                  <i class="pi pi-folder text-gray-600 text-base mr-2"></i>
+                }
+                <h3 class="text-sm font-bold text-gray-700">{{ container.containerDisplayName }}</h3>
+              </div>
+            </div>
+            <div class="p-4 space-y-2">
+              @for (element of container.elements; track element.publicId) {
+                <label
+                  [for]="element.publicId"
+                  class="flex items-center p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer transition-all group"
+                  [class.border-gray-400]="selectedElementPublicIds().includes(element.publicId)"
+                  [class.bg-gray-100]="selectedElementPublicIds().includes(element.publicId)">
+                  <p-checkbox
+                    [inputId]="element.publicId"
+                    [value]="element.publicId"
+                    [(ngModel)]="selectedElementPublicIds"
+                    [binary]="false"
+                  />
+                  <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900 select-none flex-1">
+                    @if (element.icon) {
+                      <i [class]="element.icon" class="mr-2"></i>
+                    }
+                    {{ element.displayName }}
+                  </span>
+                  @if (element.route) {
+                    <span class="text-xs text-gray-400 ml-2">{{ element.route }}</span>
+                  }
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="flex justify-between items-center gap-2 pt-6 mt-6">
+        <div class="text-sm text-gray-600">
+          Selecciona los elementos que deseas asignar a este usuario. Los cambios requerirán que el usuario vuelva a loguearse.
+        </div>
+        <div class="flex gap-2">
+          <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary" (onClick)="cancel()"></p-button>
+          <p-button
+            label="Guardar Cambios"
+            icon="pi pi-check"
+            styleClass="p-button-primary"
+            (onClick)="saveAssignments()"
+            [loading]="userStore.loading()"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+  } @else if (!userStore.loadingElements() && containers.length === 0) {
+    <div class="text-center py-12">
+      <i class="pi pi-inbox text-4xl text-gray-400 mb-4"></i>
+      <p class="text-gray-500 text-lg">No hay elementos disponibles para asignar.</p>
+    </div>
+  }
+</div>
+

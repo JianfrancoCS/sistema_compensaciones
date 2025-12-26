@@ -1,0 +1,93 @@
+<p-toast></p-toast>
+
+<div class="container mx-auto p-4">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h2 class="text-2xl font-bold">{{ isEditMode() ? 'Editar Plantilla de Adenda' : 'Crear Plantilla de Adenda' }}</h2>
+    <p-button label="Volver al Listado" icon="pi pi-arrow-left" styleClass="p-button-secondary" (onClick)="goBack(false)"></p-button>
+  </div>
+
+  <div *ngIf="isLoading()" class="flex justify-content-center align-items-center">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+
+  <div *ngIf="!isLoading()" class="grid">
+    <!-- Columna del Formulario -->
+    <div class="col-12 md:col-6">
+      <form [formGroup]="templateForm" class="p-4 border-round surface-card">
+        <div class="field">
+          <label for="name">Nombre de la Plantilla</label>
+          <input id="name" pInputText formControlName="name" class="w-full" />
+        </div>
+
+        <div class="field">
+          <label for="addendumType">Tipo de Adenda</label>
+          <p-select
+            id="addendumType"
+            [options]="addendumTypes()"
+            formControlName="addendumTypePublicId"
+            optionLabel="name"
+            optionValue="publicId"
+            placeholder="Seleccione un tipo"
+            styleClass="w-full"
+          ></p-select>
+        </div>
+
+        <div class="field">
+          <label for="state">Estado</label>
+          <p-select
+            id="state"
+            [options]="states()"
+            formControlName="statePublicId"
+            optionLabel="name"
+            optionValue="publicId"
+            placeholder="Seleccione un estado"
+            styleClass="w-full"
+          ></p-select>
+        </div>
+
+        <div class="field">
+          <label for="editor">Contenido de la Plantilla</label>
+          <app-editor
+            formControlName="templateContent"
+            [initialContent]="templateForm.get('templateContent')?.value"
+            (contentChange)="onEditorContentChange($event)"
+            (usedVariablesChange)="onEditorUsedVariablesChange($event)"
+            [availableVariables]="variables()"
+          ></app-editor>
+        </div>
+
+        <div class="flex justify-content-end mt-4">
+          <p-button label="{{ isEditMode() ? 'Actualizar' : 'Guardar' }}" icon="pi pi-check" (onClick)="saveTemplate()"></p-button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Columna de Variables y Vista Previa -->
+    <div class="col-12 md:col-6">
+      <!-- Sección de Variables -->
+      <div class="p-4 border-round surface-card mb-4">
+        <h3 class="text-xl font-bold mb-3">Variables Disponibles</h3>
+        <div class="p-inputgroup mb-3">
+            <span class="p-inputgroup-addon"><i class="pi pi-search"></i></span>
+            <input pInputText type="text" placeholder="Buscar variable..." [ngModel]="variableSearchTerm()" (ngModelChange)="variableSearchTerm.set($event)" [ngModelOptions]="{standalone: true}"/>
+        </div>
+        <div class="variables-list">
+          <div *ngFor="let variable of filteredVariables()" class="variable-chip" draggable="true" (dragstart)="onVariableDragStart($event, variable)">
+            {{ variable.name }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Vista Previa -->
+      <div class="p-4 border-round surface-card">
+        <h3 class="text-xl font-bold mb-3">Vista Previa del PDF</h3>
+        <div class="pdf-preview-container">
+          <iframe *ngIf="pdfPreviewUrl()" [src]="pdfPreviewUrl()" width="100%" height="500px" style="border: none;"></iframe>
+          <div *ngIf="!pdfPreviewUrl()" class="flex align-items-center justify-content-center h-full text-gray-500">
+            La vista previa se generará aquí.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

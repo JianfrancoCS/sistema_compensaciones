@@ -1,0 +1,48 @@
+<div class="p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-600">Boleta de Pago</h1>
+      <p class="text-sm text-gray-500 mt-1">Visualización de boleta de pago</p>
+    </div>
+    <button
+      pButton
+      label="Volver"
+      icon="pi pi-arrow-left"
+      class="p-button-outlined"
+      (click)="goBack()">
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-12 shadow-sm border border-gray-100 text-center">
+      <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-16 h-16"></p-progressSpinner>
+      <p class="text-gray-500 mt-4 text-lg">Cargando boleta...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !isLoading) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <p class="text-red-800">{{ error }}</p>
+    </div>
+  }
+
+  <!-- PDF Viewer -->
+  @if (pdfUrl && !isLoading && !error) {
+    <div class="bg-white/50 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100">
+      <!-- Object para visualizar el PDF (mejor compatibilidad que iframe) -->
+      <object
+        [data]="pdfUrl"
+        type="application/pdf"
+        class="w-full"
+        style="height: calc(100vh - 250px); min-height: 800px;">
+        <p>Tu navegador no puede mostrar PDFs. 
+          <a [href]="pdfUrl" target="_blank">Haz clic aquí para descargar el PDF</a>
+        </p>
+      </object>
+    </div>
+  }
+</div>
+

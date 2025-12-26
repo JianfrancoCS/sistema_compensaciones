@@ -1,0 +1,88 @@
+<app-modal-template
+  [visible]="visible()"
+  headerText="Crear Nueva Planilla"
+  [width]="'min(700px, 90vw)'"
+  (onHide)="hideModal()"
+  (onSubmit)="createPayroll()"
+  [isSubmitDisabled]="payrollForm.invalid"
+>
+  <form [formGroup]="payrollForm">
+    <div class="flex flex-col gap-5 p-6">
+      <!-- Info Card -->
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+          <i class="pi pi-info-circle text-blue-600 text-xl mt-0.5 flex-shrink-0"></i>
+          <div class="text-sm text-blue-800">
+            <p class="font-bold mb-3 text-blue-900">Información sobre la planilla</p>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2">
+                <i class="pi pi-check-circle text-blue-600 text-xs mt-1 flex-shrink-0"></i>
+                <span>La planilla se creará en estado <strong>BORRADOR</strong></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="pi pi-check-circle text-blue-600 text-xs mt-1 flex-shrink-0"></i>
+                <span>Debes lanzar el cálculo para procesar los conceptos de cada empleado</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="pi pi-check-circle text-blue-600 text-xs mt-1 flex-shrink-0"></i>
+                <span>Solo puede existir una planilla por sucursal y período</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subsidiary Select -->
+      <div class="space-y-2">
+        <label for="subsidiaryPublicId" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-building text-gray-500"></i>
+          Sucursal
+          <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="subsidiaryPublicId"
+          [options]="subsidiaryOptions()"
+          formControlName="subsidiaryPublicId"
+          placeholder="Seleccionar sucursal"
+          [filter]="true"
+          filterPlaceholder="Buscar sucursal"
+          styleClass="w-full"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+        @if (payrollForm.get('subsidiaryPublicId')?.invalid && (payrollForm.get('subsidiaryPublicId')?.dirty || payrollForm.get('subsidiaryPublicId')?.touched)) {
+          <small class="text-red-500 flex items-center gap-1">
+            <i class="pi pi-exclamation-circle text-xs"></i>
+            La sucursal es requerida
+          </small>
+        }
+      </div>
+
+      <!-- Period Select -->
+      <div class="space-y-2">
+        <label for="periodPublicId" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-calendar text-gray-500"></i>
+          Período
+          <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="periodPublicId"
+          [options]="periodOptions()"
+          formControlName="periodPublicId"
+          placeholder="Seleccionar período"
+          [filter]="true"
+          filterPlaceholder="Buscar período"
+          styleClass="w-full"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+        @if (payrollForm.get('periodPublicId')?.invalid && (payrollForm.get('periodPublicId')?.dirty || payrollForm.get('periodPublicId')?.touched)) {
+          <small class="text-red-500 flex items-center gap-1">
+            <i class="pi pi-exclamation-circle text-xs"></i>
+            El período es requerido
+          </small>
+        }
+      </div>
+    </div>
+  </form>
+</app-modal-template>

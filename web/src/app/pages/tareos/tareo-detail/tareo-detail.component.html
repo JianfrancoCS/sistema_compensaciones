@@ -1,0 +1,122 @@
+<div class="p-4">
+  <div class="mb-4 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-700">Detalle del Tareo</h1>
+    </div>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-arrow-left"
+      label="Regresar"
+      class="p-button-outlined"
+      (click)="goBack()">
+    </button>
+  </div>
+
+  @if (loadingDetail()) {
+    <div class="flex justify-center items-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else if (tareoDetail()) {
+    @let detail = tareoDetail()!;
+    <div class="space-y-6">
+      <!-- Información general -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm font-semibold text-gray-600">Labor</label>
+          <p class="text-lg">{{ detail.labor.name }}</p>
+          @if (detail.labor.isPiecework) {
+            <span class="text-xs text-blue-600 font-medium">(Destajo)</span>
+          }
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm font-semibold text-gray-600">Lote</label>
+          <p class="text-lg">{{ detail.lote.loteName }}</p>
+          <p class="text-sm text-gray-600">{{ detail.lote.subsidiaryName }}</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm font-semibold text-gray-600">Supervisor</label>
+          <p class="text-lg">{{ detail.supervisor.fullName || detail.supervisor.documentNumber }}</p>
+          <p class="text-sm text-gray-600">DNI: {{ detail.supervisor.documentNumber }}</p>
+        </div>
+        @if (detail.acopiador) {
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <label class="text-sm font-semibold text-gray-600">Acopiador</label>
+            <p class="text-lg">{{ detail.acopiador.fullName || detail.acopiador.documentNumber }}</p>
+            <p class="text-sm text-gray-600">DNI: {{ detail.acopiador.documentNumber }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Tabla de empleados -->
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Empleados ({{ detail.employees.length }})</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="border p-2 text-left text-sm font-semibold">DNI</th>
+                <th class="border p-2 text-left text-sm font-semibold">Nombre</th>
+                <th class="border p-2 text-left text-sm font-semibold">Cargo</th>
+                <th class="border p-2 text-center text-sm font-semibold">Hora Entrada</th>
+                <th class="border p-2 text-center text-sm font-semibold">Hora Salida</th>
+                @if (detail.labor.isPiecework) {
+                  <th class="border p-2 text-center text-sm font-semibold">Productividad</th>
+                  <th class="border p-2 text-center text-sm font-semibold">Acopiador</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (emp of detail.employees; track emp.publicId) {
+                <tr class="hover:bg-gray-50">
+                  <td class="border p-2 text-sm">{{ emp.documentNumber }}</td>
+                  <td class="border p-2 text-sm">{{ emp.fullName || '-' }}</td>
+                  <td class="border p-2 text-sm">{{ emp.position || '-' }}</td>
+                  <td class="border p-2 text-center text-sm">{{ formatTime(emp.entryTime) }}</td>
+                  <td class="border p-2 text-center text-sm">{{ formatTime(emp.exitTime) }}</td>
+                  @if (detail.labor.isPiecework) {
+                    <td class="border p-2 text-center text-sm">
+                      @if (emp.productivity) {
+                        @let prod = emp.productivity;
+                        <div>
+                          @if (prod.unitOfMeasure) {
+                            <span class="font-semibold">{{ prod.harvestCount }} {{ prod.unitOfMeasure }}</span>
+                            <p class="text-xs text-gray-600">
+                              Mínimo: {{ prod.minTaskRequirement }} {{ prod.unitOfMeasure }}
+                            </p>
+                            <p class="text-xs text-blue-600">
+                              {{ prod.productivityPercentage.toFixed(2) }}%
+                            </p>
+                          } @else {
+                            <span class="font-semibold">{{ prod.productivityPercentage.toFixed(2) }}%</span>
+                            <p class="text-xs text-gray-600">
+                              {{ prod.harvestCount }} / {{ prod.minTaskRequirement }}
+                            </p>
+                          }
+                        </div>
+                      } @else {
+                        <span class="text-gray-400">-</span>
+                      }
+                    </td>
+                    <td class="border p-2 text-center text-sm">
+                      @if (emp.productivity && emp.productivity.collector) {
+                        @let collector = emp.productivity.collector;
+                        <div>
+                          <p class="text-sm">{{ collector.fullName || collector.documentNumber }}</p>
+                          <p class="text-xs text-gray-600">DNI: {{ collector.documentNumber }}</p>
+                        </div>
+                      } @else {
+                        <span class="text-gray-400">-</span>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

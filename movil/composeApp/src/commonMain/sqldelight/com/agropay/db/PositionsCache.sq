@@ -1,0 +1,40 @@
+-- =============================================
+-- Tabla: Cache de Posiciones (SOLO LECTURA)
+-- Se carga desde: GET /v1/positions/sync
+-- NUNCA se crean/modifican desde el móvil
+-- =============================================
+
+CREATE TABLE positions_cache (
+    id TEXT PRIMARY KEY NOT NULL, -- publicId (UUID)
+    name TEXT NOT NULL,
+    cached_at INTEGER NOT NULL
+);
+
+-- Índice
+CREATE INDEX positions_cache_name ON positions_cache(name);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+-- Insertar/Actualizar posición en cache
+insertOrReplace:
+INSERT OR REPLACE INTO positions_cache (
+    id,
+    name,
+    cached_at
+) VALUES (?, ?, ?);
+
+-- Buscar posición por ID
+getById:
+SELECT * FROM positions_cache
+WHERE id = ?;
+
+-- Obtener todas las posiciones en cache
+getAll:
+SELECT * FROM positions_cache
+ORDER BY name;
+
+-- Contar posiciones en cache
+countCached:
+SELECT COUNT(*) FROM positions_cache;

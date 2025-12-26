@@ -1,0 +1,15 @@
+DROP INDEX UQ_contract_template_variables_template_variable ON app.tbl_contract_template_variables;
+GO
+
+DROP INDEX UQ_addendum_template_variables_template_variable ON app.tbl_addendum_template_variables;
+GO
+
+CREATE INDEX IX_contract_template_variables_template_variable
+ON app.tbl_contract_template_variables(contract_template_id, variable_id)
+WHERE deleted_at IS NULL;
+GO
+
+CREATE INDEX IX_addendum_template_variables_template_variable
+ON app.tbl_addendum_template_variables(addendum_template_id, variable_id)
+WHERE deleted_at IS NULL;
+GO

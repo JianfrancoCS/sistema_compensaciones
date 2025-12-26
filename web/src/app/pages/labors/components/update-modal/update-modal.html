@@ -1,0 +1,106 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Labor"
+  (onHide)="hideModal()"
+  (onSubmit)="updateLabor()"
+  [isSubmitDisabled]="laborForm.invalid"
+  submitButtonLabel="Actualizar"
+>
+  <form [formGroup]="laborForm">
+    <!-- Name -->
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="name-update" class="font-semibold text-sm">Nombre</label>
+      <input pInputText id="name-update" formControlName="name" class="flex-auto text-sm" autocomplete="off" placeholder="Ej: Cosecha de Arándanos" [invalid]="laborForm.get('name')?.invalid && (laborForm.get('name')?.dirty || laborForm.get('name')?.touched)" />
+      @if (laborForm.get('name')?.invalid && (laborForm.get('name')?.dirty || laborForm.get('name')?.touched)) {
+        @if (laborForm.get('name')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+        }
+        @if (laborForm.get('name')?.errors?.['pattern']) {
+          <p-message severity="error" variant="simple" size="small">El nombre solo debe contener letras y espacios.</p-message>
+        }
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="description-update" class="font-semibold text-sm">Descripción</label>
+      <textarea pInputTextarea id="description-update" formControlName="description" rows="3" class="text-sm" placeholder="Descripción detallada de la labor..."></textarea>
+      @if (laborForm.get('description')?.invalid && (laborForm.get('description')?.dirty || laborForm.get('description')?.touched)) {
+        @if (laborForm.get('description')?.errors?.['maxlength']) {
+          <p-message severity="error" variant="simple" size="small">La descripción no puede exceder los 500 caracteres.</p-message>
+        }
+      }
+    </div>
+
+    <!-- Labor Unit -->
+    <div class="flex flex-col gap-2 mb-4">
+        <label for="laborUnitPublicId-update" class="font-semibold text-sm">Unidad de Labor</label>
+        <p-select
+            id="laborUnitPublicId-update"
+            formControlName="laborUnitPublicId"
+            [options]="laborUnitStore.selectOptions()"
+            optionLabel="name"
+            optionValue="publicId"
+            placeholder="Seleccione una unidad de labor"
+            [style]="{'width': '100%'}"
+            [invalid]="laborForm.get('laborUnitPublicId')?.invalid && (laborForm.get('laborUnitPublicId')?.dirty || laborForm.get('laborUnitPublicId')?.touched)"
+        ></p-select>
+        @if (laborForm.get('laborUnitPublicId')?.invalid && (laborForm.get('laborUnitPublicId')?.dirty || laborForm.get('laborUnitPublicId')?.touched)) {
+            @if (laborForm.get('laborUnitPublicId')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">La unidad de labor es requerida.</p-message>
+            }
+        }
+    </div>
+
+    <!-- Is Piecework -->
+    <div class="flex flex-col gap-2 mb-4">
+        <label for="isPiecework-update" class="font-semibold text-sm">¿Es a Destajo?</label>
+        <p-toggleSwitch formControlName="isPiecework" id="isPiecework-update"></p-toggleSwitch>
+    </div>
+
+    <!-- Base Price -->
+    <div class="flex flex-col gap-2 mb-4">
+        <label for="basePrice-update" class="font-semibold text-sm">Precio Base</label>
+        <p-inputNumber
+            id="basePrice-update"
+            formControlName="basePrice"
+            mode="currency"
+            currency="PEN"
+            locale="es-PE"
+            [min]="0"
+            [style]="{'width': '100%'}"
+            [invalid]="laborForm.get('basePrice')?.invalid && (laborForm.get('basePrice')?.dirty || laborForm.get('basePrice')?.touched)"
+        ></p-inputNumber>
+        @if (laborForm.get('basePrice')?.invalid && (laborForm.get('basePrice')?.dirty || laborForm.get('basePrice')?.touched)) {
+            @if (laborForm.get('basePrice')?.errors?.['required']) {
+                <p-message severity="error" variant="simple" size="small">El precio base es requerido.</p-message>
+            }
+            @if (laborForm.get('basePrice')?.errors?.['min']) {
+                <p-message severity="error" variant="simple" size="small">El precio base debe ser mayor o igual a 0.</p-message>
+            }
+        }
+    </div>
+
+    <!-- Min Task Requirement -->
+    <div class="flex flex-col gap-2 mb-4">
+        <label for="minTaskRequirement-update" class="font-semibold text-sm">Requerimiento Mínimo de Tarea</label>
+        <p-inputNumber
+            id="minTaskRequirement-update"
+            formControlName="minTaskRequirement"
+            mode="decimal"
+            [min]="0"
+            [style]="{'width': '100%'}"
+            [invalid]="laborForm.get('minTaskRequirement')?.invalid && (laborForm.get('minTaskRequirement')?.dirty || laborForm.get('minTaskRequirement')?.touched)"
+        ></p-inputNumber>
+        @if (laborForm.get('minTaskRequirement')?.invalid && (laborForm.get('minTaskRequirement')?.dirty || laborForm.get('minTaskRequirement')?.touched)) {
+            @if (laborForm.get('minTaskRequirement')?.errors?.['required']) {
+                <p-message severity="error" variant="simple" size="small">El requerimiento es requerido.</p-message>
+            }
+            @if (laborForm.get('minTaskRequirement')?.errors?.['min']) {
+                <p-message severity="error" variant="simple" size="small">El requerimiento debe ser mayor o igual a 0.</p-message>
+            }
+        }
+    </div>
+
+  </form>
+</app-modal-template>

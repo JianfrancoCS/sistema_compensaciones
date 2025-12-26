@@ -1,0 +1,125 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-lg font-medium">Gestión de Labores</h1>
+    <p-button  type="button" label="Crear" icon="pi pi-plus"  (click)="showCreateModal()"></p-button>
+  </div>
+
+  <div class="card flex-1 h-full overflow-hidden">
+    <p-table
+      [value]="store.labors()"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
+      [paginator]="true"
+      [rows]="store.filters().size"
+      [totalRecords]="store.totalElements()"
+      [loading]="store.loading()"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      dataKey="publicId"
+      showGridlines
+      [scrollable]="true"
+      scrollHeight="flex"
+    >
+      <ng-template pTemplate="caption">
+        <div class="flex justify-end gap-4">
+          <!-- Filtro de Unidad de Labor -->
+          <p-select
+            [options]="laborUnitStore.selectOptions()"
+            [(ngModel)]="laborUnitFilter"
+            name="laborUnitFilter"
+            placeholder="Unidad de Labor"
+            optionLabel="name"
+            optionValue="publicId"
+            [showClear]="true"
+            (onChange)="onFilter()"
+            class="w-64"
+          ></p-select>
+
+          <!-- Filtro A destajo -->
+          <p-select
+            [options]="[
+              { label: 'Sí', value: true },
+              { label: 'No', value: false }
+            ]"
+            [(ngModel)]="isPieceworkFilter"
+            name="isPieceworkFilter"
+            placeholder="A destajo"
+            [showClear]="true"
+            (onChange)="onFilter()"
+            class="w-64"
+          ></p-select>
+
+          <!-- Botón Limpiar Filtros -->
+          <p-button
+            type="button"
+            severity="info"
+            icon="pi pi-trash"
+            (click)="onClearFilter()"
+          ></p-button>
+
+          <!-- Búsqueda por Nombre -->
+          <p-inputgroup class="max-w-sm">
+            <p-inputgroup-addon>
+                <i class="pi pi-search"></i>
+            </p-inputgroup-addon>
+            <input pInputText type="text" [value]="nameFilter"  (input)="onFilterByName($event)" placeholder="Buscar por nombre" class="text-sm"/>
+            <p-inputgroup-addon>
+                <p-button icon="pi pi-times" severity="secondary" (click)="onClearNameFilter()"></p-button>
+            </p-inputgroup-addon>
+          </p-inputgroup>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 20%" pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+          <th style="width: 20%">Descripción</th>
+          <th style="width: 10%" pSortableColumn="minTaskRequirement">Requerimiento Mín. <p-sortIcon field="minTaskRequirement"></p-sortIcon></th>
+          <th style="width: 15%" pSortableColumn="laborUnitName">Unidad de Labor <p-sortIcon field="laborUnitName"></p-sortIcon></th>
+          <th style="width: 10%" pSortableColumn="isPiecework">A destajo <p-sortIcon field="isPiecework"></p-sortIcon></th>
+          <th style="width: 15%" pSortableColumn="basePrice">Precio Base <p-sortIcon field="basePrice"></p-sortIcon></th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-labor>
+        <tr>
+          <td>{{ labor.name }}</td>
+          <td>{{ labor.description }}</td>
+          <td class="text-center">{{ labor.minTaskRequirement }}</td>
+          <td>{{ labor.laborUnitName }}</td>
+          <td class="text-center">
+            <i [class]="labor.isPiecework ? 'pi pi-check text-green-500' : 'pi pi-times text-red-500'" style="font-size: 1.5rem"></i>
+          </td>
+          <td>{{ labor.basePrice ? (labor.basePrice | currency:'PEN':'S/.') : 'Sin precio' }}</td>
+          <td>
+            <div class="flex gap-2">
+              <button pButton type="button" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="showUpdateModal(labor)"></button>
+              <button pButton type="button" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(labor)"></button>
+
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center">No se encontraron labores.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<app-labor-create-modal
+  [visible]="createModalVisible()"
+  (onHide)="hideCreateModal()"
+></app-labor-create-modal>
+
+<app-labor-update-modal
+  [visible]="updateModalVisible()"
+  [labor]="selectedLabor()"
+  (onHide)="hideUpdateModal()"
+></app-labor-update-modal>

@@ -1,0 +1,51 @@
+<!-- Contenedor único que cambia de flex-col (móvil) a flex-row (desktop) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+
+  <!-- Sección Scanner - En móvil arriba, en desktop izquierda -->
+  <div class=" md:col-span-1 lg:col-span-1 flex flex-col">
+    <!-- Controles del scanner -->
+    @if (showControls) {
+      <div class="mb-4">
+        <button pButton
+                type="button"
+                [label]="getScannerButtonLabel()"
+                icon="pi pi-camera"
+                class="p-button-outlined w-full"
+                (click)="startScanning()"
+                [disabled]="!scannerReady || scannerIsScanning">
+        </button>
+      </div>
+    }
+
+    <!-- Área del Scanner - SE ADAPTA AUTOMÁTICAMENTE -->
+    <div class="  flex-1 relative min-h-[300px]  md:max-h-[450px]">
+      <div class="w-full h-full " [hidden]="!scannerIsScanning">
+        <app-qr-scanner
+          #qrScanner
+          [autoInitialize]="autoInitialize"
+          [showControls]="false"
+          [showUploadButton]="showUploadButton"
+          (onScanSuccess)="onQrScanSuccess($event)"
+          (onScanError)="onQrScanError($event)">
+        </app-qr-scanner>
+      </div>
+
+      <!-- Placeholder cuando no está activo -->
+      <div class="w-full h-full p-4 md:p-8 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-center text-gray-500 bg-white md:bg-gray-50"
+           [hidden]="scannerIsScanning">
+        <div>
+          <i class="pi pi-camera text-3xl md:text-4xl mb-3 md:mb-4 block"></i>
+          <p class="mb-2">El escáner de código QR estará aquí cuando se active.</p>
+          <p class="text-sm">Haz clic en "Escanear Código QR" para iniciar.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Slot para contenido adicional (formularios, etc) - En móvil abajo, en desktop derecha -->
+  <div class=" md:col-span-1 lg:col-span-2 flex flex-col">
+    <ng-content></ng-content>
+  </div>
+
+</div>

@@ -1,0 +1,155 @@
+.rich-text-editor-container {
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  background-color: #f9f9f9;
+  align-items: center;
+  width: 567px;
+  box-sizing: border-box;
+}
+
+.editor-toolbar-button {
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.p-button.active {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.toolbar-select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  height: 2.5rem;
+}
+
+.alignment-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.editor-content {
+  flex-grow: 1;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  line-height: 1.5;
+  margin-top: 60px;
+  overflow-y: auto;
+  transition: background-color 0.2s, outline 0.2s;
+}
+
+.editor-content.drag-over-active {
+  outline: 2px dashed #3b82f6;
+  outline-offset: -4px;
+  background-color: #eff6ff;
+}
+
+
+:host ::ng-deep .variable-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e0eafc;
+  color: #3b82f6;
+  border: 1px solid #bfd7ff;
+  border-radius: 16px;
+  padding: 4px 10px;
+  margin: 0 2px;
+  font-size: 11pt;
+  font-weight: 500;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+:host ::ng-deep .variable-chip:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+:host ::ng-deep .variable-chip:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+:host ::ng-deep .remove-chip-btn {
+  background: #bfd7ff;
+  color: #3b82f6;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:host ::ng-deep .remove-chip-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.editor-content b,
+.editor-content strong {
+  font-weight: bold;
+}
+
+.editor-content i,
+.editor-content em {
+  font-style: italic;
+}
+
+.editor-content u {
+  text-decoration: underline;
+}
+
+.editor-content font[size="3"] { font-size: 12pt; }
+.editor-content font[size="4"] { font-size: 14pt; }
+.editor-content font[size="5"] { font-size: 18pt; }
+.editor-content font[size="6"] { font-size: 24pt; }
+
+.editor-content [style*="text-align: left"] { text-align: left; }
+.editor-content [style*="text-align: center"] { text-align: center; }
+.editor-content [style*="text-align: right"] { text-align: right; }
+.editor-content [style*="text-align: justify"] { text-align: justify; }
+
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar > *:not(.alignment-buttons) {
+    width: 100%;
+  }
+
+  .alignment-buttons {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .alignment-buttons .p-button {
+    flex-grow: 1;
+  }
+}

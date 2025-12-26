@@ -1,0 +1,59 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Nuevo Período"
+  [width]="'min(700px, 90vw)'"
+  (onHide)="onHide.emit()"
+  (onSubmit)="createPeriod()"
+  [isSubmitDisabled]="periodForm.invalid"
+>
+  <form [formGroup]="periodForm">
+    <div class="flex flex-col gap-5 p-6">
+      <!-- Info Card -->
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+          <i class="pi pi-info-circle text-blue-600 text-xl mt-0.5 flex-shrink-0"></i>
+          <div class="text-sm text-blue-800">
+            <p class="font-bold mb-3 text-blue-900">¿Cómo funciona?</p>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2">
+                <i class="pi pi-check-circle text-blue-600 text-xs mt-1 flex-shrink-0"></i>
+                <span>Si no especificas una fecha, el sistema la calculará automáticamente basándose en el último período</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="pi pi-check-circle text-blue-600 text-xs mt-1 flex-shrink-0"></i>
+                <span>La fecha de inicio debe ser posterior al último período registrado</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="pi pi-check-circle text-blue-600 text-xs mt-1 flex-shrink-0"></i>
+                <span>Las fechas de fin y declaración se configuran automáticamente</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Picker -->
+      <div class="space-y-2">
+        <label for="explicitStartDate" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-calendar text-gray-500"></i>
+          Fecha de Inicio
+          <span class="text-xs text-gray-500 font-normal">(Opcional)</span>
+        </label>
+        <p-datepicker
+          inputId="explicitStartDate"
+          formControlName="explicitStartDate"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          placeholder="Dejar vacío para calcular automáticamente"
+          [iconDisplay]="'input'"
+          [fluid]="true"
+          appendTo="body">
+        </p-datepicker>
+        <small class="text-gray-500 text-xs flex items-center gap-1">
+          <i class="pi pi-question-circle"></i>
+          Deja este campo vacío para cálculo automático
+        </small>
+      </div>
+    </div>
+  </form>
+</app-modal-template>

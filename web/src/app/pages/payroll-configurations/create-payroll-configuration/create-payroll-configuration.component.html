@@ -1,0 +1,89 @@
+<div class="p-4">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-semibold text-gray-600">
+      @if (mode() === 'create') {
+        Nueva Configuración de Planilla
+      } @else {
+        Editar Conceptos
+      }
+    </h2>
+    @if (selectedConceptsForCreation().length > 0) {
+      <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+        {{ selectedConceptsForCreation().length }} seleccionado{{ selectedConceptsForCreation().length > 1 ? 's' : '' }}
+      </span>
+    }
+  </div>
+
+  @if (store.isLoading()) {
+    <div class="flex items-center justify-center h-32 text-gray-600">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i>
+      @if (mode() === 'create') {
+        Creando configuración...
+      } @else {
+        Actualizando conceptos...
+      }
+    </div>
+  }
+
+  @if (!store.isLoading()) {
+    <div>
+      @if (groupedConceptsByCategory().length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (category of groupedConceptsByCategory(); track category.name) {
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:border-gray-300 transition-all">
+              <div class="bg-gradient-to-br from-gray-50 to-gray-100 px-5 py-3 border-b border-gray-200">
+                <div class="flex items-center">
+                  <i class="pi pi-folder text-gray-600 text-base mr-2"></i>
+                  <h3 class="text-sm font-bold text-gray-700">{{ category.name }}</h3>
+                </div>
+              </div>
+              <div class="p-4 space-y-2">
+                @for (concept of category.concepts; track concept.publicId) {
+                  <label
+                    [for]="concept.publicId"
+                    class="flex items-center p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer transition-all group"
+                    [class.border-gray-400]="selectedConceptsForCreation().includes(concept.publicId)"
+                    [class.bg-gray-100]="selectedConceptsForCreation().includes(concept.publicId)">
+                    <p-checkbox
+                      [inputId]="concept.publicId"
+                      [value]="concept.publicId"
+                      [(ngModel)]="selectedConceptsForCreation"
+                      [binary]="false"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900 select-none">
+                      {{ concept.name }}
+                    </span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-12">
+          <i class="pi pi-inbox text-4xl text-gray-400 mb-4"></i>
+          <p class="text-gray-500 text-lg">No hay conceptos disponibles para seleccionar.</p>
+        </div>
+      }
+
+      <div class="flex justify-between items-center gap-2 pt-6 mt-6">
+        <div class="text-sm text-gray-600">
+          @if (selectedConceptsForCreation().length === 0) {
+            Selecciona al menos un concepto para continuar
+          }
+        </div>
+        <div class="flex gap-2">
+          <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary" (onClick)="cancelCreation()"></p-button>
+          <p-button
+            [label]="mode() === 'create' ? 'Crear Configuración' : 'Guardar Cambios'"
+            icon="pi pi-check"
+            styleClass="p-button-primary"
+            (onClick)="saveConfiguration()"
+            [disabled]="selectedConceptsForCreation().length === 0"
+            [loading]="store.isLoading()"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

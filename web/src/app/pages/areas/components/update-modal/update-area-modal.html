@@ -1,0 +1,22 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Área"
+  (onHide)="onHide.emit()"
+  (onSubmit)="updateArea()"
+  [isSubmitDisabled]="areaForm.invalid"
+>
+  <form [formGroup]="areaForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="name" class="font-semibold text-sm">Nombre</label>
+      <input pInputText id="name" formControlName="name" class="flex-auto text-sm" autocomplete="off" placeholder="Ej: Área de Producción" [invalid]="areaForm.get('name')?.invalid && (areaForm.get('name')?.dirty || areaForm.get('name')?.touched)" />
+      @if (areaForm.get('name')?.invalid && (areaForm.get('name')?.dirty || areaForm.get('name')?.touched)) {
+        @if (areaForm.get('name')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+        }
+        @if (areaForm.get('name')?.errors?.['pattern']) {
+          <p-message severity="error" variant="simple" size="small">El nombre solo debe contener letras y espacios.</p-message>
+        }
+      }
+    </div>
+  </form>
+</app-modal-template>

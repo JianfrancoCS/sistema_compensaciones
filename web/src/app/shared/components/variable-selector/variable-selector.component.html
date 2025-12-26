@@ -1,0 +1,137 @@
+<div class="variable-selector">
+  <!-- Barra de búsqueda -->
+  <div class="search-section mb-3">
+    <p-iconfield iconPosition="left">
+      <p-inputicon>
+        <i class="pi pi-search"></i>
+      </p-inputicon>
+      <input
+        pInputText
+        type="text"
+        [(ngModel)]="searchText"
+        (input)="onSearchChange($event.target.value || '')"
+        [placeholder]="placeholder"
+        class="w-full"
+        autocomplete="off"
+      />
+    </p-iconfield>
+  </div>
+
+  <!-- Controles de selección (solo para multiple) -->
+  @if (allowMultiple) {
+    <div class="selection-controls mb-3">
+      <div class="flex gap-2">
+        <button
+          type="button"
+          class="p-button-text p-button-sm"
+          (click)="selectAll()"
+          [disabled]="loading()"
+        >
+          <i class="pi pi-check-square mr-1"></i>
+          Seleccionar todo
+        </button>
+        <button
+          type="button"
+          class="p-button-text p-button-sm"
+          (click)="clearSelection()"
+          [disabled]="loading()"
+        >
+          <i class="pi pi-times mr-1"></i>
+          Limpiar selección
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de variables -->
+  <div class="variables-list">
+    @if (loading()) {
+      <div class="loading-indicator text-center py-4">
+        <i class="pi pi-spin pi-spinner text-2xl"></i>
+        <p class="mt-2 text-muted">Cargando variables...</p>
+      </div>
+    }
+
+    @if (!loading() && availableVariables().length === 0) {
+      <div class="no-results text-center py-4">
+        <i class="pi pi-search text-2xl text-muted"></i>
+        <p class="mt-2 text-muted">No se encontraron variables</p>
+        @if (searchText) {
+          <button
+            type="button"
+            class="p-button-text p-button-sm mt-2"
+            (click)="clearSearch()"
+          >
+            <i class="pi pi-times mr-1"></i>
+            Limpiar búsqueda
+          </button>
+        }
+      </div>
+    }
+
+    @if (!loading() && availableVariables().length > 0) {
+      <div class="variables-container">
+        @for (variable of availableVariables(); track variable.publicId) {
+          <div class="variable-item">
+            <div class="flex items-center p-3 border rounded-md hover:bg-gray-50 transition-colors">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isVariableSelected(variable)"
+                (onChange)="onVariableToggle(variable, $event.checked)"
+                [inputId]="'var-' + variable.publicId"
+                class="mr-3"
+              ></p-checkbox>
+
+              <label
+                [for]="'var-' + variable.publicId"
+                class="flex-1 cursor-pointer"
+              >
+                <div class="variable-info">
+                  <div class="variable-name font-medium text-primary">
+                    {{ variable.name }}
+                  </div>
+                  <div class="variable-code text-sm text-muted">
+                    Código: {{ variable.code }}
+                  </div>
+                  @if (variable.defaultValue) {
+                    <div class="variable-default text-sm text-muted">
+                      Valor por defecto: {{ variable.defaultValue }}
+                    </div>
+                  }
+                  @if (variable.isRequired) {
+                    <div class="variable-required text-sm">
+                      <i class="pi pi-exclamation-triangle text-orange-500 mr-1"></i>
+                      <span class="text-orange-500">Requerida</span>
+                    </div>
+                  }
+                </div>
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Resumen de selección -->
+  @if (selectedVariables.length > 0) {
+    <div class="selection-summary mt-3">
+      <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-blue-700">
+            <i class="pi pi-info-circle mr-1"></i>
+            {{ selectedVariables.length }} variable{{ selectedVariables.length === 1 ? '' : 's' }} seleccionada{{ selectedVariables.length === 1 ? '' : 's' }}
+          </span>
+          <button
+            type="button"
+            class="p-button-text p-button-sm text-blue-600"
+            (click)="clearSelection()"
+          >
+            <i class="pi pi-times mr-1"></i>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

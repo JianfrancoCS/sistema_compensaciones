@@ -1,0 +1,93 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Documentos del Contrato"
+  [showSubmitButton]="false"
+  width="95vw"
+  (onHide)="hideModal()">
+
+  @if (loading()) {
+    <div class="flex items-center justify-center p-8">
+      <i class="pi pi-spin pi-spinner text-blue-500 text-2xl mr-3"></i>
+      <span>Cargando detalles del contrato...</span>
+    </div>
+  } @else if (contractDetails()) {
+    <div class="flex gap-4" style="height: 85vh;">
+
+      <!-- Lista de PDFs a la izquierda -->
+      <div class="w-80 flex flex-col bg-gray-50 rounded-lg p-4">
+        <h3 class="text-lg font-semibold mb-4">Documentos PDF ({{ contractDetails()?.imageUrls?.length || 0 }})</h3>
+
+        @if (contractDetails()?.imageUrls && contractDetails()!.imageUrls.length > 0) {
+          <div class="flex flex-col gap-2">
+            @for (pdf of contractDetails()!.imageUrls; track pdf.publicId; let i = $index) {
+              <div
+                class="p-3 rounded-lg cursor-pointer transition-colors border-2"
+                [class]="selectedPdfIndex() === i ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200 hover:bg-gray-100'"
+                (click)="selectPdf(i)">
+                <div class="flex items-center gap-3">
+                  <i class="pi pi-file-pdf text-red-500 text-xl"></i>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">{{ getPdfFileName(pdf.url) }}</p>
+                    <p class="text-xs text-gray-500">Orden: {{ pdf.order }}</p>
+                  </div>
+                  @if (selectedPdfIndex() === i) {
+                    <i class="pi pi-eye text-blue-500"></i>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+            <i class="pi pi-file-pdf text-4xl mb-2"></i>
+            <p>No hay documentos PDF</p>
+          </div>
+        }
+      </div>
+
+      <!-- Visor de PDF a la derecha -->
+      <div class="flex-1 flex flex-col bg-gray-100 rounded-lg overflow-hidden">
+        @if (selectedPdfUrl()) {
+          <div class="bg-white p-3 border-b border-gray-200">
+            <h4 class="font-medium">
+              Documento {{ selectedPdfIndex() + 1 }} de {{ contractDetails()?.imageUrls?.length || 0 }}
+            </h4>
+          </div>
+          <iframe
+            [src]="selectedPdfUrl()"
+            class="w-full h-full border-none">
+          </iframe>
+        } @else {
+          <div class="flex flex-col items-center justify-center h-full text-gray-500">
+            <i class="pi pi-file-pdf text-6xl mb-4"></i>
+            <p class="text-lg">Selecciona un documento para visualizar</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Información del contrato -->
+    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div>
+          <span class="font-medium text-gray-700">Número:</span>
+          <span class="ml-2">{{ contractDetails()?.contractNumber }}</span>
+        </div>
+        <div>
+          <span class="font-medium text-gray-700">Persona:</span>
+          <span class="ml-2">{{ contractDetails()?.personFullName }}</span>
+        </div>
+        <div>
+          <span class="font-medium text-gray-700">Tipo:</span>
+          <span class="ml-2">{{ contractDetails()?.contractTypeName }}</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col items-center justify-center p-8 text-gray-500">
+      <i class="pi pi-exclamation-triangle text-4xl mb-2"></i>
+      <p>No se pudieron cargar los detalles del contrato</p>
+    </div>
+  }
+
+</app-modal-template>

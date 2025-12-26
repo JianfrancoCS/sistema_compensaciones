@@ -1,0 +1,86 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Perfiles</h1>
+    <p-button type="button" label="Crear" icon="pi pi-plus" (click)="showCreateModal()"></p-button>
+  </div>
+
+  <app-profile-create-modal [visible]="isCreateModalVisible()" (onHide)="hideCreateModal()"></app-profile-create-modal>
+  <app-profile-update-modal [visible]="isUpdateModalVisible()" [profile]="selectedProfile()!" (onHide)="hideUpdateModal()"></app-profile-update-modal>
+
+  <!-- Tabla -->
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="profiles()"
+               dataKey="publicId"
+               [rows]="10"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="loading()"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadProfiles($event)"
+               [totalRecords]="totalRecords()"
+               [first]="0"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex p-0 justify-end">
+            <p-inputgroup class="max-w-sm">
+                <p-inputgroup-addon>
+                    <i class="pi pi-search"></i>
+                </p-inputgroup-addon>
+                <input pInputText type="text" [value]="store.filters().query" (input)="onSearch($event)" placeholder="Buscar por nombre" class="text-sm"/>
+                <p-inputgroup-addon>
+                    <p-button icon="pi pi-times" severity="secondary" (click)="store.clearSearch()"></p-button>
+                </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:15rem" pSortableColumn="name" class="text-sm">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th style="min-width:20rem" class="text-sm">Descripción</th>
+            <th style="min-width:15rem" pSortableColumn="createdAt" class="text-sm">Fecha de Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="width: 12rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-profile>
+          <tr>
+            <td class="text-sm px-3">{{ profile.name }}</td>
+            <td class="text-sm px-3">{{ profile.description || '-' }}</td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="profile.createdAt"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button pButton type="button" icon="pi pi-shield" class="p-button-info h-8 w-8" [pTooltip]="'Asignar Elementos'" tooltipPosition="top" (click)="assignElements(profile)"></button>
+                <button pButton type="button" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="showUpdateModal(profile)"></button>
+                <button pButton type="button" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(profile)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr class="">
+            <td colspan="4" class="text-center text-sm p-4">No se encontraron perfiles.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,45 @@
+import kotlin.Boolean;
+
+-- =============================================
+-- Tabla: Cache de Motivos de Tareo (CACHE - SOLO LECTURA)
+-- Datos precargados desde: GET /v1/assignment/tareo-motives/sync
+-- El API retorna solo los motivos activos
+-- =============================================
+
+CREATE TABLE tareo_motives_cache (
+    id TEXT PRIMARY KEY NOT NULL, -- publicId del servidor
+    name TEXT NOT NULL,
+    description TEXT,
+    is_paid INTEGER AS Boolean NOT NULL DEFAULT 0,
+    cached_at INTEGER NOT NULL
+);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+insertOrReplace:
+INSERT OR REPLACE INTO tareo_motives_cache(
+    id, name, description, is_paid, cached_at
+)
+VALUES (?, ?, ?, ?, ?);
+
+-- Obtener todos los motivos (el API ya filtra activos)
+getAll:
+SELECT * FROM tareo_motives_cache ORDER BY name;
+
+-- Obtener solo motivos pagados
+getPaidMotives:
+SELECT * FROM tareo_motives_cache WHERE is_paid = 1 ORDER BY name;
+
+-- Buscar por ID
+getById:
+SELECT * FROM tareo_motives_cache WHERE id = ?;
+
+-- Limpiar cache antiguo
+deleteOlderThan:
+DELETE FROM tareo_motives_cache WHERE cached_at < ?;
+
+-- Contar motivos en cache
+countCached:
+SELECT COUNT(*) FROM tareo_motives_cache;

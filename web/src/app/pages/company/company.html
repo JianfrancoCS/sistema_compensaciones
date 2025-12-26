@@ -1,0 +1,295 @@
+<div [ngStyle]="{
+  'min-height': '100vh',
+  'background': 'linear-gradient(135deg, #f7f7f7 0%, #ffffff 100%)',
+  'padding': '2rem'
+}">
+  <div [ngStyle]="{
+    'max-width': '1400px',
+    'margin': '0 auto'
+  }">
+    @if (loading() && !company()) {
+      <div [ngStyle]="{
+        'background': 'white',
+        'border-radius': '24px',
+        'padding': '4rem',
+        'text-align': 'center',
+        'box-shadow': '0 4px 20px rgba(0, 0, 0, 0.08)'
+      }">
+        <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-20 h-20"></p-progressSpinner>
+        <p [ngStyle]="{
+          'color': '#666',
+          'margin-top': '1.5rem',
+          'font-size': '1.125rem',
+          'font-weight': '500'
+        }">Cargando información...</p>
+      </div>
+    } @else if (!company()) {
+    <!-- No Company Registered - Create Form -->
+    <div [ngStyle]="{
+      'background': 'white',
+      'border-radius': '24px',
+      'padding': '3rem',
+      'box-shadow': '0 4px 20px rgba(0, 0, 0, 0.08)',
+      'border': '1px solid #f0f0f0'
+    }">
+      <div [ngStyle]="{
+        'text-align': 'center',
+        'margin-bottom': '3rem'
+      }">
+        <div [ngStyle]="{
+          'display': 'inline-flex',
+          'align-items': 'center',
+          'justify-content': 'center',
+          'width': '100px',
+          'height': '100px',
+          'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+          'border-radius': '50%',
+          'margin-bottom': '1.5rem',
+          'border': '3px solid #4faf5a20'
+        }">
+          <i class="pi pi-building" [ngStyle]="{
+            'font-size': '3rem',
+            'color': '#4faf5a'
+          }"></i>
+        </div>
+        <h2 [ngStyle]="{
+          'font-size': '2rem',
+          'font-weight': '700',
+          'color': '#131613',
+          'margin-bottom': '0.75rem'
+        }">Registra tu Empresa</h2>
+        <p [ngStyle]="{
+          'color': '#666',
+          'font-size': '1.125rem'
+        }">Completa la información para comenzar a usar el sistema</p>
+      </div>
+
+      <form [formGroup]="createForm" (ngSubmit)="onSubmit()" [ngStyle]="{
+        'max-width': '900px',
+        'margin': '0 auto'
+      }">
+        <!-- Sección: Información Legal -->
+        <div [ngStyle]="{
+          'margin-bottom': '2.5rem'
+        }">
+          <div [ngStyle]="{
+            'display': 'flex',
+            'align-items': 'center',
+            'gap': '0.75rem',
+            'margin-bottom': '1.5rem',
+            'padding-bottom': '0.75rem',
+            'border-bottom': '2px solid #4faf5a'
+          }">
+            <i class="pi pi-shield" [ngStyle]="{
+              'font-size': '1.25rem',
+              'color': '#4faf5a'
+            }"></i>
+            <h3 [ngStyle]="{
+              'font-size': '1.25rem',
+              'font-weight': '600',
+              'color': '#131613',
+              'margin': '0'
+            }">Información Legal</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- RUC -->
+            <div>
+            <div class="p-inputgroup">
+              <p-floatlabel class="flex-1">
+                <input
+                  pInputText
+                  id="ruc"
+                  formControlName="ruc"
+                  placeholder="12345678901"
+                  class="w-full font-mono h-12"
+                  (input)="onRucInput()"
+                  maxlength="11" />
+                <label for="ruc">RUC <span class="text-red-500">*</span></label>
+              </p-floatlabel>
+              <span class="p-inputgroup-addon">
+                @if (externalLookupLoading()) {
+                  <i class="pi pi-spin pi-spinner"></i>
+                }
+              </span>
+            </div>
+            @if (createForm.get('ruc')?.invalid && createForm.get('ruc')?.touched) {
+              <div class="text-red-500 text-sm mt-2 pl-2">
+                @if (createForm.get('ruc')?.errors?.['required']) {
+                  <p-message severity="error" variant="simple" size="small">El RUC es requerido.</p-message>
+                }
+                @if (createForm.get('ruc')?.errors?.['pattern']) {
+                  <p-message severity="error" variant="simple" size="small">El RUC debe tener 11 dígitos.</p-message>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Tipo de Empresa -->
+          <div>
+            <p-floatlabel>
+              <input
+                pInputText
+                id="companyType"
+                formControlName="companyType"
+                class="w-full h-12"
+                [readOnly]="true"
+              />
+              <label for="companyType">Tipo de Empresa</label>
+            </p-floatlabel>
+          </div>
+        </div>
+
+          <div [ngStyle]="{
+            'display': 'grid',
+            'grid-template-columns': '1fr',
+            'gap': '1.5rem',
+            'margin-bottom': '0'
+          }">
+            <!-- Razón Social -->
+            <p-floatlabel>
+              <input
+                pInputText
+                id="legalName"
+                formControlName="legalName"
+                class="w-full h-12"
+                [readOnly]="true"
+              />
+              <label for="legalName">Razón Social</label>
+            </p-floatlabel>
+
+            <!-- Nombre Comercial -->
+            <p-floatlabel>
+              <input
+                pInputText
+                id="tradeName"
+                formControlName="tradeName"
+                class="w-full h-12"
+                [readOnly]="true"
+              />
+              <label for="tradeName">Nombre Comercial</label>
+            </p-floatlabel>
+          </div>
+        </div>
+
+        <!-- Sección: Configuración de Nómina -->
+        <div [ngStyle]="{
+          'margin-bottom': '2rem'
+        }">
+          <div [ngStyle]="{
+            'display': 'flex',
+            'align-items': 'center',
+            'gap': '0.75rem',
+            'margin-bottom': '1.5rem',
+            'padding-bottom': '0.75rem',
+            'border-bottom': '2px solid #4faf5a'
+          }">
+            <i class="pi pi-cog" [ngStyle]="{
+              'font-size': '1.25rem',
+              'color': '#4faf5a'
+            }"></i>
+            <h3 [ngStyle]="{
+              'font-size': '1.25rem',
+              'font-weight': '600',
+              'color': '#131613',
+              'margin': '0'
+            }">Configuración de Nómina</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+          <!-- Días de Intervalo de Pago -->
+          <p-floatlabel>
+            <p-inputNumber inputId="paymentIntervalDays" formControlName="paymentIntervalDays" [min]="1"></p-inputNumber>
+            <label for="paymentIntervalDays">Intervalo de Pago (días)</label>
+          </p-floatlabel>
+
+          <!-- Horas Máximas Mensuales -->
+          <p-floatlabel>
+            <p-inputNumber inputId="maxMonthlyWorkingHours" formControlName="maxMonthlyWorkingHours" [min]="1"></p-inputNumber>
+            <label for="maxMonthlyWorkingHours">Horas Máximas/Mes</label>
+          </p-floatlabel>
+
+          <!-- Día de Declaración de Planilla -->
+          <p-floatlabel>
+            <p-inputNumber inputId="payrollDeclarationDay" formControlName="payrollDeclarationDay" [min]="1" [max]="28"></p-inputNumber>
+            <label for="payrollDeclarationDay">Día Declaración Planilla</label>
+          </p-floatlabel>
+
+          <!-- Días de Anticipación de Planilla -->
+          <p-floatlabel>
+            <p-inputNumber inputId="payrollAnticipationDays" formControlName="payrollAnticipationDays" [min]="0"></p-inputNumber>
+            <label for="payrollAnticipationDays">Días Anticipo Planilla</label>
+          </p-floatlabel>
+
+          <!-- Tasa de Horas Extra -->
+          <p-floatlabel>
+            <p-inputNumber inputId="overtimeRate" formControlName="overtimeRate" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" [max]="1" suffix="%"></p-inputNumber>
+            <label for="overtimeRate">Tasa Horas Extra</label>
+          </p-floatlabel>
+
+          <!-- Horas Normales Diarias -->
+          <p-floatlabel>
+            <p-inputNumber inputId="dailyNormalHours" formControlName="dailyNormalHours" mode="decimal" [minFractionDigits]="1" [maxFractionDigits]="2" [min]="1"></p-inputNumber>
+            <label for="dailyNormalHours">Horas Normales/Día</label>
+          </p-floatlabel>
+
+          <!-- Días de Cálculo del Mes -->
+          <p-floatlabel>
+            <p-inputNumber inputId="monthCalculationDays" formControlName="monthCalculationDays" [min]="28" [max]="31"></p-inputNumber>
+            <label for="monthCalculationDays">Días Cálculo Mes</label>
+          </p-floatlabel>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div [ngStyle]="{
+          'text-align': 'center',
+          'padding-top': '2.5rem',
+          'margin-top': '2rem',
+          'border-top': '1px solid #f0f0f0'
+        }">
+          <button
+            type="submit"
+            pButton
+            icon="pi pi-check"
+            class="p-button-lg"
+            [loading]="loading()"
+            [disabled]="createForm.invalid || loading() || externalLookupLoading()"
+            [ngStyle]="{
+              'background': 'linear-gradient(135deg, #4faf5a 0%, #3d8f47 100%)',
+              'border': 'none',
+              'padding': '1rem 3rem',
+              'font-size': '1.125rem',
+              'font-weight': '600',
+              'border-radius': '12px',
+              'box-shadow': '0 4px 12px rgba(79, 175, 90, 0.3)',
+              'transition': 'all 0.2s ease',
+              'cursor': (createForm.invalid || loading() || externalLookupLoading()) ? 'not-allowed' : 'pointer'
+            }">
+            <span [ngStyle]="{
+              'display': 'flex',
+              'align-items': 'center',
+              'gap': '0.5rem'
+            }">
+              <i class="pi pi-check"></i>
+              <span>Registrar Empresa</span>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  } @else {
+    <!-- Company Registered - Display Info -->
+    <app-company-info-display
+      (onEdit)="showEditModal()">
+    </app-company-info-display>
+  }
+
+  <app-company-edit-modal
+    [visible]="isEditModalVisible()"
+    [company]="company()"
+    (visibleChange)="hideEditModal()">
+  </app-company-edit-modal>
+
+  <p-toast></p-toast>
+</div>

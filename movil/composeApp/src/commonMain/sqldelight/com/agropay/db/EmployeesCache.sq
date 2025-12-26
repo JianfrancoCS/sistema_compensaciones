@@ -1,0 +1,49 @@
+-- =============================================
+-- Tabla: Cache de Empleados (SOLO LECTURA)
+-- Se busca en tiempo real por HTTP
+-- Esta tabla NO se usa para búsqueda, solo para almacenar empleados ya escaneados
+-- =============================================
+
+CREATE TABLE employees_cache (
+    document_number TEXT PRIMARY KEY NOT NULL,
+    names TEXT NOT NULL,
+    paternal_lastname TEXT NOT NULL,
+    maternal_lastname TEXT NOT NULL,
+    subsidiary_id TEXT NOT NULL, -- UUID de la subsidiaria (referencia a subsidiaries_cache)
+    position_id TEXT NOT NULL, -- UUID de la posición (referencia a positions_cache)
+    cached_at INTEGER NOT NULL
+);
+
+-- Índices
+CREATE INDEX employees_cache_subsidiary_id ON employees_cache(subsidiary_id);
+CREATE INDEX employees_cache_position_id ON employees_cache(position_id);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+-- Insertar/Actualizar empleado en cache
+insertOrReplace:
+INSERT OR REPLACE INTO employees_cache (
+    document_number,
+    names,
+    paternal_lastname,
+    maternal_lastname,
+    subsidiary_id,
+    position_id,
+    cached_at
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Buscar empleado por DNI
+getByDocumentNumber:
+SELECT * FROM employees_cache
+WHERE document_number = ?;
+
+-- Obtener todos los empleados en cache
+getAll:
+SELECT * FROM employees_cache
+ORDER BY paternal_lastname, maternal_lastname, names;
+
+-- Contar empleados en cache
+countCached:
+SELECT COUNT(*) FROM employees_cache;

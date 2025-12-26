@@ -1,0 +1,35 @@
+-- =============================================
+-- Tabla: Cache de Sucursales (CACHE - SOLO LECTURA)
+-- Datos precargados desde: GET /v1/subsidiaries/sync
+-- El API retorna solo las sucursales activas
+-- =============================================
+
+CREATE TABLE subsidiaries_cache (
+    id TEXT PRIMARY KEY NOT NULL, -- publicId del servidor
+    name TEXT NOT NULL,
+    cached_at INTEGER NOT NULL
+);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+insertOrReplace:
+INSERT OR REPLACE INTO subsidiaries_cache(id, name, cached_at)
+VALUES (?, ?, ?);
+
+-- Obtener todas las sucursales (el API ya filtra activas)
+getAll:
+SELECT * FROM subsidiaries_cache ORDER BY name;
+
+-- Buscar por ID
+getById:
+SELECT * FROM subsidiaries_cache WHERE id = ?;
+
+-- Limpiar cache antiguo (más de X días)
+deleteOlderThan:
+DELETE FROM subsidiaries_cache WHERE cached_at < ?;
+
+-- Contar sucursales en cache
+countCached:
+SELECT COUNT(*) FROM subsidiaries_cache;

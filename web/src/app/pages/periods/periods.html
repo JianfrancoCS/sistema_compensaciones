@@ -1,0 +1,119 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-600">Períodos de Planilla</h1>
+      <p class="text-sm text-gray-500 mt-1">Gestiona los períodos de pago de la empresa</p>
+    </div>
+    <button
+      pButton
+      label="Nuevo Período"
+      icon="pi pi-plus"
+      class="p-button-primary"
+      (click)="showCreateModal()">
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-12 shadow-sm border border-gray-100 text-center">
+      <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-16 h-16"></p-progressSpinner>
+      <p class="text-gray-500 mt-4 text-lg">Cargando períodos...</p>
+    </div>
+  } @else if (isEmpty()) {
+    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-12 shadow-sm border border-gray-100 text-center">
+      <i class="pi pi-calendar text-6xl text-gray-400 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay períodos registrados</h3>
+      <p class="text-gray-500 mb-6">Comienza creando el primer período de planilla</p>
+      <button
+        pButton
+        label="Crear Primer Período"
+        icon="pi pi-plus"
+        class="p-button-primary"
+        (click)="showCreateModal()">
+      </button>
+    </div>
+  } @else {
+    <div class="bg-white rounded-lg shadow">
+      <p-table
+        [value]="periods()"
+        dataKey="publicId"
+        [loading]="loading()"
+        showGridlines
+        [scrollable]="true"
+        scrollHeight="flex">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:12rem" class="text-sm">Período</th>
+            <th style="min-width:12rem" pSortableColumn="periodStart" class="text-sm">Fecha Inicio <p-sortIcon field="periodStart"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="periodEnd" class="text-sm">Fecha Fin <p-sortIcon field="periodEnd"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="declarationDate" class="text-sm">Fecha Declaración <p-sortIcon field="declarationDate"></p-sortIcon></th>
+            <th style="width: 8rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-period>
+          <tr>
+            <td>
+              <div class="font-bold text-gray-800">
+                {{ getMonthName(period.month) }} {{ period.year }}
+              </div>
+            </td>
+            <td>
+              <app-date-display
+                [date]="period.periodStart"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <app-date-display
+                [date]="period.periodEnd"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <app-date-display
+                [date]="period.declarationDate"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-danger h-8 w-8"
+                  [pTooltip]="'Eliminar'"
+                  tooltipPosition="top"
+                  (click)="confirmDelete(period)">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center text-gray-500 py-4">
+              No se encontraron períodos
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  }
+
+  <app-create-period-modal
+    [visible]="isCreateModalVisible()"
+    (onHide)="hideCreateModal()">
+  </app-create-period-modal>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>

@@ -1,0 +1,222 @@
+<div class="variable-validation-form">
+  <!-- Mensaje de error personalizado -->
+  <div class="mb-6">
+    <p-floatlabel variant="in">
+      <textarea
+        pInputText
+        id="error_message"
+        [(ngModel)]="errorMessage"
+        (input)="onErrorMessageChange()"
+        rows="3"
+        class="w-full"
+        placeholder="Ingrese el mensaje de error que se mostrará al usuario..."
+      ></textarea>
+      <label for="error_message">Mensaje de Error Personalizado</label>
+    </p-floatlabel>
+    <small class="text-gray-600 mt-1 block">
+      Este mensaje se mostrará cuando la validación falle
+    </small>
+  </div>
+
+  <!-- Métodos de validación -->
+  <div class="mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold text-gray-800">
+        Métodos de Validación
+      </h3>
+      <button
+        type="button"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2 transition-colors"
+        (click)="addValidationMethod()"
+        [disabled]="loading()"
+      >
+        <i class="pi pi-plus"></i>
+        Agregar Método
+      </button>
+    </div>
+
+    <!-- Lista de métodos seleccionados -->
+    @if (selectedMethods.length > 0) {
+      <div class="space-y-4">
+        @for (methodForm of selectedMethods; track $index; let i = $index) {
+          <div class="border border-gray-200 rounded-lg bg-white shadow-sm">
+        <!-- Cabecera del método -->
+        <div class="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              class="text-gray-600 hover:text-gray-800 transition-colors"
+              (click)="toggleMethodExpansion(i)"
+            >
+              <i [class]="methodForm.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+            </button>
+
+            <div class="flex items-center gap-2">
+              <p-tag
+                [value]="'#' + (i + 1)"
+                severity="info"
+                [rounded]="true"
+              ></p-tag>
+              <span class="font-medium text-gray-800">
+                {{ methodForm.methodName || 'Método no seleccionado' }}
+              </span>
+            </div>
+
+            @if (methodForm.requiresValue) {
+              <p-tag
+                value="Requiere valor"
+                severity="warning"
+                [rounded]="true"
+              ></p-tag>
+            }
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Controles de orden -->
+            <button
+              type="button"
+              class="text-gray-600 hover:text-blue-600 p-1 transition-colors"
+              (click)="moveMethodUp(i)"
+              [disabled]="i === 0"
+              pTooltip="Mover arriba"
+            >
+              <i class="pi pi-arrow-up"></i>
+            </button>
+            <button
+              type="button"
+              class="text-gray-600 hover:text-blue-600 p-1 transition-colors"
+              (click)="moveMethodDown(i)"
+              [disabled]="i === selectedMethods.length - 1"
+              pTooltip="Mover abajo"
+            >
+              <i class="pi pi-arrow-down"></i>
+            </button>
+
+            <!-- Eliminar método -->
+            <button
+              type="button"
+              class="text-red-600 hover:text-red-800 p-1 transition-colors"
+              (click)="removeMethod(i)"
+              pTooltip="Eliminar método"
+            >
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenido expandible -->
+        @if (methodForm.expanded) {
+          <div class="p-4 space-y-4">
+          <!-- Selector de método -->
+          <div>
+            <p-floatlabel variant="in">
+              <p-select
+                [options]="getAvailableMethodsForSelect()"
+                [(ngModel)]="methodForm.methodPublicId"
+                (onChange)="onMethodSelect(methodForm, $event.value)"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Seleccionar método de validación"
+                class="w-full"
+                [showClear]="true"
+                appendTo="body"
+              >
+                <ng-template let-option #item>
+                  <div class="flex flex-col">
+                    <span class="font-medium">{{ option.label }}</span>
+                    @if (option.description) {
+                      <small class="text-gray-600">
+                        {{ option.description }}
+                      </small>
+                    }
+                  </div>
+                </ng-template>
+              </p-select>
+              <label>Método de Validación</label>
+            </p-floatlabel>
+          </div>
+
+          <!-- Campo de valor (solo si el método lo requiere) -->
+          @if (methodForm.requiresValue) {
+            <div>
+            <p-floatlabel variant="in">
+              <input
+                pInputText
+                [(ngModel)]="methodForm.value"
+                (input)="onMethodValueChange()"
+                class="w-full"
+              />
+              <label>Valor del Método</label>
+            </p-floatlabel>
+            @if (methodForm.methodDescription) {
+              <small class="text-gray-600 mt-1 block">
+                {{ methodForm.methodDescription }}
+              </small>
+            }
+            </div>
+          }
+
+          <!-- Información del método -->
+          @if (methodForm.methodName) {
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div class="flex items-start gap-2">
+                <i class="pi pi-info-circle text-blue-600 mt-1"></i>
+                <div class="text-sm text-blue-800">
+                  <div class="font-medium">{{ methodForm.methodName }}</div>
+                  <div class="mt-1">Tipo: {{ methodForm.methodType }}</div>
+                  @if (methodForm.methodDescription) {
+                    <div class="mt-1">
+                      {{ methodForm.methodDescription }}
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+          </div>
+        }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Estado vacío -->
+    @if (selectedMethods.length === 0) {
+      <div class="text-center py-8 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+        <i class="pi pi-shield text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-600 mb-4">
+          No hay métodos de validación configurados
+        </p>
+        <button
+          type="button"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2 mx-auto transition-colors"
+          (click)="addValidationMethod()"
+        >
+          <i class="pi pi-plus"></i>
+          Agregar Primer Método
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Acciones -->
+  <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+    @if (selectedMethods.length > 0) {
+      <button
+        type="button"
+        class="text-red-600 hover:text-red-800 text-sm flex items-center gap-2 transition-colors"
+        (click)="clearValidation()"
+      >
+        <i class="pi pi-trash"></i>
+        Limpiar Validación
+      </button>
+    }
+
+    <div class="flex items-center gap-2 text-sm">
+      <div class="flex items-center gap-1" [class]="isFormValid() ? 'text-green-600' : 'text-red-600'">
+        <i [class]="isFormValid() ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
+        <span>{{ isFormValid() ? 'Validación completa' : 'Validación incompleta' }}</span>
+      </div>
+    </div>
+  </div>
+</div>

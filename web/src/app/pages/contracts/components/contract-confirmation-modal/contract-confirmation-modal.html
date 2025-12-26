@@ -1,0 +1,56 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '35rem' }"
+  header="Contrato Creado Exitosamente"
+  (onHide)="hideModal()"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="false"
+>
+  <div class="flex flex-col gap-4">
+    <!-- Mensaje de éxito -->
+    <div class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+      <i class="pi pi-check-circle text-green-600 text-2xl"></i>
+      <div class="flex-1">
+        <p class="font-semibold text-green-900">¡Contrato creado exitosamente!</p>
+        <p class="text-sm text-green-700">
+          Contrato <strong>{{ contract?.contractNumber }}</strong> ha sido creado.
+        </p>
+      </div>
+    </div>
+
+    <!-- Opciones de acción -->
+    <div class="flex flex-col gap-3 mt-2">
+      <p class="text-sm text-gray-600 font-medium">¿Qué desea hacer ahora?</p>
+      
+      <button
+        pButton
+        type="button"
+        label="Ver Contratos"
+        icon="pi pi-list"
+        class="p-button-info w-full"
+        (click)="viewContracts()">
+      </button>
+
+      <button
+        pButton
+        type="button"
+        label="Firmar Contrato"
+        icon="pi pi-pencil"
+        class="p-button-success w-full"
+        (click)="signContract()">
+      </button>
+
+      <button
+        pButton
+        type="button"
+        label="Continuar Contratando"
+        icon="pi pi-plus-circle"
+        class="p-button-secondary w-full"
+        (click)="continueCreating()">
+      </button>
+    </div>
+  </div>
+</p-dialog>
+

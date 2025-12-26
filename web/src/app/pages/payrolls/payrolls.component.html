@@ -1,0 +1,226 @@
+<div class="p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-600">Planillas de Pago</h1>
+      <p class="text-sm text-gray-500 mt-1">Gestión de planillas y nóminas</p>
+    </div>
+    <button
+      pButton
+      label="Nueva Planilla"
+      icon="pi pi-plus"
+      class="p-button-primary"
+      (click)="showCreateModal()">
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-gray-100 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label for="subsidiaryFilter" class="block text-sm font-medium text-gray-700 mb-2">Sucursal</label>
+        <p-select
+          inputId="subsidiaryFilter"
+          [options]="subsidiaryOptions()"
+          [(ngModel)]="selectedSubsidiary"
+          (onChange)="onSubsidiaryFilterChange($event.value)"
+          placeholder="Todas las sucursales"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="periodFilter" class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+        <p-select
+          inputId="periodFilter"
+          [options]="periodOptions()"
+          [(ngModel)]="selectedPeriod"
+          (onChange)="onPeriodFilterChange($event.value)"
+          placeholder="Todos los períodos"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+        <p-select
+          inputId="statusFilter"
+          [options]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (onChange)="onStatusFilterChange($event.value)"
+          placeholder="Todos los estados"
+          [showClear]="true"
+          [fluid]="true"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div class="flex items-end">
+        <button
+          pButton
+          label="Limpiar Filtros"
+          icon="pi pi-filter-slash"
+          class="p-button-outlined w-full"
+          (click)="clearFilters()">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (store.isLoading()) {
+    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-12 shadow-sm border border-gray-100 text-center">
+      <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-16 h-16"></p-progressSpinner>
+      <p class="text-gray-500 mt-4 text-lg">Cargando planillas...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if (store.payrolls().length === 0 && !store.isLoading()) {
+    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-12 shadow-sm border border-gray-100 text-center">
+      <i class="pi pi-file-excel text-6xl text-gray-400 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay planillas registradas</h3>
+      <p class="text-gray-500 mb-6">Comienza creando la primera planilla</p>
+      <button
+        pButton
+        label="Crear Primera Planilla"
+        icon="pi pi-plus"
+        class="p-button-primary"
+        (click)="showCreateModal()">
+      </button>
+    </div>
+  }
+
+  <!-- Payrolls Table -->
+  @else {
+    <div class="bg-white rounded-lg shadow">
+      <p-table
+        [value]="store.payrolls()"
+        dataKey="publicId"
+        [rows]="store.size()"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [loading]="store.isLoading()"
+        [paginator]="true"
+        [lazy]="false"
+        [totalRecords]="store.totalItems()"
+        [first]="store.page() * store.size()"
+        (onPageChange)="onPageChange($event)"
+        showGridlines
+        [scrollable]="true"
+        scrollHeight="flex">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:10rem" class="text-sm">ID</th>
+            <th style="min-width:12rem" pSortableColumn="subsidiaryName" class="text-sm">Sucursal <p-sortIcon field="subsidiaryName"></p-sortIcon></th>
+            <th style="min-width:10rem" class="text-sm">Período</th>
+            <th style="min-width:10rem" class="text-sm">Estado</th>
+            <th style="min-width:10rem" pSortableColumn="totalEmployees" class="text-sm">Empleados <p-sortIcon field="totalEmployees"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="processedTareos" class="text-sm">Tareos Procesados <p-sortIcon field="processedTareos"></p-sortIcon></th>
+            <th style="min-width:12rem" pSortableColumn="createdAt" class="text-sm">Creado <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="width: 12rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-payroll>
+          <tr>
+            <td class="font-mono text-xs">{{ payroll.code || '-' }}</td>
+            <td>{{ payroll.subsidiaryName }}</td>
+            <td>{{ payroll.periodName || '-' }}</td>
+            <td>
+              <span [class]="'px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 w-fit ' + getStatusBadgeClass(payroll.stateName)">
+                <i [class]="'pi ' + getStatusIcon(payroll.stateName) + ' text-xs'"></i>
+                {{ getStatusDisplayName(payroll.stateName) }}
+              </span>
+            </td>
+            <td class="text-center">{{ payroll.totalEmployees }}</td>
+            <td class="text-center font-semibold">{{ payroll.processedTareos || 0 }}</td>
+            <td>
+              <app-date-display
+                [date]="payroll.createdAt"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <div class="flex justify-center gap-2">
+                @if (payroll.stateName === 'DRAFT') {
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-play"
+                    class="p-button-success h-8 w-8"
+                    [pTooltip]="'Calcular'"
+                    tooltipPosition="top"
+                    (click)="confirmLaunch(payroll)">
+                  </button>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-trash"
+                    class="p-button-danger h-8 w-8"
+                    [pTooltip]="'Eliminar'"
+                    tooltipPosition="top"
+                    (click)="confirmDelete(payroll)">
+                  </button>
+                }
+                @if (payroll.stateName === 'CALCULATED' || payroll.stateName === 'APPROVED') {
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-eye"
+                    class="p-button-info h-8 w-8"
+                    [pTooltip]="'Ver Resumen'"
+                    tooltipPosition="top"
+                    (click)="viewSummary(payroll)">
+                  </button>
+                  @if (!payroll.hasPayslips) {
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-file-pdf"
+                      class="p-button-warning h-8 w-8"
+                      [pTooltip]="'Generar Boletas'"
+                      tooltipPosition="top"
+                      (click)="confirmGeneratePayslips(payroll)">
+                    </button>
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-times-circle"
+                      class="p-button-danger h-8 w-8"
+                      [pTooltip]="'Anular Planilla'"
+                      tooltipPosition="top"
+                      (click)="confirmCancel(payroll)">
+                    </button>
+                  }
+                }
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center text-gray-500 py-4">
+              No se encontraron planillas
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  }
+
+  <app-create-payroll-modal
+    [visible]="isCreateModalVisible()"
+    (onHide)="hideCreateModal()">
+  </app-create-payroll-modal>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>

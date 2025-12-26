@@ -1,0 +1,188 @@
+<!-- Carrusel -->
+<div class="relative overflow-hidden h-screen">
+  <div
+    class="relative h-full transition-transform duration-500 ease-out flex"
+    [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'"
+  >
+    @for (slide of slides; track slide.title) {
+      <div
+        class="w-full h-full flex-shrink-0 bg-cover bg-center relative"
+        [style.background-image]="'url(' + slide.image + ')'"
+      >
+        <!-- Gradiente oscuro para mejorar contraste -->
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Texto centrado -->
+        <div
+          class="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
+        >
+          <h1
+            class="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg leading-tight"
+          >
+            {{ slide.title }}
+          </h1>
+          @if (slide.subtitle) {
+            <p
+              class="mt-4 text-lg md:text-2xl text-gray-200 max-w-2xl leading-relaxed"
+            >
+              {{ slide.subtitle }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Indicadores -->
+  <div
+    class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20"
+  >
+    @for (slide of slides; track $index) {
+      <button
+        (click)="goToSlide($index)"
+        class="w-3 h-3 rounded-full transition-all duration-200"
+        [class]="$index === currentSlide ? 'bg-white' : 'bg-white/50 hover:bg-white/70'"
+      ></button>
+    }
+  </div>
+</div>
+
+<!-- Sección de Features -->
+<section [ngStyle]="{
+  'min-height': '100vh',
+  'padding-top': '4rem',
+  'padding-bottom': '4rem',
+  'background': '#f7f7f7'
+}">
+  <div [ngStyle]="{
+    'max-width': '1200px',
+    'margin': '0 auto',
+    'padding': '0 1rem'
+  }">
+
+    <!-- Header -->
+    <div [ngStyle]="{
+      'text-align': 'center',
+      'margin-bottom': '3rem'
+    }">
+      <h2 [ngStyle]="{
+        'font-size': '2.5rem',
+        'font-weight': '700',
+        'color': '#131613',
+        'margin-bottom': '1rem'
+      }">
+        Nuestros Procesos
+      </h2>
+      <p [ngStyle]="{
+        'font-size': '1.125rem',
+        'color': '#666',
+        'max-width': '600px',
+        'margin': '0 auto'
+      }">
+        Optimiza la gestión de tu personal agrícola con herramientas diseñadas para la eficiencia
+      </p>
+    </div>
+
+    <!-- Features Grid -->
+    <div [ngStyle]="{
+      'display': 'grid',
+      'grid-template-columns': 'repeat(auto-fit, minmax(300px, 1fr))',
+      'gap': '1.5rem',
+      'margin-bottom': '3rem'
+    }">
+      @for (feature of features; track feature.title) {
+        <div [ngStyle]="{
+          'background': 'white',
+          'border': '1px solid #f2f2f2',
+          'border-radius': '16px',
+          'padding': '2rem',
+          'transition': 'all 0.3s ease',
+          'box-shadow': '0 2px 8px rgba(0, 0, 0, 0.04)'
+        }">
+          <div [ngStyle]="{
+            'width': '60px',
+            'height': '60px',
+            'background': '#f7f7f7',
+            'border-radius': '12px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center',
+            'margin-bottom': '1.5rem',
+            'border': '2px solid #f2f2f2'
+          }">
+            <i [class]="'pi ' + feature.icon" [ngStyle]="{
+              'font-size': '1.75rem',
+              'color': feature.color
+            }"></i>
+          </div>
+
+          <h3 [ngStyle]="{
+            'font-size': '1.25rem',
+            'font-weight': '600',
+            'color': '#131613',
+            'margin-bottom': '0.75rem'
+          }">
+            {{ feature.title }}
+          </h3>
+
+          <p [ngStyle]="{
+            'font-size': '0.95rem',
+            'color': '#666',
+            'line-height': '1.6'
+          }">
+            {{ feature.description }}
+          </p>
+        </div>
+      }
+    </div>
+
+    <!-- CTA Section -->
+    <div [ngStyle]="{
+      'background': 'white',
+      'border': '1px solid #f2f2f2',
+      'border-radius': '20px',
+      'padding': '3rem 2rem',
+      'text-align': 'center',
+      'box-shadow': '0 2px 8px rgba(0, 0, 0, 0.04)'
+    }">
+      <h2 [ngStyle]="{
+        'font-size': '1.875rem',
+        'font-weight': '700',
+        'color': '#131613',
+        'margin-bottom': '1rem'
+      }">
+        ¿Listo para comenzar?
+      </h2>
+      <p [ngStyle]="{
+        'font-size': '1rem',
+        'color': '#666',
+        'margin-bottom': '2rem',
+        'max-width': '500px',
+        'margin-left': 'auto',
+        'margin-right': 'auto'
+      }">
+        Únete a las empresas agrícolas que ya optimizan su gestión de personal con AgroPay
+      </p>
+      <button
+        (click)="login()"
+        [ngStyle]="{
+        'background': '#4faf5a',
+        'color': 'white',
+        'border': 'none',
+        'border-radius': '12px',
+        'padding': '14px 32px',
+        'font-size': '1rem',
+        'font-weight': '600',
+        'cursor': 'pointer',
+        'transition': 'all 0.2s ease',
+        'box-shadow': '0 4px 12px rgba(79, 175, 90, 0.3)'
+      }">
+        Comenzar ahora
+        <i class="pi pi-arrow-right" [ngStyle]="{
+          'margin-left': '0.5rem'
+        }"></i>
+      </button>
+    </div>
+
+  </div>
+</section>

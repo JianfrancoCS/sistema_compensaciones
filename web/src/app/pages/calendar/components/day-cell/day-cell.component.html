@@ -1,0 +1,34 @@
+<div
+  class="relative flex flex-col h-full min-h-[100px] p-3 border rounded-lg transition-all duration-200"
+  [ngClass]="{
+    'bg-gradient-to-br from-red-50 to-red-100/80 border-red-300 hover:border-red-400 hover:shadow-md': day && !day.isWorkingDay && !day.isOutsideMonth,
+    'bg-white border-gray-200 hover:border-gray-300 hover:shadow-md': day && day.isWorkingDay && !day.isOutsideMonth,
+    'bg-gray-50/50 border-gray-100 cursor-not-allowed': day && day.isOutsideMonth,
+    'cursor-pointer': day && !day.isOutsideMonth
+  }"
+  (click)="onDayClick()">
+
+  @if (day) {
+    <div class="flex items-center justify-between mb-2">
+      <span
+        class="text-xl font-bold"
+        [ngClass]="{
+          'text-gray-300': day.isOutsideMonth,
+          'text-red-700': !day.isWorkingDay && !day.isOutsideMonth,
+          'text-gray-800': day.isWorkingDay && !day.isOutsideMonth
+        }">
+        {{ dayNumber }}
+      </span>
+
+      @if (!day.isWorkingDay && !day.isOutsideMonth) {
+        <i class="pi pi-ban text-red-500 text-sm"></i>
+      }
+    </div>
+
+    @if (day.eventCount > 0 && !day.isOutsideMonth) {
+      <div class="absolute bottom-2 right-2 flex items-center justify-center w-6 h-6 bg-blue-500 rounded-full text-white text-xs font-bold shadow-md">
+        {{ day.eventCount }}
+      </div>
+    }
+  }
+</div>

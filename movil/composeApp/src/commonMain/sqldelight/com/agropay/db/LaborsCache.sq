@@ -1,0 +1,49 @@
+import kotlin.Boolean;
+
+-- =============================================
+-- Tabla: Cache de Labores (CACHE - SOLO LECTURA)
+-- Datos precargados desde: GET /v1/assignment/labors/sync
+-- El API retorna solo las labores activas
+-- =============================================
+
+CREATE TABLE labors_cache (
+    id TEXT PRIMARY KEY NOT NULL, -- publicId del servidor
+    name TEXT NOT NULL,
+    description TEXT,
+    is_piecework INTEGER AS Boolean NOT NULL DEFAULT 0,
+    labor_unit_name TEXT,
+    min_task_requirement REAL,
+    base_price REAL,
+    cached_at INTEGER NOT NULL
+);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+insertOrReplace:
+INSERT OR REPLACE INTO labors_cache(
+    id, name, description, is_piecework,
+    labor_unit_name, min_task_requirement, base_price, cached_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Obtener todas las labores (el API ya filtra activas)
+getAll:
+SELECT * FROM labors_cache ORDER BY name;
+
+-- Obtener solo labores por destajo
+getPieceworkLabors:
+SELECT * FROM labors_cache WHERE is_piecework = 1 ORDER BY name;
+
+-- Buscar por ID
+getById:
+SELECT * FROM labors_cache WHERE id = ?;
+
+-- Limpiar cache antiguo
+deleteOlderThan:
+DELETE FROM labors_cache WHERE cached_at < ?;
+
+-- Contar labores en cache
+countCached:
+SELECT COUNT(*) FROM labors_cache;

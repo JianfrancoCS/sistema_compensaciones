@@ -1,0 +1,32 @@
+import kotlin.Boolean;
+
+-- =============================================
+-- Tabla: Cache de QR Rolls (SOLO LECTURA)
+-- Se carga desde: GET /v1/tareos/{tareoPublicId}/employees/sync
+-- Contiene los rollos de QR codes asignados a empleados
+-- =============================================
+
+CREATE TABLE qr_rolls_cache (
+    id TEXT PRIMARY KEY NOT NULL, -- UUID del roll
+    max_qr_codes_per_day INTEGER,
+    cached_at INTEGER NOT NULL
+);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+insertOrReplace:
+INSERT OR REPLACE INTO qr_rolls_cache(
+    id, max_qr_codes_per_day, cached_at
+)
+VALUES (?, ?, ?);
+
+getById:
+SELECT * FROM qr_rolls_cache WHERE id = ?;
+
+getAll:
+SELECT * FROM qr_rolls_cache;
+
+deleteOlderThan:
+DELETE FROM qr_rolls_cache WHERE cached_at < ?;

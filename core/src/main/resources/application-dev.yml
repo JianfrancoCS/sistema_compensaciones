@@ -1,0 +1,56 @@
+# Perfil de DESARROLLO
+# Para usar este perfil: SPRING_PROFILES_ACTIVE=dev o dejar por defecto
+
+server:
+  port: ${SERVER_PORT:10000}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=agropay;trustServerCertificate=true}
+    username: ${DB_USERNAME:agropay_user}
+    password: ${DB_PASSWORD:227480@AGROPAy2025}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+  security:
+    jwt:
+      secret: ${SPRING_SECURITY_JWT_SECRET:your-secret-key-must-be-at-least-32-characters-long-for-hmac-sha256-algorithm}
+      expiration: ${SPRING_SECURITY_JWT_EXPIRATION:3600000}
+      refresh-expiration: ${SPRING_SECURITY_JWT_REFRESH_EXPIRATION:604800000}
+
+external-services:
+  reniec:
+    peru-devs:
+      base-url: ${RENIEC_BASE_URL:https://api.perudevs.com/api}
+      api-key: ${PERU_DEVS_API_KEY:cGVydWRldnMucHJvZHVjdGlvbi5maXRjb2RlcnMuNjhiMGZlZWQ3NzAwMmUxM2U0NzI4YTI2}
+  sunat:
+    peru-devs:
+      base-url: ${SUNAT_BASE_URL:https://api.perudevs.com/api}
+      api-key: ${PERU_DEVS_API_KEY:cGVydWRldnMucHJvZHVjdGlvbi5maXRjb2RlcnMuNjhiMGZlZWQ3NzAwMmUxM2U0NzI4YTI2}
+  foreign-person:
+    verifica-id:
+      base-url: ${VERIFICA_ID_BASE_URL:https://api.verifica.id}
+      api-key: ${VERIFICA_ID_API_KEY:sk-EAmFeRAf8QBaP0ueTV3KTHe8R2bsSwigjlUR79pr51g==}
+
+cloudinary:
+  cloud_name: ${CLOUDINARY_CLOUD_NAME:dcg6envhf}
+  api_key: ${CLOUDINARY_API_KEY:323978785792211}
+  api_secret: ${CLOUDINARY_API_SECRET:fFSRAiQE86fVM5YVDpkFmRVfn_w}
+
+logging:
+  level:
+    root: INFO
+    com.agropay.core: DEBUG
+    com.agropay.core.payroll: DEBUG
+    com.agropay.core.payroll.batch: DEBUG
+    com.agropay.core.payroll.batch.reader: DEBUG
+    com.agropay.core.payroll.batch.processor: DEBUG
+    com.agropay.core.payroll.batch.writer: DEBUG
+    com.agropay.core.payroll.batch.tasklet: DEBUG
+    org.springframework.batch: INFO
+    org.springframework.batch.core: INFO
+    org.springframework.batch.core.step: DEBUG
+    org.springframework.transaction: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+

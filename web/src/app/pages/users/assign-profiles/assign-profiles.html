@@ -1,0 +1,72 @@
+<div class="p-4">
+  <p-toast></p-toast>
+
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-semibold text-gray-600">
+      Asignar Perfiles al Usuario: {{ username() }}
+    </h2>
+    @if (selectedProfilePublicIds().length > 0) {
+      <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+        {{ selectedProfilePublicIds().length }} seleccionado{{ selectedProfilePublicIds().length > 1 ? 's' : '' }}
+      </span>
+    }
+  </div>
+
+  @if (userStore.loadingProfilesForAssignment()) {
+    <div class="flex items-center justify-center h-32 text-gray-600">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i>
+      Cargando perfiles...
+    </div>
+  }
+
+  @if (!userStore.loadingProfilesForAssignment() && profiles.length > 0) {
+    <div>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-4 space-y-2">
+          @for (profile of profiles; track profile.publicId) {
+            <label
+              [for]="profile.publicId"
+              class="flex items-center p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer transition-all group"
+              [class.border-gray-400]="selectedProfilePublicIds().includes(profile.publicId)"
+              [class.bg-gray-100]="selectedProfilePublicIds().includes(profile.publicId)">
+              <p-checkbox
+                [inputId]="profile.publicId"
+                [value]="profile.publicId"
+                [(ngModel)]="selectedProfilePublicIds"
+                [binary]="false"
+              />
+              <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900 select-none flex-1">
+                {{ profile.name }}
+              </span>
+              @if (profile.description) {
+                <span class="text-xs text-gray-400 ml-2">{{ profile.description }}</span>
+              }
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center gap-2 pt-6 mt-6">
+        <div class="text-sm text-gray-600">
+          Selecciona los perfiles que deseas asignar a este usuario
+        </div>
+        <div class="flex gap-2">
+          <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary" (onClick)="cancel()"></p-button>
+          <p-button
+            label="Guardar Cambios"
+            icon="pi pi-check"
+            styleClass="p-button-primary"
+            (onClick)="saveAssignments()"
+            [loading]="userStore.loading()"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+  } @else if (!userStore.loadingProfilesForAssignment() && profiles.length === 0) {
+    <div class="text-center py-12">
+      <i class="pi pi-inbox text-4xl text-gray-400 mb-4"></i>
+      <p class="text-gray-500 text-lg">No hay perfiles disponibles para asignar.</p>
+    </div>
+  }
+</div>
+

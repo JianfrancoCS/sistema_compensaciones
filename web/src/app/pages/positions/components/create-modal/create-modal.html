@@ -1,0 +1,106 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Posición"
+  (onHide)="hideModal()"
+  (onSubmit)="createPosition()"
+  [isSubmitDisabled]="positionForm.invalid"
+>
+  <form [formGroup]="positionForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="name" class="font-semibold text-sm">Nombre</label>
+      <input pInputText id="name" formControlName="name" class="flex-auto text-sm" autocomplete="off" [invalid]="positionForm.get('name')?.invalid && (positionForm.get('name')?.dirty || positionForm.get('name')?.touched)" />
+      @if (positionForm.get('name')?.invalid && (positionForm.get('name')?.dirty || positionForm.get('name')?.touched)) {
+        @if (positionForm.get('name')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+        }
+        @if (positionForm.get('name')?.errors?.['minlength']) {
+          <p-message severity="error" variant="simple" size="small">El nombre debe tener al menos 3 caracteres.</p-message>
+        }
+        @if (positionForm.get('name')?.errors?.['pattern']) {
+          <p-message severity="error" variant="simple" size="small">El nombre solo puede contener letras y espacios.</p-message>
+        }
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="area" class="font-semibold text-sm">Área</label>
+      <p-select
+        id="area"
+        formControlName="areaPublicId"
+        [options]="areaOptions()"
+        optionLabel="name"
+        optionValue="publicId"
+        placeholder="Selecciona un área"
+        emptyFilterMessage="No se encontraron areas disponibles"
+        class="w-full"
+        appendTo="body"
+        [invalid]="positionForm.get('areaPublicId')?.invalid && positionForm.get('areaPublicId')?.touched"
+      ></p-select>
+      @if (positionForm.get('areaPublicId')?.invalid && positionForm.get('areaPublicId')?.touched) {
+        <p-message severity="error" variant="simple" size="small">El área es requerida.</p-message>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="salary" class="font-semibold text-sm">Salario por Defecto</label>
+      <input 
+        pInputText 
+        id="salary" 
+        type="number" 
+        formControlName="salary" 
+        class="flex-auto text-sm" 
+        autocomplete="off" 
+        placeholder="0.00"
+        step="0.01"
+        min="0.01"
+        [invalid]="positionForm.get('salary')?.invalid && (positionForm.get('salary')?.dirty || positionForm.get('salary')?.touched)" 
+      />
+      @if (positionForm.get('salary')?.invalid && (positionForm.get('salary')?.dirty || positionForm.get('salary')?.touched)) {
+        @if (positionForm.get('salary')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El salario es requerido.</p-message>
+        }
+        @if (positionForm.get('salary')?.errors?.['min']) {
+          <p-message severity="error" variant="simple" size="small">El salario debe ser mayor a 0.</p-message>
+        }
+      }
+    </div>
+
+    <div class="flex items-center gap-2 mb-4">
+      <p-checkbox formControlName="requiresManager" [binary]="true" inputId="requiresManager"></p-checkbox>
+      <label for="requiresManager" class="text-sm">Requiere jefe directo</label>
+    </div>
+
+    @if (positionForm.get('requiresManager')?.value) {
+      <div class="flex items-center gap-2 mb-4">
+        <p-checkbox [(ngModel)]="filterByArea" [ngModelOptions]="{standalone: true}" [binary]="true" inputId="filterByAreaCreate" (onChange)="onFilterByAreaChange()"></p-checkbox>
+        <label for="filterByArea" class="text-sm">Solo mostrar cargos de esta área</label>
+      </div>
+
+      <div class="flex flex-col gap-4 mb-4">
+        <label for="managerPosition" class="font-semibold text-sm">Cargo de jefe directo</label>
+        <p-select
+          id="managerPosition"
+          formControlName="requiredManagerPositionPublicId"
+          [options]="managerPositionOptions()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Selecciona una posición de gerente"
+          [filter]="true"
+          filterBy="name"
+          emptyFilterMessage="No se encontraron cargos disponibles"
+          class="w-full"
+          appendTo="body"
+          [invalid]="positionForm.get('requiredManagerPositionPublicId')?.invalid && positionForm.get('requiredManagerPositionPublicId')?.touched"
+        ></p-select>
+        @if (positionForm.get('requiredManagerPositionPublicId')?.invalid && positionForm.get('requiredManagerPositionPublicId')?.touched) {
+          <p-message severity="error" variant="simple" size="small">El cargo del jefe directo es requerido.</p-message>
+        }
+      </div>
+    }
+
+    <div class="flex items-center gap-2 mb-4">
+      <p-checkbox formControlName="unique" [binary]="true" inputId="unique"></p-checkbox>
+      <label for="unique" class="text-sm">Personal único</label>
+    </div>
+  </form>
+</app-modal-template>

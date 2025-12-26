@@ -1,0 +1,243 @@
+<div class="flex h-full flex-col">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-lg font-medium">Gestión de Rollos QR</h1>
+    <div class="flex items-center gap-4">
+      <!-- Filter and Sort Controls -->
+      <div class="flex items-center gap-2">
+        <p-selectButton
+          [options]="filterOptions"
+          [(ngModel)]="selectedFilterValue"
+          (onChange)="onFilterChange($event)"
+          optionLabel="label"
+          optionValue="value">
+        </p-selectButton>
+
+        <p-select
+          [options]="sortOptions"
+          [(ngModel)]="selectedSort"
+          (onChange)="onSortChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Ordenar por fecha">
+        </p-select>
+      </div>
+
+      <div class="flex gap-2">
+        <p-button
+          type="button"
+          label="Crear Rollo"
+          icon="pi pi-file"
+          (click)="store.openCreateModal()"
+        ></p-button>
+        <p-button
+          type="button"
+          label="Generar Lote"
+          icon="pi pi-copy"
+          severity="success"
+          (click)="showBatchGenerateModal()"
+        ></p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card flex flex-col flex-1 overflow-hidden">
+    <!-- Grid con overflow -->
+    <div class="flex-1 overflow-auto">
+      <!-- Loading State with Skeletons -->
+      @if (store.loading() && store.qrRolls().length === 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+          @for (item of [1,2,3,4,5,6,7,8]; track item) {
+            <p-card>
+              <ng-template pTemplate="header">
+                <div class="flex justify-center p-4">
+                  <p-skeleton width="8rem" height="8rem" />
+                </div>
+              </ng-template>
+
+              <div class="flex flex-col gap-2">
+                <p-skeleton width="100%" height="1.5rem" />
+                <p-skeleton width="100%" height="1.5rem" />
+                <p-skeleton width="100%" height="1.5rem" />
+                <p-skeleton width="100%" height="1.5rem" />
+              </div>
+
+              <ng-template pTemplate="footer">
+                <div class="flex gap-2 justify-end">
+                  <p-skeleton width="2rem" height="2rem" />
+                  <p-skeleton width="2rem" height="2rem" />
+                  <p-skeleton width="2rem" height="2rem" />
+                </div>
+              </ng-template>
+            </p-card>
+          }
+        </div>
+      } @else if (store.isEmpty()) {
+        <div class="flex justify-center items-center h-full">
+          <p class="text-gray-500">No se encontraron rollos QR con los filtros seleccionados.</p>
+        </div>
+      } @else {
+        <!-- Grid de Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+          @for (qrRoll of store.qrRolls(); track qrRoll.publicId) {
+            <p-card styleClass="relative">
+              <ng-template pTemplate="header">
+                <div class="flex justify-center p-4">
+                  <img
+                    src="/images/qr_rollo.png"
+                    alt="QR Roll"
+                    class="w-32 h-32 object-contain"
+                  />
+                </div>
+              </ng-template>
+
+              <div class="flex flex-col gap-3 text-sm">
+                <div class="flex justify-between">
+                  <span class="font-semibold">Total códigos:</span>
+                  <span>{{ qrRoll.totalQrCodes }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-semibold">Sin imprimir:</span>
+                  <span class="font-bold" [class.text-orange-600]="qrRoll.unprintedQrCodes > 0">
+                    {{ qrRoll.unprintedQrCodes }}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-semibold">Máx. por día:</span>
+                  <span>{{ qrRoll.maxQrCodesPerDay }}</span>
+                </div>
+                <div class="flex gap-2">
+                  <app-date-display [date]="qrRoll.createdAt" type="created" variant="full" size="sm" />
+                  <app-date-display [date]="qrRoll.updatedAt" type="updated" variant="full" size="sm" />
+                </div>
+              </div>
+
+              <ng-template pTemplate="footer">
+                <div class="flex gap-2 justify-end">
+                  @if (qrRoll.unprintedQrCodes > 0) {
+                    <p-button
+                      pTooltip="Imprimir {{ qrRoll.unprintedQrCodes }} código(s) QR"
+                      tooltipPosition="top"
+                      icon="pi pi-print"
+                      styleClass="p-button-warning"
+                      size="small"
+                      (click)="store.confirmPrint(qrRoll)">
+                    </p-button>
+                  }
+                  <p-button
+                    pTooltip="Editar Rollo"
+                    tooltipPosition="top"
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    (click)="store.openEditModal(qrRoll)"
+                  ></p-button>
+                  <p-button
+                    pTooltip="Ver Códigos"
+                    tooltipPosition="top"
+                    icon="pi pi-eye"
+                    severity="info"
+                    size="small"
+                    (click)="viewQrCodes(qrRoll)"
+                  ></p-button>
+                  <p-button
+                    pTooltip="Eliminar Rollo"
+                    tooltipPosition="top"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    (click)="store.confirmDelete(qrRoll)"
+                  ></p-button>
+                </div>
+              </ng-template>
+
+              <!-- New button for generating codes -->
+              <button
+                pButton
+                type="button"
+                icon="pi pi-plus"
+                class="p-button-rounded p-button-success p-button-sm"
+                style="position: absolute; top: 0.5rem; right: 0.5rem;"
+                pTooltip="Generar Códigos QR"
+                tooltipPosition="left"
+                (click)="showGenerateCodesModal(qrRoll.publicId)"
+              ></button>
+            </p-card>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Paginación abajo -->
+    @if(!store.isEmpty()){
+      <div class="flex justify-center p-4">
+        <p-paginator
+          [rows]="store.filters().size"
+          [totalRecords]="store.totalElements()"
+          [rowsPerPageOptions]="[10, 20, 50]"
+          (onPageChange)="onPageChange($event)"
+          [first]="store.filters().page! * store.filters().size!"
+        ></p-paginator>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Create QrRoll Modal -->
+<p-dialog
+  header="Crear Nuevo Rollo QR"
+  [visible]="store.isCreateModalVisible()"
+  [modal]="true"
+  [style]="{ width: '25rem' }"
+  (onHide)="store.closeCreateModal()"
+>
+  <form #createForm="ngForm" (ngSubmit)="create(createForm.value); createForm.reset()">
+    <div class="flex flex-col gap-3 p-fluid">
+      <label for="maxQrCodesPerDay" class="font-semibold">Máximo de Códigos por Día</label>
+      <p-inputNumber
+        inputId="maxQrCodesPerDay"
+        name="maxQrCodesPerDay"
+        [(ngModel)]="maxQrCodesPerDay"
+        [min]="1"
+        [showButtons]="true"
+        required
+      ></p-inputNumber>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        (click)="store.closeCreateModal()"
+      ></p-button>
+      <p-button
+        label="Guardar"
+        type="submit"
+        [disabled]="createForm.invalid || store.loading()"
+        [loading]="store.loading()"
+      ></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Edit QrRoll Modal -->
+<app-edit-qr-roll-modal
+  [visible]="store.isEditModalVisible()"
+  [qrRoll]="store.selectedQrRoll()"
+  (onHide)="store.closeEditModal()"
+></app-edit-qr-roll-modal>
+
+<app-batch-generate-modal
+  [visible]="batchGenerateModalVisible()"
+  (onHide)="hideBatchGenerateModal()"
+></app-batch-generate-modal>
+
+<!-- New Generate Codes Modal -->
+<app-qr-generate-codes-modal
+  [visible]="generateCodesModalVisible()"
+  [rollPublicId]="selectedRollForCodeGeneration()"
+  (onHide)="hideGenerateCodesModal()"
+></app-qr-generate-codes-modal>

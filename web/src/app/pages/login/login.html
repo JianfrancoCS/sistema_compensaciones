@@ -1,0 +1,53 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="/images/logo.svg" alt="AgroPay" class="logo" />
+      <h1>AgroPay</h1>
+      <p class="subtitle">Inicia sesión en tu cuenta</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="username">Número de documento</label>
+        <input
+          id="username"
+          type="text"
+          pInputText
+          formControlName="username"
+          placeholder="Ingresa tu número de documento"
+          [class.ng-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+        />
+        @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+          <small class="error-text">El número de documento es requerido</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <p-password
+          id="password"
+          formControlName="password"
+          placeholder="Ingresa tu contraseña"
+          [feedback]="false"
+          [toggleMask]="true"
+          styleClass="w-full"
+          [class.ng-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <small class="error-text">La contraseña es requerida</small>
+        }
+      </div>
+
+      <p-button
+        type="submit"
+        label="Iniciar Sesión"
+        [loading]="loading"
+        [disabled]="loginForm.invalid"
+        styleClass="w-full login-button"
+      />
+    </form>
+  </div>
+</div>
+
+<p-toast />
+

@@ -1,0 +1,308 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestión de Personas Extranjeras</h1>
+      <p class="text-gray-600">Buscar, crear y actualizar información de personas extranjeras (CE)</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Buscar Persona</h2>
+
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="flex gap-4 items-end">
+        <div class="flex-1">
+          <p-floatlabel variant="in">
+            <input
+              pInputText
+              id="searchDocument"
+              formControlName="documentNumber"
+              autocomplete="off"
+              [class.ng-invalid]="searchForm.get('documentNumber')?.invalid && searchForm.get('documentNumber')?.touched"
+            />
+            <label for="searchDocument">Número de Carnet de Extranjería (9 dígitos)</label>
+          </p-floatlabel>
+          @if (searchForm.get('documentNumber')?.invalid && searchForm.get('documentNumber')?.touched) {
+            <small class="text-red-500 mt-1 block">Ingrese un CE válido de 9 dígitos</small>
+          }
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Buscar"
+          icon="pi pi-search"
+          class="p-button-primary"
+          [disabled]="searchForm.invalid || loading()"
+          [loading]="loading()"
+        ></button>
+
+        @if (searchPerformed()) {
+          <button
+            pButton
+            type="button"
+            label="Nueva Búsqueda"
+            icon="pi pi-plus"
+            class="p-button-secondary"
+            (click)="onNewSearch()"
+          ></button>
+        }
+      </form>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6">
+        <p-toast></p-toast>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <div class="flex justify-center">
+          <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+        </div>
+        <p class="mt-4 text-gray-600">Buscando persona...</p>
+      </div>
+    }
+
+    <!-- Person Found -->
+    @if (currentPerson() && !isEditing()) {
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Información de la Persona</h2>
+          <button
+            pButton
+            type="button"
+            label="Editar"
+            icon="pi pi-pencil"
+            class="p-button-warning"
+            (click)="onEdit()"
+          ></button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Documento</label>
+            <p class="text-gray-900">{{ currentPerson()?.documentNumber }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+            <p class="text-gray-900">{{ currentPerson()?.names }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellido Paterno</label>
+            <p class="text-gray-900">{{ currentPerson()?.paternalLastname }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellido Materno</label>
+            <p class="text-gray-900">{{ currentPerson()?.maternalLastname }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Person Not Found - Create Form -->
+    @if (isEmpty()) {
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Persona No Encontrada - Crear Nueva</h2>
+        <p class="text-gray-600 mb-6">La persona con CE {{ searchDocument() }} no existe. Complete los datos para crearla:</p>
+
+        <form [formGroup]="personForm" (ngSubmit)="onSave()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Número de Documento -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="documentNumber"
+                  formControlName="documentNumber"
+                  autocomplete="off"
+                  [disabled]="true"
+                />
+                <label for="documentNumber">Carnet de Extranjería</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Nombres -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="names"
+                  formControlName="names"
+                  autocomplete="off"
+                />
+                <label for="names">Nombres *</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Apellido Paterno -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="paternalLastname"
+                  formControlName="paternalLastname"
+                  autocomplete="off"
+                />
+                <label for="paternalLastname">Apellido Paterno *</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Apellido Materno -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="maternalLastname"
+                  formControlName="maternalLastname"
+                  autocomplete="off"
+                />
+                <label for="maternalLastname">Apellido Materno *</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Fecha de Nacimiento -->
+            <div>
+              <p-datepicker
+                formControlName="dateOfBirth"
+                placeholder="Seleccione fecha de nacimiento"
+                class="w-full"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                [maxDate]="maxDate"
+              ></p-datepicker>
+            </div>
+
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+            <button
+              pButton
+              type="submit"
+              label="Crear Persona"
+              icon="pi pi-save"
+              class="p-button-success"
+              [disabled]="personForm.invalid || loading()"
+              [loading]="loading()"
+            ></button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Edit Form -->
+    @if (currentPerson() && isEditing()) {
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Editar Persona</h2>
+
+        <form [formGroup]="personForm" (ngSubmit)="onSave()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Tipo de Documento -->
+            <div>
+              <p-select
+                formControlName="documentTypePublicId"
+                [options]="documentTypes()"
+                optionLabel="name"
+                optionValue="publicId"
+                placeholder="Seleccione tipo de documento"
+                class="w-full"
+                [disabled]="true"
+              ></p-select>
+            </div>
+
+            <!-- Número de Documento -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="editDocumentNumber"
+                  formControlName="documentNumber"
+                  autocomplete="off"
+                  [disabled]="true"
+                />
+                <label for="editDocumentNumber">Número de Documento</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Nombres -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="editNames"
+                  formControlName="names"
+                  autocomplete="off"
+                />
+                <label for="editNames">Nombres *</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Apellido Paterno -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="editPaternalLastname"
+                  formControlName="paternalLastname"
+                  autocomplete="off"
+                />
+                <label for="editPaternalLastname">Apellido Paterno *</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Apellido Materno -->
+            <div>
+              <p-floatlabel variant="in">
+                <input
+                  pInputText
+                  id="editMaternalLastname"
+                  formControlName="maternalLastname"
+                  autocomplete="off"
+                />
+                <label for="editMaternalLastname">Apellido Materno *</label>
+              </p-floatlabel>
+            </div>
+
+            <!-- Fecha de Nacimiento -->
+            <div>
+              <p-datepicker
+                formControlName="dateOfBirth"
+                placeholder="Seleccione fecha de nacimiento"
+                class="w-full"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                [maxDate]="maxDate"
+              ></p-datepicker>
+            </div>
+
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+            <button
+              pButton
+              type="button"
+              label="Cancelar"
+              icon="pi pi-times"
+              class="p-button-secondary"
+              (click)="onCancel()"
+            ></button>
+            <button
+              pButton
+              type="submit"
+              label="Guardar Cambios"
+              icon="pi pi-save"
+              class="p-button-success"
+              [disabled]="personForm.invalid || loading()"
+              [loading]="loading()"
+            ></button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>
+</div>

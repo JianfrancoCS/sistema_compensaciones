@@ -1,0 +1,26 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Vista Previa del Contrato"
+  [showSubmitButton]="false"
+  width="90vw"
+  (onHide)="hideModal()">
+
+  <div class="flex flex-col" style="height: 80vh;">
+    @if (loading()) {
+      <div class="flex items-center justify-center p-8">
+        <i class="pi pi-spin pi-spinner text-blue-500 text-2xl mr-3"></i>
+        <span>Cargando contrato...</span>
+      </div>
+    } @else {
+      @if (pdfPreviewUrl()) {
+        <iframe [src]="pdfPreviewUrl()" class="w-full h-full border-none"></iframe>
+      } @else {
+        <div class="flex flex-col items-center justify-center bg-gray-50 p-8 h-full">
+          <i class="pi pi-file-pdf text-gray-400 text-6xl mb-4"></i>
+          <p class="text-gray-600 text-lg">No se pudo cargar la vista previa del contrato</p>
+        </div>
+      }
+    }
+  </div>
+
+</app-modal-template>

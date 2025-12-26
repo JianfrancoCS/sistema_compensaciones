@@ -1,0 +1,240 @@
+<div class="p-6">
+  <p-toast></p-toast>
+
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Mi Perfil</h1>
+    <p class="text-gray-600 mt-2">Gestiona tu información personal y configuración de cuenta</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center py-12">
+      <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
+    </div>
+  } @else if (userInfo()) {
+    @let info = userInfo()!;
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <!-- Columna Izquierda (1/4) -->
+      <div class="lg:col-span-1">
+        <p-card>
+          <div class="flex flex-col items-center text-center">
+            <!-- Avatar/Foto con fallback -->
+            <div class="mb-4">
+              @if (info.photoUrl) {
+                <img [src]="info.photoUrl" 
+                     [alt]="fullName"
+                     class="w-[150px] h-[150px] rounded-full object-cover border-4 border-white shadow-lg" />
+              } @else {
+                <p-avatar
+                  [label]="getInitials()"
+                  [style]="{'width': '150px', 'height': '150px', 'font-size': '3.5rem'}"
+                  styleClass="bg-gradient-to-br from-blue-500 to-purple-600 text-white border-4 border-white shadow-lg">
+                </p-avatar>
+              }
+            </div>
+            
+            <!-- Nombre Completo (Nombres + Apellidos) -->
+            <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">{{ fullName }}</h2>
+            
+            <!-- Cargo -->
+            @if (info.positionName) {
+              <p class="text-gray-600 text-base mb-6 text-center">{{ info.positionName }}</p>
+            }
+            
+            <!-- Título: Acciones Rápidas -->
+            <div class="w-full mb-3">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase text-left">Acciones Rápidas</h3>
+            </div>
+            
+            <!-- Botones de Acciones Rápidas -->
+            <div class="w-full space-y-2">
+              <p-button
+                type="button"
+                label="Cambiar Contraseña"
+                icon="pi pi-key"
+                styleClass="w-full"
+                (click)="goToChangePassword()">
+              </p-button>
+              
+              <!-- Aquí puedes agregar más botones de acciones rápidas -->
+              <!-- Ejemplo:
+              <p-button
+                type="button"
+                label="Editar Perfil"
+                icon="pi pi-pencil"
+                styleClass="w-full"
+                severity="secondary"
+                [outlined]="true">
+              </p-button>
+              -->
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Columna Derecha (3/4) -->
+      <div class="lg:col-span-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Card: Cargo -->
+          @if (info.positionName) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-briefcase text-2xl text-blue-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Cargo</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">{{ info.positionName }}</p>
+            </p-card>
+          }
+
+          <!-- Card: Sueldo -->
+          @if (info.customSalary || info.positionSalary) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-money-bill text-2xl text-green-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Sueldo</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">
+                @if (info.customSalary) {
+                  S/ {{ info.customSalary | number:'1.2-2' }}
+                } @else if (info.positionSalary) {
+                  S/ {{ info.positionSalary | number:'1.2-2' }}
+                }
+              </p>
+            </p-card>
+          }
+
+          <!-- Card: AFP/ONP -->
+          @if (info.afpAffiliationNumber || info.retirementConceptName) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-id-card text-2xl text-purple-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Sistema de Pensiones</h3>
+              </div>
+              <div class="space-y-1">
+                @if (info.retirementConceptName) {
+                  <p class="text-base font-semibold text-gray-800">{{ info.retirementConceptName }}</p>
+                }
+                @if (info.afpAffiliationNumber) {
+                  <p class="text-sm text-gray-600">{{ info.afpAffiliationNumber }}</p>
+                }
+              </div>
+            </p-card>
+          }
+
+          <!-- Card: Fecha de Nacimiento -->
+          @if (info.dateOfBirth) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-calendar text-2xl text-orange-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Fecha de Nacimiento</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">{{ info.dateOfBirth | date:'dd/MM/yyyy' }}</p>
+              @if (getAge()) {
+                <p class="text-sm text-gray-600 mt-1">Edad: {{ getAge() }} años</p>
+              }
+            </p-card>
+          }
+
+          <!-- Card: Sexo/Género -->
+          @if (info.gender) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-user text-2xl text-pink-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Sexo</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">
+                {{ info.gender === 'M' ? 'Masculino' : info.gender === 'F' ? 'Femenino' : info.gender }}
+              </p>
+            </p-card>
+          }
+
+          <!-- Card: Nacionalidad -->
+          @if (info.isForeign !== undefined || info.nationality) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-globe text-2xl text-indigo-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Nacionalidad</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">
+                @if (info.isForeign === false || !info.isForeign) {
+                  Nacional
+                } @else if (info.isForeign === true) {
+                  Extranjero
+                } @else if (info.nationality) {
+                  {{ info.nationality }}
+                } @else {
+                  Nacional
+                }
+              </p>
+            </p-card>
+          }
+
+          <!-- Card: Número de Documento -->
+          <p-card>
+            <div class="flex items-center gap-3 mb-2">
+              <i class="pi pi-file text-2xl text-gray-500"></i>
+              <h3 class="text-sm font-semibold text-gray-500 uppercase">Número de Documento</h3>
+            </div>
+            <p class="text-lg font-semibold text-gray-800">{{ info.documentNumber }}</p>
+          </p-card>
+
+          <!-- Card: Subsidiaria/Fundo -->
+          @if (info.subsidiaryName) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-building text-2xl text-teal-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Subsidiaria/Fundo</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">{{ info.subsidiaryName }}</p>
+            </p-card>
+          }
+
+          <!-- Card: Código de Empleado -->
+          @if (info.code) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-hashtag text-2xl text-cyan-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Código de Empleado</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">{{ info.code }}</p>
+            </p-card>
+          }
+
+          <!-- Card: Cuenta Bancaria -->
+          @if (info.bankAccountNumber) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-credit-card text-2xl text-emerald-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Cuenta Bancaria</h3>
+              </div>
+              <div class="space-y-1">
+                <p class="text-base font-semibold text-gray-800">{{ info.bankAccountNumber }}</p>
+                @if (info.bankName) {
+                  <p class="text-sm text-gray-600">{{ info.bankName }}</p>
+                }
+              </div>
+            </p-card>
+          }
+
+          <!-- Card: Fecha de Ingreso -->
+          @if (info.hireDate) {
+            <p-card>
+              <div class="flex items-center gap-3 mb-2">
+                <i class="pi pi-calendar-plus text-2xl text-amber-500"></i>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Fecha de Ingreso</h3>
+              </div>
+              <p class="text-lg font-semibold text-gray-800">{{ info.hireDate | date:'dd/MM/yyyy' }}</p>
+            </p-card>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <p class="text-yellow-800 text-sm">
+        <i class="pi pi-exclamation-triangle mr-2"></i>
+        Este usuario no tiene un empleado asociado. No hay información personal disponible.
+      </p>
+    </div>
+  }
+</div>

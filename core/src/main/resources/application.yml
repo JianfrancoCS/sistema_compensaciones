@@ -1,0 +1,77 @@
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev} # Por defecto usa 'dev'
+  flyway:
+    default-schema: app
+    schemas:
+      - app
+    table: flyway_schema_history
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+  batch:
+    jdbc:
+      initialize-schema: never
+      table-prefix: app.BATCH_
+    job:
+      enabled: false
+logging:
+  level:
+    org.springframework.batch: INFO
+    com.agropay.core.payroll: INFO
+  messages:
+    basename: i18n/exceptions
+    encoding: UTF-8
+  application:
+    name: core
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-secret-key-must-be-at-least-32-characters-long-for-hmac-sha256-algorithm}
+      expiration: ${JWT_EXPIRATION:3600000} # 1 hora en milisegundos (access token)
+      refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 días en milisegundos (refresh token)
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  info:
+    title: AGROPAY-CORE API
+    version: 0.0.1-SNAPSHOT
+    description: API for Agropay Core services
+  swagger-ui:
+    path: /swagger-ui.html
+
+springwolf:
+  enabled: true
+  docket:
+    base-package: com.agropay.core.attendance
+    default-content-type: application/json
+    info:
+      title: ${spring.application.name} WebSocket API
+      version: 1.0.0
+      description: Real-time attendance tracking WebSocket API using STOMP protocol
+      contact:
+        name: Agropay Team
+        email: agropay@example.com
+    servers:
+      websocket-server:
+        protocol: ws
+        host: localhost:8080
+        description: WebSocket server for real-time attendance updates (STOMP over WebSocket)
+  plugin:
+    stomp:
+      scanner:
+        stomp-message-mapping:
+          enabled: true
+        stomp-send-to:
+          enabled: true
+        stomp-send-to-user:
+          enabled: true

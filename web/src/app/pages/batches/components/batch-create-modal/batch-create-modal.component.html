@@ -1,0 +1,78 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Lote"
+  (onHide)="onModalHide()"
+  (onSubmit)="onSubmit()"
+  [isSubmitDisabled]="batchForm.invalid"
+>
+  <form [formGroup]="batchForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="name" class="font-semibold text-sm">Nombre</label>
+      <input pInputText id="name" formControlName="name" class="flex-auto text-sm" autocomplete="off" placeholder="Ej: Lote 1" [invalid]="batchForm.get('name')?.invalid && (batchForm.get('name')?.dirty || batchForm.get('name')?.touched)" />
+      @if (batchForm.get('name')?.invalid && (batchForm.get('name')?.dirty || batchForm.get('name')?.touched)) {
+        @if (batchForm.get('name')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+        }
+        @if (batchForm.get('name')?.errors?.['pattern']) {
+          <p-message severity="error" variant="simple" size="small">El nombre solo debe contener letras y espacios.</p-message>
+        }
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="hectareage" class="font-semibold text-sm">Hectáreas</label>
+      <p-inputNumber
+        id="hectareage"
+        formControlName="hectareage"
+        mode="decimal"
+        [min]="0"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="5"
+        [invalid]="batchForm.get('hectareage')?.invalid && (batchForm.get('hectareage')?.dirty || batchForm.get('hectareage')?.touched)"
+      ></p-inputNumber>
+      @if (batchForm.get('hectareage')?.invalid && (batchForm.get('hectareage')?.dirty || batchForm.get('hectareage')?.touched)) {
+        @if (batchForm.get('hectareage')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">Las hectáreas son requeridas.</p-message>
+        }
+        @if (batchForm.get('hectareage')?.errors?.['min']) {
+          <p-message severity="error" variant="simple" size="small">Las hectáreas deben ser un número positivo.</p-message>
+        }
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 mb-4">
+      <label for="subsidiary" class="font-semibold text-sm">Sucursal</label>
+      <p-select
+        id="subsidiary"
+        formControlName="subsidiaryPublicId"
+        [options]="store.subsidiarySelectOptions()"
+        optionLabel="name"
+        optionValue="publicId"
+        placeholder="Seleccione una sucursal"
+        [invalid]="batchForm.get('subsidiaryPublicId')?.invalid && (batchForm.get('subsidiaryPublicId')?.dirty || batchForm.get('subsidiaryPublicId')?.touched)"
+        appendTo="body"
+        [filter]="true"
+        filterBy="name"
+        [showClear]="true"
+        class="w-full"
+        emptyMessage="No se encontraron sucursales."
+      >
+        <ng-template #selectedItem let-selectedOption>
+          <div class="flex items-center gap-2">
+            <div>{{ selectedOption.name }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-subsidiary #item>
+          <div class="flex items-center gap-2">
+            <div>{{ subsidiary.name }}</div>
+          </div>
+        </ng-template>
+      </p-select>
+      @if (batchForm.get('subsidiaryPublicId')?.invalid && (batchForm.get('subsidiaryPublicId')?.dirty || batchForm.get('subsidiaryPublicId')?.touched)) {
+        @if (batchForm.get('subsidiaryPublicId')?.errors?.['required']) {
+          <p-message severity="error" variant="simple" size="small">La sucursal es requerida.</p-message>
+        }
+      }
+    </div>
+  </form>
+</app-modal-template>

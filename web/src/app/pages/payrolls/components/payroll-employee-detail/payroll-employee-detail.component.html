@@ -1,0 +1,257 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-800">Detalle de Empleado</h1>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-arrow-left"
+      label="Volver"
+      class="p-button-outlined"
+      (click)="goBack()">
+    </button>
+  </div>
+
+  @if (payrollStore.isLoadingEmployeeDetail()) {
+    <div class="text-center py-12">
+      <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-12 h-12"></p-progressSpinner>
+      <p class="text-gray-500 mt-4">Cargando detalle del empleado...</p>
+    </div>
+  } @else if (payrollStore.selectedEmployee()) {
+    @let emp = payrollStore.selectedEmployee()!;
+    
+    <div class="grid grid-cols-4 gap-6">
+      <!-- Columna Izquierda (1/4) - Resumen del Empleado -->
+      <div class="col-span-1">
+        <div class="bg-white rounded-lg shadow p-4 sticky top-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ emp.employeeFullName }}</h2>
+          
+          <!-- Información del Empleado -->
+          <div class="space-y-3 mb-6">
+            <div>
+              <label class="text-xs font-medium text-gray-500">DNI</label>
+              <p class="text-sm font-semibold text-gray-800">{{ emp.employeeDocumentNumber }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500">Cargo</label>
+              <p class="text-sm font-semibold text-gray-800">{{ emp.positionName }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500">Días Laborados</label>
+              <p class="text-sm font-semibold text-gray-800">{{ emp.daysWorked }} días</p>
+            </div>
+          </div>
+
+          <!-- Resumen Financiero - Más compacto -->
+          <div class="border-t pt-3 mt-3">
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <p class="text-gray-500">Ingresos</p>
+                <p class="font-semibold text-gray-800">{{ formatCurrency(emp.totalIncome) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Descuentos</p>
+                <p class="font-semibold text-gray-800">{{ formatCurrency(emp.totalDeductions) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Aport. Emp.</p>
+                <p class="font-semibold text-gray-800">{{ formatCurrency(emp.totalEmployerContributions) }}</p>
+              </div>
+              <div class="bg-blue-50 rounded p-1">
+                <p class="text-gray-600">Neto</p>
+                <p class="font-bold text-blue-800">{{ formatCurrency(emp.netToPay) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Horas - Más compacto -->
+          <div class="border-t pt-3 mt-3">
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <p class="text-gray-500">Normales</p>
+                <p class="font-semibold text-gray-800">{{ emp.normalHours | number:'1.2-2' }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Nocturnas</p>
+                <p class="font-semibold text-gray-800">{{ emp.nightHours | number:'1.2-2' }}</p>
+              </div>
+              @if (emp.overtimeHours25 > 0) {
+                <div>
+                  <p class="text-gray-500">Extra 25%</p>
+                  <p class="font-semibold text-gray-800">{{ emp.overtimeHours25 | number:'1.2-2' }}</p>
+                </div>
+              }
+              @if (emp.overtimeHours35 > 0) {
+                <div>
+                  <p class="text-gray-500">Extra 35%</p>
+                  <p class="font-semibold text-gray-800">{{ emp.overtimeHours35 | number:'1.2-2' }}</p>
+                </div>
+              }
+              @if (emp.overtimeHours100 > 0) {
+                <div>
+                  <p class="text-gray-500">Extra 100%</p>
+                  <p class="font-semibold text-gray-800">{{ emp.overtimeHours100 | number:'1.2-2' }}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Desglose de Conceptos -->
+          <div class="border-t pt-3 mt-3">
+            <h3 class="text-xs font-semibold text-gray-700 mb-2">Desglose de Conceptos</h3>
+            
+            <!-- Ingresos -->
+            @if (getConceptsByCategory('INCOME').length > 0) {
+              <div class="mb-3">
+                <p class="text-xs font-medium text-gray-600 mb-1">Ingresos:</p>
+                <div class="space-y-1">
+                  @for (concept of getConceptsByCategory('INCOME'); track concept.code) {
+                    <div class="flex justify-between text-xs">
+                      <span class="text-gray-600">{{ concept.name }}</span>
+                      <span class="font-semibold text-gray-800">{{ formatCurrency(concept.amount) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Descuentos -->
+            @if (getAllDeductionConcepts().length > 0) {
+              <div class="mb-3">
+                <p class="text-xs font-medium text-gray-600 mb-1">Descuentos:</p>
+                <div class="space-y-1">
+                  @for (concept of getAllDeductionConcepts(); track concept.code) {
+                    <div class="flex justify-between text-xs">
+                      <span class="text-gray-600">{{ concept.name }}</span>
+                      <span class="font-semibold text-red-600">{{ formatCurrency(concept.amount) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Aportes del Empleador -->
+            @if (getConceptsByCategory('EMPLOYER_CONTRIBUTION').length > 0) {
+              <div>
+                <p class="text-xs font-medium text-gray-600 mb-1">Aportes del Empleador:</p>
+                <div class="space-y-1">
+                  @for (concept of getConceptsByCategory('EMPLOYER_CONTRIBUTION'); track concept.code) {
+                    <div class="flex justify-between text-xs">
+                      <span class="text-gray-600">{{ concept.name }}</span>
+                      <span class="font-semibold text-blue-600">{{ formatCurrency(concept.amount) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha (3/4) - Tabla de Días Laborados -->
+      <div class="col-span-3">
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-4 py-3 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-700">Días del Período</h2>
+          </div>
+          
+          <div class="p-4">
+            @if (emp.dailyDetails && emp.dailyDetails.length > 0) {
+              <p-table
+                [value]="emp.dailyDetails"
+                [showGridlines]="true"
+                styleClass="p-datatable-sm"
+                [paginator]="true"
+                [rows]="30"
+                [rowsPerPageOptions]="[15, 30, 50, 100]">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="text-xs font-semibold text-gray-700">Fecha</th>
+                    <th class="text-xs font-semibold text-gray-700">Día</th>
+                    <th class="text-xs font-semibold text-gray-700 text-right">Horas</th>
+                    <th class="text-xs font-semibold text-gray-700 text-right">Horas Nocturnas</th>
+                    <th class="text-xs font-semibold text-gray-700 text-right">Productividad</th>
+                    <th class="text-xs font-semibold text-gray-700 text-center">Estado</th>
+                    <th class="text-xs font-semibold text-gray-700 text-center">Feriado</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-day>
+                  <tr [class.bg-gray-50]="!day.worked && day.isNonWorkingDay" [class.bg-red-50]="!day.worked && !day.isNonWorkingDay">
+                    <td class="text-xs text-gray-700">{{ formatDate(day.date) }}</td>
+                    <td class="text-xs text-gray-700">{{ getDayName(day.dayOfWeek) }}</td>
+                    <td class="text-xs text-gray-700 text-right">
+                      @if (day.worked) {
+                        {{ day.hours | number:'1.2-2' }}
+                      } @else {
+                        <span class="text-gray-400">-</span>
+                      }
+                    </td>
+                    <td class="text-xs text-gray-700 text-right">
+                      @if (day.worked) {
+                        {{ day.nightHours | number:'1.2-2' }}
+                      } @else {
+                        <span class="text-gray-400">-</span>
+                      }
+                    </td>
+                    <td class="text-xs text-gray-700 text-right">
+                      @if (day.worked && day.productivityValue !== null) {
+                        <div>
+                          <span class="font-semibold">{{ day.productivityValue }}</span>
+                          @if (day.productivityUnit) {
+                            <span class="text-gray-500 ml-1">{{ day.productivityUnit }}</span>
+                          }
+                          @if (day.performancePercentage > 0) {
+                            <div class="text-xs text-gray-500">({{ day.performancePercentage | number:'1.2-2' }}%)</div>
+                          }
+                        </div>
+                      } @else {
+                        <span class="text-gray-400">-</span>
+                      }
+                    </td>
+                    <td class="text-xs text-center">
+                      @if (day.worked) {
+                        <span class="text-green-600 font-semibold">Trabajó</span>
+                      } @else if (day.isNonWorkingDay) {
+                        <span class="text-gray-400">-</span>
+                      } @else {
+                        <span class="text-red-600 font-semibold">Faltó</span>
+                      }
+                    </td>
+                    <td class="text-xs text-center">
+                      @if (day.isHoliday) {
+                        <span class="text-orange-600 font-semibold">Sí</span>
+                      } @else {
+                        <span class="text-gray-400">No</span>
+                      }
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="7" class="text-center text-gray-500 py-8">
+                      No hay días registrados.
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            } @else {
+              <p class="text-xs text-gray-500 text-center py-8">No hay días registrados.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <p class="text-gray-500">No se encontró información del empleado.</p>
+      <button
+        pButton
+        type="button"
+        label="Volver"
+        icon="pi pi-arrow-left"
+        class="p-button-outlined mt-4"
+        (click)="goBack()">
+      </button>
+    </div>
+  }
+</div>
+

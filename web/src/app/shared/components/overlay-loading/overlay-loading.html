@@ -1,0 +1,27 @@
+@if (loadingService.isLoading()) {
+  <div class="loading-overlay fixed inset-0 z-50 flex items-center justify-center">
+    <!-- Backdrop prácticamente blanco con leve transparente -->
+    <div class="absolute inset-0 bg-white/85 dark:bg-gray-900/85 backdrop-blur-sm"></div>
+
+    <!-- SIN RECUADRO - Solo el contenido centrado -->
+    <div class="loading-container relative flex flex-col items-center gap-6 text-center">
+
+      <!-- TU SVG original - SIN CAMBIOS -->
+      <div class="w-20 h-20 relative">
+        <img
+          src="/svg/loading.svg"
+          alt="Loading..."
+          class="w-full h-full object-contain"
+        />
+      </div>
+
+      <!-- Texto de loading original -->
+      @if (loadingService.loadingText(); as text) {
+        <p class="m-0 font-medium text-base text-gray-700 dark:text-gray-200
+                  tracking-tight leading-6 font-['AirbnbCereal']">
+          {{ text }}
+        </p>
+      }
+    </div>
+  </div>
+}

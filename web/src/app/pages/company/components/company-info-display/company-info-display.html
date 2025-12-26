@@ -1,0 +1,504 @@
+<div class="bg-white rounded-xl p-8 shadow-sm">
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <h2 class="text-3xl font-bold text-gray-800 mb-2">{{ company()?.legalName }}</h2>
+      <p class="text-xl text-gray-600">{{ company()?.tradeName }}</p>
+    </div>
+    <button
+      pButton
+      label="Editar Información"
+      icon="pi pi-pencil"
+      class="p-button-outlined p-button-lg"
+      (click)="editCompany()">
+    </button>
+  </div>
+
+  <div [ngStyle]="{
+    'padding': '0'
+  }">
+
+    <div [ngStyle]="{
+      'display': 'grid',
+      'grid-template-columns': 'repeat(auto-fit, minmax(280px, 1fr))',
+      'gap': '1.5rem'
+    }">
+      <!-- RUC -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-id-card" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">RUC</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613',
+          'font-family': 'monospace'
+        }">{{ company()?.ruc }}</div>
+      </div>
+
+      <!-- Tipo de Empresa -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-tag" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Tipo de Empresa</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.companyType }}</div>
+      </div>
+
+      <!-- Intervalo de Pago -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-calendar-times" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Intervalo de Pago</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.paymentIntervalDays }} días</div>
+      </div>
+
+      <!-- Horas Máximas/Mes -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-clock" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Horas Máximas/Mes</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.maxMonthlyWorkingHours ? (company()?.maxMonthlyWorkingHours + ' hrs') : 'No definido' }}</div>
+      </div>
+
+      <!-- Día Declaración Planilla -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-calendar" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Día Declaración Planilla</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.payrollDeclarationDay }}</div>
+      </div>
+
+      <!-- Días Anticipo Planilla -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-calendar-plus" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Días Anticipo Planilla</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.payrollAnticipationDays }} días</div>
+      </div>
+
+      <!-- Tasa Horas Extra -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-percentage" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Tasa Horas Extra</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.overtimeRate | percent:'1.0-2' }}</div>
+      </div>
+
+      <!-- Horas Normales/Día -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-hourglass" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Horas Normales/Día</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.dailyNormalHours }} hrs</div>
+      </div>
+
+      <!-- Días Cálculo Mes -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-calendar-minus" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Días Cálculo Mes</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">{{ company()?.monthCalculationDays }}</div>
+      </div>
+
+      <!-- Fecha de Registro -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-plus-circle" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Fecha de Registro</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">
+          <app-date-display [date]="company()?.createdAt || ''" variant="simple"></app-date-display>
+        </div>
+      </div>
+
+      <!-- Última Actualización -->
+      <div [ngStyle]="{
+        'background': '#fafafa',
+        'border': '1px solid #f0f0f0',
+        'border-radius': '16px',
+        'padding': '1.5rem',
+        'transition': 'all 0.2s ease'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1rem'
+        }">
+          <div [ngStyle]="{
+            'width': '40px',
+            'height': '40px',
+            'background': 'linear-gradient(135deg, #f0f9f1 0%, #e8f5e9 100%)',
+            'border-radius': '10px',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center'
+          }">
+            <i class="pi pi-refresh" [ngStyle]="{
+              'color': '#4faf5a',
+              'font-size': '1.25rem'
+            }"></i>
+          </div>
+          <span [ngStyle]="{
+            'font-size': '0.875rem',
+            'font-weight': '600',
+            'color': '#666',
+            'text-transform': 'uppercase',
+            'letter-spacing': '0.5px'
+          }">Última Actualización</span>
+        </div>
+        <div [ngStyle]="{
+          'font-size': '1.25rem',
+          'font-weight': '700',
+          'color': '#131613'
+        }">
+          <app-date-display [date]="company()?.updatedAt || ''" variant="simple"></app-date-display>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

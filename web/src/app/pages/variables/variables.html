@@ -1,0 +1,171 @@
+<div class="p-6">
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold text-primary mb-2">Variables del Sistema</h1>
+    <p class="text-gray-600">Gestiona las variables que se utilizan en contratos y adendas</p>
+  </div>
+
+  <div class="bg-white rounded-xl p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+      <div class="w-full sm:w-auto sm:flex-1 max-w-md">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search"></p-inputicon>
+          <input pInputText
+                 placeholder="Buscar por nombre..."
+                 (input)="onSearch($event)"
+                 class="w-full" />
+        </p-iconfield>
+      </div>
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button pButton
+                label="Variable + Validación"
+                icon="pi pi-plus-circle"
+                class="p-button-info w-full sm:w-auto"
+                (click)="showCreateWithValidationModal()"></button>
+        <button pButton
+                label="Nueva Variable"
+                icon="pi pi-plus"
+                class="p-button-success w-full sm:w-auto"
+                (click)="showCreateModal()"></button>
+      </div>
+    </div>
+
+    <p-table [value]="variables()"
+             [lazy]="true"
+             [loading]="loading()"
+             [totalRecords]="totalRecords()"
+             [paginator]="true"
+             [rows]="10"
+             [rowsPerPageOptions]="[10, 25, 50]"
+             [sortMode]="'single'"
+             [sortField]="'createdAt'"
+             [sortOrder]="-1"
+             (onLazyLoad)="loadVariables($event)"
+             styleClass="p-datatable-striped"
+             responsiveLayout="scroll">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="code">
+            Código
+            <p-sortIcon field="code"></p-sortIcon>
+          </th>
+          <th pSortableColumn="name">
+            Nombre
+            <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th>
+            Valor por Defecto
+          </th>
+          <th>
+            Validación
+          </th>
+          <th pSortableColumn="createdAt">
+            Fecha de Creación
+            <p-sortIcon field="createdAt"></p-sortIcon>
+          </th>
+          <th>
+            Acciones
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-variable>
+        <tr>
+          <td>
+            <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium font-mono">{{ variable.code }}</span>
+          </td>
+          <td>
+            {{ variable.name }}
+          </td>
+          <td>
+            <span class="text-gray-500 italic">{{ variable.defaultValue || 'Sin valor por defecto' }}</span>
+          </td>
+          <td>
+            <div class="flex items-center gap-2">
+              @if (variable.validationMethodsCount && variable.validationMethodsCount > 0) {
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                  <i class="pi pi-shield"></i>
+                  Configurada ({{ variable.validationMethodsCount }} métodos)
+                </span>
+                <button pButton
+                        icon="pi pi-cog"
+                        class="p-button-rounded p-button-text p-button-sm p-button-success"
+                        pTooltip="Gestionar validación"
+                        (click)="showValidationModal(variable)"></button>
+              } @else {
+                <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                  Sin validación
+                </span>
+                <button pButton
+                        icon="pi pi-cog"
+                        class="p-button-rounded p-button-text p-button-sm p-button-info"
+                        pTooltip="Configurar validación"
+                        (click)="showValidationModal(variable)"></button>
+              }
+            </div>
+          </td>
+          <td>
+            {{ variable.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+          <td>
+            <div class="flex justify-center gap-2">
+              <button pButton
+                      icon="pi pi-pencil"
+                      class="p-button-rounded p-button-text p-button-warning"
+                      pTooltip="Editar variable"
+                      (click)="showUpdateModal(variable)"></button>
+              <button pButton
+                      icon="pi pi-trash"
+                      class="p-button-rounded p-button-text p-button-danger"
+                      pTooltip="Eliminar variable"
+                      (click)="confirmDelete(variable)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">
+            <div class="text-center py-12">
+              <i class="pi pi-code text-6xl text-gray-400 mb-4"></i>
+              <p class="text-gray-500 text-lg mb-4">No se encontraron variables</p>
+              <button pButton
+                      label="Crear Primera Variable"
+                      icon="pi pi-plus"
+                      class="p-button-success"
+                      (click)="showCreateModal()"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Modals -->
+  <app-variable-create-modal
+    [visible]="isCreateModalVisible()"
+    (visibleChange)="hideCreateModal()"
+    (variableCreated)="onVariableCreated()">
+  </app-variable-create-modal>
+
+  <app-variable-update-modal
+    [visible]="isUpdateModalVisible()"
+    [variable]="selectedVariable()"
+    (visibleChange)="hideUpdateModal()"
+    (variableUpdated)="onVariableUpdated()">
+  </app-variable-update-modal>
+
+  <app-variable-validation-modal
+    [visible]="isValidationModalVisible()"
+    [mode]="validationModalMode()"
+    [variableId]="selectedVariable()?.publicId"
+    [validationMethodsCount]="selectedVariable()?.validationMethodsCount"
+    [preSelectedVariable]="preSelectedVariable()"
+    (visibleChange)="hideValidationModal()"
+    (variableSaved)="onValidationSaved()">
+  </app-variable-validation-modal>
+
+  <p-toast position="top-right"></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>

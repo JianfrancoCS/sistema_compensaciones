@@ -1,0 +1,107 @@
+<div class="flex h-full flex-col ">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center ">
+    <h1 class="text-lg font-medium">Gestión de Conceptos</h1>
+    <p-button  type="button" label="Crear" icon="pi pi-plus"  (click)="showCreateModal()"></p-button>
+  </div>
+
+  <app-concept-create-modal [visible]="isCreateModalVisible()" (onHide)="hideCreateModal()"></app-concept-create-modal>
+  <app-concept-update-modal [visible]="isUpdateModalVisible()" [concept]="selectedConcept()!" (onHide)="hideUpdateModal()"></app-concept-update-modal>
+
+  <!-- Tabla -->
+  <div class="flex-1 min-h-0 ">
+    <div class="card flex-1 h-full overflow-hidden">
+      <p-table #dt1
+               [value]="concepts()"
+               dataKey="publicId"
+               [rows]="10"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [loading]="loading()"
+               [paginator]="true"
+               [lazy]="true"
+               (onLazyLoad)="loadConcepts($event)"
+               [totalRecords]="totalRecords()"
+               [first]="0"
+               showGridlines
+               [scrollable]="true"
+               scrollHeight="flex">
+
+        <ng-template pTemplate="caption">
+          <div class="flex p-0 justify-end gap-2">
+            <p-select
+              [options]="categoryOptions()"
+              [(ngModel)]="selectedCategory"
+              (onChange)="onCategoryChange($event.value)"
+              placeholder="Filtrar por categoría"
+              styleClass="w-64"
+              [showClear]="true"
+              [ngModelOptions]="{standalone: true}">
+            </p-select>
+            <p-inputgroup class="max-w-sm">
+                <p-inputgroup-addon>
+                    <i class="pi pi-search"></i>
+                </p-inputgroup-addon>
+                <input pInputText type="text" [value]="store.filters().name"  (input)="onSearch($event)" placeholder="Buscar por nombre o código" class="text-sm"/>
+                <p-inputgroup-addon>
+                    <p-button icon="pi pi-times" severity="secondary" (click)="store.clearSearch()"></p-button>
+                </p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:15rem" pSortableColumn="name" class="text-sm">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="categoryName" class="text-sm">Categoría <p-sortIcon field="categoryName"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="value" class="text-sm text-right">Valor <p-sortIcon field="value"></p-sortIcon></th>
+            <th style="min-width:10rem" pSortableColumn="calculationPriority" class="text-sm text-right">Prioridad <p-sortIcon field="calculationPriority"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="createdAt" class="text-sm">Fecha de Creación <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th style="min-width:15rem" pSortableColumn="updatedAt" class="text-sm">Fecha de Actualización <p-sortIcon field="updatedAt"></p-sortIcon></th>
+            <th style="width: 8rem" class="text-sm">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-concept>
+          <tr>
+            <td class="text-sm px-3">{{ concept.name }}</td>
+            <td class="text-sm px-3">{{ concept.categoryName }}</td>
+            <td class="text-sm px-3 text-right">{{ concept.value !== null ? (concept.value | number:'1.2-2') : '-' }}</td>
+            <td class="text-sm px-3 text-right">{{ concept.calculationPriority }}</td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="concept.createdAt"
+                type="created"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td class="text-sm px-3">
+              <app-date-display
+                [date]="concept.updatedAt"
+                type="updated"
+                variant="table"
+                size="sm">
+              </app-date-display>
+            </td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button pButton type="button" icon="pi pi-pencil" class="p-button-warning h-8 w-8" (click)="showUpdateModal(concept)"></button>
+                <button pButton type="button" icon="pi pi-trash" class="p-button-danger h-8 w-8" (click)="confirmDelete(concept)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr class="">
+            <td colspan="7" class="text-center text-sm   p-4">No se encontraron conceptos.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+

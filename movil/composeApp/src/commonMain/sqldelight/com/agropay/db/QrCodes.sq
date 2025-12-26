@@ -1,0 +1,52 @@
+import kotlin.Boolean;
+
+-- =============================================
+-- Tabla: QR Codes individuales (CACHE - SOLO LECTURA)
+-- Se carga desde: GET /v1/tareos/{tareoPublicId}/employees/sync
+-- Solo usa publicId (UUID), NO hay ID numérico
+-- =============================================
+
+CREATE TABLE qr_codes (
+    public_id TEXT PRIMARY KEY NOT NULL, -- UUID del QR code (se imprime en físico)
+    qr_roll_id TEXT NOT NULL,
+    is_used INTEGER AS Boolean NOT NULL DEFAULT 0,
+    is_printed INTEGER AS Boolean NOT NULL DEFAULT 0,
+    cached_at INTEGER NOT NULL,
+
+    FOREIGN KEY (qr_roll_id) REFERENCES qr_rolls_cache(id)
+);
+
+-- Índices para búsquedas rápidas
+CREATE INDEX qr_codes_roll ON qr_codes(qr_roll_id);
+CREATE INDEX qr_codes_used ON qr_codes(is_used);
+
+-- =============================================
+-- QUERIES
+-- =============================================
+
+insertOrReplace:
+INSERT OR REPLACE INTO qr_codes(
+    public_id, qr_roll_id, is_used, is_printed, cached_at
+)
+VALUES (?, ?, ?, ?, ?);
+
+getByRollId:
+SELECT * FROM qr_codes WHERE qr_roll_id = ? ORDER BY public_id;
+
+getAvailableByRollId:
+SELECT * FROM qr_codes
+WHERE qr_roll_id = ? AND is_used = 0
+ORDER BY public_id;
+
+getByPublicId:
+SELECT * FROM qr_codes WHERE public_id = ?;
+
+markAsUsed:
+UPDATE qr_codes SET is_used = 1 WHERE public_id = ?;
+
+countUsedByRoll:
+SELECT COUNT(*) FROM qr_codes
+WHERE qr_roll_id = ? AND is_used = 1;
+
+deleteOlderThan:
+DELETE FROM qr_codes WHERE cached_at < ?;

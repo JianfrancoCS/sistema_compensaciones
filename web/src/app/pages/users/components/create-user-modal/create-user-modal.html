@@ -1,0 +1,95 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Nuevo Usuario"
+  [width]="'min(600px, 90vw)'"
+  (onHide)="onHide.emit()"
+  (onSubmit)="createUser()"
+  [isSubmitDisabled]="userForm.invalid"
+>
+  <form [formGroup]="userForm">
+    <div class="flex flex-col gap-4 p-6">
+      <div class="space-y-2">
+        <label for="username" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-user text-gray-500"></i>
+          Nombre de Usuario
+          <span class="text-red-500">*</span>
+        </label>
+        <input
+          pInputText
+          id="username"
+          formControlName="username"
+          class="w-full"
+          placeholder="Ej: jperez"
+          autocomplete="off" />
+        @if (userForm.get('username')?.invalid && userForm.get('username')?.touched) {
+          <small class="text-red-500 flex items-center gap-1">
+            <i class="pi pi-exclamation-circle text-xs"></i>
+            El nombre de usuario es requerido (mínimo 3 caracteres)
+          </small>
+        }
+      </div>
+
+      <div class="space-y-2">
+        <label for="password" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-lock text-gray-500"></i>
+          Contraseña
+          <span class="text-red-500">*</span>
+        </label>
+        <p-password
+          inputId="password"
+          formControlName="password"
+          [toggleMask]="true"
+          [feedback]="false"
+          placeholder="Mínimo 6 caracteres"
+          styleClass="w-full"
+          [inputStyleClass]="'w-full'"
+          [fluid]="true">
+        </p-password>
+        @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
+          <small class="text-red-500 flex items-center gap-1">
+            <i class="pi pi-exclamation-circle text-xs"></i>
+            La contraseña es requerida (mínimo 6 caracteres)
+          </small>
+        }
+      </div>
+
+      <div class="space-y-2">
+        <label for="positionId" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-briefcase text-gray-500"></i>
+          Cargo
+        </label>
+        <p-select
+          inputId="positionId"
+          formControlName="positionId"
+          [options]="positionOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione un cargo (opcional)"
+          [showClear]="true"
+          [filter]="true"
+          filterPlaceholder="Buscar cargo..."
+          [virtualScroll]="true"
+          [virtualScrollItemSize]="38"
+          class="w-full">
+        </p-select>
+      </div>
+
+      <div class="space-y-2">
+        <label for="employeeId" class="flex items-center gap-2 font-semibold text-sm text-gray-700">
+          <i class="pi pi-id-card text-gray-500"></i>
+          Número de Documento (Empleado)
+        </label>
+        <input
+          pInputText
+          id="employeeId"
+          formControlName="employeeId"
+          class="w-full"
+          placeholder="Ej: 12345678 (opcional)"
+          autocomplete="off" />
+        <small class="text-gray-500 text-xs">
+          Asociar este usuario a un empleado existente por su número de documento
+        </small>
+      </div>
+    </div>
+  </form>
+</app-modal-template>

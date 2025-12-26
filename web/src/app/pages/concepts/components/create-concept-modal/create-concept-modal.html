@@ -1,0 +1,105 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Concepto"
+  (onHide)="onHide.emit()"
+  (onSubmit)="createConcept()"
+  [isSubmitDisabled]="conceptForm.invalid"
+  [width]="'35rem'"
+>
+  <form [formGroup]="conceptForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <div>
+        <label for="code" class="font-semibold text-sm">Código</label>
+        <input pInputText id="code" formControlName="code" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: BASIC_SALARY" [invalid]="conceptForm.get('code')?.invalid && (conceptForm.get('code')?.dirty || conceptForm.get('code')?.touched)" />
+        @if (conceptForm.get('code')?.invalid && (conceptForm.get('code')?.dirty || conceptForm.get('code')?.touched)) {
+          @if (conceptForm.get('code')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El código es requerido.</p-message>
+          }
+          @if (conceptForm.get('code')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El código no puede exceder 20 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="name" class="font-semibold text-sm">Nombre</label>
+        <input pInputText id="name" formControlName="name" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: Sueldo Básico" [invalid]="conceptForm.get('name')?.invalid && (conceptForm.get('name')?.dirty || conceptForm.get('name')?.touched)" />
+        @if (conceptForm.get('name')?.invalid && (conceptForm.get('name')?.dirty || conceptForm.get('name')?.touched)) {
+          @if (conceptForm.get('name')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+          }
+          @if (conceptForm.get('name')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El nombre no puede exceder 100 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="description" class="font-semibold text-sm">Descripción</label>
+        <input pInputText id="description" formControlName="description" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Descripción del concepto (opcional)" [invalid]="conceptForm.get('description')?.invalid && (conceptForm.get('description')?.dirty || conceptForm.get('description')?.touched)" />
+        @if (conceptForm.get('description')?.invalid && (conceptForm.get('description')?.dirty || conceptForm.get('description')?.touched)) {
+          @if (conceptForm.get('description')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">La descripción no puede exceder 255 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="categoryPublicId" class="font-semibold text-sm">Categoría</label>
+        <p-select 
+          id="categoryPublicId"
+          formControlName="categoryPublicId"
+          [options]="categories()"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Seleccione una categoría"
+          styleClass="w-full"
+          [invalid]="conceptForm.get('categoryPublicId')?.invalid && (conceptForm.get('categoryPublicId')?.dirty || conceptForm.get('categoryPublicId')?.touched)">
+        </p-select>
+        @if (conceptForm.get('categoryPublicId')?.invalid && (conceptForm.get('categoryPublicId')?.dirty || conceptForm.get('categoryPublicId')?.touched)) {
+          @if (conceptForm.get('categoryPublicId')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">La categoría es requerida.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="value" class="font-semibold text-sm">Valor</label>
+        <p-inputNumber 
+          id="value"
+          formControlName="value"
+          mode="decimal"
+          [min]="0"
+          [maxFractionDigits]="2"
+          placeholder="0.00"
+          class="w-full"
+          [showButtons]="false">
+        </p-inputNumber>
+        <small class="text-gray-500">Valor numérico del concepto (opcional, ej: porcentaje para AFP)</small>
+      </div>
+
+      <div>
+        <label for="calculationPriority" class="font-semibold text-sm">Prioridad de Cálculo</label>
+        <p-inputNumber 
+          id="calculationPriority"
+          formControlName="calculationPriority"
+          [min]="0"
+          [max]="999"
+          placeholder="100"
+          class="w-full"
+          [showButtons]="false">
+        </p-inputNumber>
+        <small class="text-gray-500">Orden en que se calcula este concepto (menor número = se calcula primero)</small>
+        @if (conceptForm.get('calculationPriority')?.invalid && (conceptForm.get('calculationPriority')?.dirty || conceptForm.get('calculationPriority')?.touched)) {
+          @if (conceptForm.get('calculationPriority')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">La prioridad es requerida.</p-message>
+          }
+          @if (conceptForm.get('calculationPriority')?.errors?.['min']) {
+            <p-message severity="error" variant="simple" size="small">La prioridad debe ser mayor o igual a 0.</p-message>
+          }
+        }
+      </div>
+    </div>
+  </form>
+</app-modal-template>
+

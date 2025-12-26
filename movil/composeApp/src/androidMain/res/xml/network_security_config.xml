@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- IP de desarrollo - Red WiFi actual -->
+        <domain includeSubdomains="true">10.181.78.8</domain>
+        <!-- IPs anteriores para referencia -->
+        <domain includeSubdomains="true">10.73.235.8</domain>
+        <domain includeSubdomains="true">10.218.130.8</domain>
+        <domain includeSubdomains="true">192.168.43.8</domain>
+        <domain includeSubdomains="true">10.75.176.8</domain>
+        <!-- Localhost para desarrollo -->
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- Android emulator localhost -->
+    </domain-config>
+</network-security-config>

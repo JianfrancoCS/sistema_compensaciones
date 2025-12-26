@@ -1,0 +1,39 @@
+<p-dialog
+  header="Editar Rollo QR"
+  [visible]="visible"
+  [modal]="true"
+  [style]="{ width: '25rem' }"
+  (onHide)="hideModal()"
+>
+  @if (qrRoll) {
+    <form #editForm="ngForm" (ngSubmit)="save(editForm)">
+      <div class="flex flex-col gap-3 p-fluid">
+        <label for="maxQrCodesPerDayEdit" class="font-semibold">Máximo de Códigos por Día</label>
+        <p-inputNumber
+          inputId="maxQrCodesPerDayEdit"
+          name="maxQrCodesPerDay"
+          [(ngModel)]="maxQrCodesPerDay"
+          [min]="1"
+          [showButtons]="true"
+          required
+        ></p-inputNumber>
+      </div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <p-button
+          label="Cancelar"
+          severity="secondary"
+          (click)="hideModal()"
+        ></p-button>
+        <p-button
+          label="Guardar Cambios"
+          type="submit"
+          [disabled]="editForm.invalid || store.loading()"
+          [loading]="store.loading()"
+        ></p-button>
+      </div>
+    </form>
+  } @else {
+    <p>No se ha seleccionado ningún rollo para editar.</p>
+  }
+</p-dialog>

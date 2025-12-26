@@ -1,0 +1,83 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Contenedor"
+  (onHide)="hideModal()"
+  (onSubmit)="updateContainer()"
+  [isSubmitDisabled]="containerForm.invalid"
+>
+  <form [formGroup]="containerForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <div>
+        <label for="name" class="font-semibold text-sm">Nombre (identificador único)</label>
+        <input pInputText id="name" formControlName="name" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: organizations" [invalid]="containerForm.get('name')?.invalid && (containerForm.get('name')?.dirty || containerForm.get('name')?.touched)" />
+        @if (containerForm.get('name')?.invalid && (containerForm.get('name')?.dirty || containerForm.get('name')?.touched)) {
+          @if (containerForm.get('name')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+          }
+          @if (containerForm.get('name')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El nombre no puede exceder 100 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="displayName" class="font-semibold text-sm">Nombre para Mostrar</label>
+        <input pInputText id="displayName" formControlName="displayName" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: Organizaciones" [invalid]="containerForm.get('displayName')?.invalid && (containerForm.get('displayName')?.dirty || containerForm.get('displayName')?.touched)" />
+        @if (containerForm.get('displayName')?.invalid && (containerForm.get('displayName')?.dirty || containerForm.get('displayName')?.touched)) {
+          @if (containerForm.get('displayName')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre para mostrar es requerido.</p-message>
+          }
+          @if (containerForm.get('displayName')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El nombre para mostrar no puede exceder 150 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="icon" class="font-semibold text-sm">Icono (PrimeNG) - Opcional si subes una imagen</label>
+        <input pInputText id="icon" formControlName="icon" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: pi pi-sitemap" [invalid]="containerForm.get('icon')?.invalid && (containerForm.get('icon')?.dirty || containerForm.get('icon')?.touched)" />
+        @if (containerForm.get('icon')?.invalid && (containerForm.get('icon')?.dirty || containerForm.get('icon')?.touched)) {
+          @if (containerForm.get('icon')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El icono no puede exceder 100 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label class="font-semibold text-sm">Icono (Imagen) - Se subirá a Cloudinary</label>
+        <p-fileUpload
+          mode="basic"
+          [accept]="'image/*'"
+          [maxFileSize]="5000000"
+          (onSelect)="onFileSelect($event)"
+          chooseLabel="Seleccionar imagen"
+          [auto]="false"
+          [showUploadButton]="false"
+          [showCancelButton]="false"
+          class="w-full">
+        </p-fileUpload>
+        @if (previewUrl()) {
+          <div class="mt-2 flex items-center gap-2">
+            <img [src]="previewUrl()!" alt="Preview" class="w-16 h-16 object-contain border border-gray-300 rounded" />
+            <button type="button" (click)="removeFile()" class="text-red-600 hover:text-red-800 text-sm">Eliminar</button>
+          </div>
+        }
+        <p class="text-xs text-gray-500 mt-1">Si no subes una nueva imagen, se mantendrá la actual o se usará el icono de PrimeNG.</p>
+      </div>
+
+      <div>
+        <label for="orderIndex" class="font-semibold text-sm">Orden de Aparición</label>
+        <p-inputNumber id="orderIndex" formControlName="orderIndex" [showButtons]="true" [min]="0" class="w-full"></p-inputNumber>
+        @if (containerForm.get('orderIndex')?.invalid && (containerForm.get('orderIndex')?.dirty || containerForm.get('orderIndex')?.touched)) {
+          @if (containerForm.get('orderIndex')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El orden es requerido.</p-message>
+          }
+          @if (containerForm.get('orderIndex')?.errors?.['min']) {
+            <p-message severity="error" variant="simple" size="small">El orden debe ser mayor o igual a 0.</p-message>
+          }
+        }
+      </div>
+    </div>
+  </form>
+</app-modal-template>
+

@@ -1,0 +1,28 @@
+<app-modal-template
+  [visible]="visible"
+  [headerText]="'Editar Adenda: ' + (addendum?.addendumNumber || '')"
+  (onHide)="hideModal()"
+  (onSubmit)="updateAddendum()"
+  [isSubmitDisabled]="addendumForm.invalid"
+>
+  <form [formGroup]="addendumForm" class="flex flex-col gap-4">
+
+    <div class="flex flex-col gap-2">
+      <label for="addendumType" class="font-semibold text-sm">Tipo de Adenda</label>
+      <p-select id="addendumType" formControlName="addendumTypePublicId" [options]="addendumTypes()" optionLabel="name" optionValue="publicId" placeholder="Seleccione un tipo" styleClass="w-full" [disabled]="true"></p-select>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="state" class="font-semibold text-sm">Estado</label>
+      <p-select id="state" formControlName="statePublicId" [options]="states()" optionLabel="name" optionValue="publicId" placeholder="Seleccione un estado" styleClass="w-full"></p-select>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="template" class="font-semibold text-sm">Plantilla</label>
+      <p-select id="template" formControlName="templatePublicId" [options]="templates()" optionLabel="name" optionValue="publicId" placeholder="Seleccione una plantilla" styleClass="w-full"></p-select>
+    </div>
+
+    <!-- TODO: Add form for variables based on selected template once API is ready -->
+
+  </form>
+</app-modal-template>

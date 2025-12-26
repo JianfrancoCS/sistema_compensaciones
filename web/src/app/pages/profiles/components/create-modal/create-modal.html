@@ -1,0 +1,35 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Perfil"
+  (onHide)="hideModal()"
+  (onSubmit)="createProfile()"
+  [isSubmitDisabled]="profileForm.invalid"
+>
+  <form [formGroup]="profileForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <div>
+        <label for="name" class="font-semibold text-sm">Nombre</label>
+        <input pInputText id="name" formControlName="name" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: Administrador" [invalid]="profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty || profileForm.get('name')?.touched)" />
+        @if (profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty || profileForm.get('name')?.touched)) {
+          @if (profileForm.get('name')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+          }
+          @if (profileForm.get('name')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El nombre no puede exceder 100 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="description" class="font-semibold text-sm">Descripción</label>
+        <textarea pInputTextarea id="description" formControlName="description" class="flex-auto text-sm w-full" rows="3" autocomplete="off" placeholder="Ej: Perfil con acceso completo al sistema" [invalid]="profileForm.get('description')?.invalid && (profileForm.get('description')?.dirty || profileForm.get('description')?.touched)"></textarea>
+        @if (profileForm.get('description')?.invalid && (profileForm.get('description')?.dirty || profileForm.get('description')?.touched)) {
+          @if (profileForm.get('description')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">La descripción no puede exceder 500 caracteres.</p-message>
+          }
+        }
+      </div>
+    </div>
+  </form>
+</app-modal-template>
+

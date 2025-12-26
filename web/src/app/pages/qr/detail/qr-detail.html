@@ -1,0 +1,117 @@
+<div class="flex h-full flex-col">
+  <p-toast></p-toast>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-lg font-medium">Códigos QR del Rollo</h1>
+    <p-button
+      type="button"
+      label="Volver"
+      icon="pi pi-arrow-left"
+      [routerLink]="['/system/qr']"
+    ></p-button>
+  </div>
+
+  <div class="card flex-1 h-full overflow-hidden">
+    <p-table
+      [value]="store.qrCodes()"
+      [loading]="store.qrCodesLoading()"
+      [tableStyle]="{ 'min-width': '60rem' }"
+      showGridlines
+      [scrollable]="true"
+      scrollHeight="flex"
+    >
+      <ng-template pTemplate="caption">
+        <div class="flex justify-end items-center gap-4">
+          <!-- Filter by Used Status -->
+          <p-select
+            [options]="filterOptionsUsed"
+            [(ngModel)]="isUsedFilter"
+            name="isUsedFilter"
+            placeholder="Filtrar por uso"
+            [showClear]="true"
+            (onChange)="onFilterChange()"
+            class="w-48"
+          ></p-select>
+
+          <!-- Filter by Printed Status -->
+          <p-select
+            [options]="filterOptionsPrinted"
+            [(ngModel)]="isPrintedFilter"
+            name="isPrintedFilter"
+            placeholder="Filtrar por impresión"
+            [showClear]="true"
+            (onChange)="onFilterChange()"
+            class="w-48"
+          ></p-select>
+
+          <!-- Clear Filters Button -->
+          <p-button
+            pTooltip="Limpiar filtros"
+            tooltipPosition="top"
+            type="button"
+            severity="info"
+            icon="pi pi-filter-slash"
+            (click)="onClearFilters()"
+          ></p-button>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 20%">Código QR</th>
+          <th style="width: 30%">ID Público</th>
+          <th style="width: 15%" class="text-center">Estado (Uso)</th>
+          <th style="width: 15%" class="text-center">Estado (Impresión)</th>
+          <th style="width: 20%">Fecha de Creación</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-qrCode>
+        <tr>
+          <td class="text-center">
+            <qr-code
+              [value]="qrCode.publicId"
+              [size]="100"
+              [errorCorrectionLevel]="'M'"
+            ></qr-code>
+          </td>
+          <td class="font-mono text-xs">{{ qrCode.publicId }}</td>
+          <td class="text-center">
+            @if (qrCode.isUsed) {
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-800 text-sm">
+                <i class="pi pi-check-circle"></i>
+                Usado
+              </span>
+            } @else {
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-800 text-sm">
+                <i class="pi pi-times-circle"></i>
+                No usado
+              </span>
+            }
+          </td>
+          <td class="text-center">
+            @if (qrCode.isPrinted) {
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
+                <i class="pi pi-print"></i>
+                Impreso
+              </span>
+            } @else {
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-800 text-sm">
+                <i class="pi pi-ban"></i>
+                No impreso
+              </span>
+            }
+          </td>
+          <td>{{ qrCode.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center p-4">No se encontraron códigos QR con los filtros aplicados.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

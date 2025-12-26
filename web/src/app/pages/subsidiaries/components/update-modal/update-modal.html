@@ -1,0 +1,86 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Actualizar Sucursal"
+  (onHide)="hideModal()"
+  (onSubmit)="updateSubsidiary()"
+  [isSubmitDisabled]="subsidiaryForm.invalid || loading()"
+>
+  <div *ngIf="loading()" class="flex justify-content-center align-items-center" style="min-height: 250px;">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+
+  <form [formGroup]="subsidiaryForm" *ngIf="!loading()">
+    <div class="flex flex-col gap-4">
+      <div class="field">
+        <label for="name" class="font-semibold text-sm">Nombre</label>
+        <input pInputText id="name" formControlName="name" class="w-full" autocomplete="off" placeholder="Ej: Fundo San Juan" [invalid]="subsidiaryForm.get('name')?.invalid && (subsidiaryForm.get('name')?.touched || subsidiaryForm.get('name')?.dirty)" />
+        @if (subsidiaryForm.get('name')?.invalid && (subsidiaryForm.get('name')?.touched || subsidiaryForm.get('name')?.dirty)) {
+          @if (subsidiaryForm.get('name')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+          }
+          @if (subsidiaryForm.get('name')?.errors?.['pattern']) {
+            <p-message severity="error" variant="simple" size="small">El nombre solo debe contener letras y espacios.</p-message>
+          }
+        }
+      </div>
+
+      <div class="field">
+        <label for="department" class="font-semibold text-sm">Departamento</label>
+        <p-select
+          id="department"
+          [options]="departments()"
+          formControlName="departmentPublicId"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Seleccione un departamento"
+          (onChange)="onDepartmentChange()"
+          styleClass="w-full"
+          appendTo="body"
+          [invalid]="subsidiaryForm.get('departmentPublicId')?.invalid && subsidiaryForm.get('departmentPublicId')?.touched"
+        ></p-select>
+        @if (subsidiaryForm.get('departmentPublicId')?.invalid && subsidiaryForm.get('departmentPublicId')?.touched) {
+          <p-message severity="error" variant="simple" size="small">El departamento es requerido.</p-message>
+        }
+      </div>
+
+      <div class="field">
+        <label for="province" class="font-semibold text-sm">Provincia</label>
+        <p-select
+          id="province"
+          [options]="provinces()"
+          formControlName="provincePublicId"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Seleccione una provincia"
+          (onChange)="onProvinceChange()"
+          [disabled]="!subsidiaryForm.get('departmentPublicId')?.value"
+          styleClass="w-full"
+          appendTo="body"
+          [invalid]="subsidiaryForm.get('provincePublicId')?.invalid && subsidiaryForm.get('provincePublicId')?.touched"
+        ></p-select>
+        @if (subsidiaryForm.get('provincePublicId')?.invalid && subsidiaryForm.get('provincePublicId')?.touched) {
+          <p-message severity="error" variant="simple" size="small">La provincia es requerida.</p-message>
+        }
+      </div>
+
+      <div class="field">
+        <label for="district" class="font-semibold text-sm">Distrito</label>
+        <p-select
+          id="district"
+          [options]="districts()"
+          formControlName="districtPublicId"
+          optionLabel="name"
+          optionValue="publicId"
+          placeholder="Seleccione un distrito"
+          [disabled]="!subsidiaryForm.get('provincePublicId')?.value"
+          styleClass="w-full"
+          appendTo="body"
+          [invalid]="subsidiaryForm.get('districtPublicId')?.invalid && subsidiaryForm.get('districtPublicId')?.touched"
+        ></p-select>
+        @if (subsidiaryForm.get('districtPublicId')?.invalid && subsidiaryForm.get('districtPublicId')?.touched) {
+          <p-message severity="error" variant="simple" size="small">El distrito es requerido.</p-message>
+        }
+      </div>
+    </div>
+  </form>
+</app-modal-template>

@@ -1,0 +1,316 @@
+<div class="flex h-full flex-col">
+  <p-toast></p-toast>
+
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center gap-3">
+      <button pButton type="button" icon="pi pi-arrow-left" class="p-button-text h-10 w-10" (click)="cancel()"></button>
+      <h1 class="text-lg font-medium">{{ isEditMode() ? 'Editar' : 'Crear' }} Contrato</h1>
+      @if (loadingContract()) {
+        <i class="pi pi-spin pi-spinner text-blue-500"></i>
+      }
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-auto">
+    <form [formGroup]="contractForm" (ngSubmit)="submitForm()">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="flex flex-col gap-6">
+          <div class="card relative">
+            @if (isSearchingPerson()) {
+              <div class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+                <div class="flex items-center gap-2 text-blue-600">
+                  <i class="pi pi-spin pi-spinner"></i>
+                  <span class="text-sm font-medium">Buscando persona...</span>
+                </div>
+              </div>
+            }
+            <h3 class="text-md font-semibold mb-4 text-gray-700">Información de la Persona</h3>
+            
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <label for="personDocumentNumber" class="text-sm font-medium text-gray-700">N° de Documento *</label>
+                <p-inputGroup>
+                  <input pInputText id="personDocumentNumber" formControlName="personDocumentNumber"
+                         placeholder="12345678" class="text-sm"
+                         [disabled]="isSearchingPerson()" />
+                  <p-inputGroupAddon>
+                    @if (isSearchingPerson()) {
+                      <i class="pi pi-spin pi-spinner text-blue-500"></i>
+                    } @else if (!isSearchingPerson() && personFound()) {
+                      <i class="pi pi-check text-green-500"></i>
+                    } @else if (!isSearchingPerson() && personNotFound()) {
+                      <i class="pi pi-exclamation-triangle text-amber-500"></i>
+                    } @else if (!isSearchingPerson() && !personFound() && !personNotFound()) {
+                      <i class="pi pi-user text-gray-400"></i>
+                    }
+                  </p-inputGroupAddon>
+                </p-inputGroup>
+                @if (contractForm.get('personDocumentNumber')?.invalid && contractForm.get('personDocumentNumber')?.touched) {
+                  <small class="text-red-500">Documento requerido (8 dígitos)</small>
+                }
+                @if (!contractForm.get('personDocumentNumber')?.invalid && !isSearchingPerson()) {
+                  <small class="text-gray-500">Ingrese 8 dígitos para buscar automáticamente</small>
+                }
+                @if (isSearchingPerson()) {
+                  <small class="text-blue-500">Buscando persona...</small>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="names" class="text-sm font-medium text-gray-700">Nombres *</label>
+                <input pInputText id="names" formControlName="names"
+                       [class]="'text-sm ' + (contractForm.get('names')?.disabled ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '')" />
+                @if (contractForm.get('names')?.invalid && contractForm.get('names')?.touched) {
+                  <small class="text-red-500">Nombres requeridos</small>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="paternalSurname" class="text-sm font-medium text-gray-700">Apellido Paterno *</label>
+                <input pInputText id="paternalSurname" formControlName="paternalSurname"
+                       [class]="'text-sm ' + (contractForm.get('paternalSurname')?.disabled ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '')" />
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="maternalSurname" class="text-sm font-medium text-gray-700">Apellido Materno *</label>
+                <input pInputText id="maternalSurname" formControlName="maternalSurname"
+                       [class]="'text-sm ' + (contractForm.get('maternalSurname')?.disabled ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '')" />
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="dateOfBirth" class="text-sm font-medium text-gray-700">Fecha de Nacimiento *</label>
+                <div [class]="contractForm.get('dateOfBirth')?.disabled ? 'opacity-60 pointer-events-none' : ''">
+                  <p-datePicker id="dateOfBirth" formControlName="dateOfBirth"
+                               dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="w-full"></p-datePicker>
+                </div>
+              </div>
+            </div>
+
+            @if (!isEditMode()) {
+              <div class="mt-6">
+                <h4 class="text-sm font-semibold mb-3 text-gray-700">Foto de la Persona *</h4>
+                <div class="flex flex-col gap-4">
+                  <div class="flex flex-col gap-2">
+                    <label for="photo" class="text-sm font-medium text-gray-700">Seleccionar Foto *</label>
+                    
+                    <input 
+                      type="file" 
+                      id="photo" 
+                      accept="image/*" 
+                      (change)="onPhotoSelected($event)"
+                      class="hidden"
+                      #photoInput />
+                    
+                    <button
+                      type="button"
+                      pButton
+                      label="Seleccionar Foto"
+                      icon="pi pi-upload"
+                      class="p-button-outlined p-button-secondary"
+                      (click)="photoInput.click()"
+                      [class.p-button-danger]="contractForm.get('photo')?.invalid && contractForm.get('photo')?.touched">
+                    </button>
+                    
+                    @if (contractForm.get('photo')?.invalid && contractForm.get('photo')?.touched) {
+                      <small class="text-red-500">La foto es obligatoria</small>
+                    }
+                    <small class="text-gray-500">La foto se asociará a la persona después de consultar RENIEC</small>
+                  </div>
+                  
+                  @if (photoPreview()) {
+                    <div class="mt-2">
+                      <div class="relative inline-block">
+                        <img [src]="photoPreview()!" alt="Preview" class="max-w-full max-h-64 rounded-lg border border-gray-300 shadow-md" />
+                        <button
+                          type="button"
+                          pButton
+                          icon="pi pi-times"
+                          class="p-button-danger p-button-rounded p-button-text absolute top-2 right-2"
+                          styleClass="p-button-sm"
+                          (click)="removePhoto()"
+                          [title]="'Eliminar foto'">
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-6">
+          <div class="card">
+            <h3 class="text-md font-semibold mb-4 text-gray-700">Información del Contrato</h3>
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <label for="startDate" class="text-sm font-medium text-gray-700">Fecha de Inicio *</label>
+                <p-datePicker id="startDate" formControlName="startDate"
+                             dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="w-full">                </p-datePicker>
+              </div>
+
+              @if (showEndDate()) {
+                <div class="flex flex-col gap-2">
+                  <label for="endDate" class="text-sm font-medium text-gray-700">Fecha de Fin *</label>
+                  <p-datePicker id="endDate" formControlName="endDate"
+                               dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="w-full"></p-datePicker>
+                  @if (contractForm.get('endDate')?.invalid && contractForm.get('endDate')?.touched) {
+                    <small class="text-red-500">Fecha de fin requerida para contratos a plazo fijo</small>
+                  }
+                </div>
+              }
+
+              <div class="flex flex-col gap-2">
+                <label for="subsidiary" class="text-sm font-medium text-gray-700">Fundo *</label>
+                <p-select id="subsidiary" formControlName="subsidiaryPublicId"
+                         [options]="subsidiaries()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione un fundo" styleClass="w-full"
+                         [loading]="validatingSubsidiarySigner()"></p-select>
+                @if (validatingSubsidiarySigner()) {
+                  <small class="text-blue-600">Validando responsable de firma...</small>
+                }
+                @if (subsidiarySignerError()) {
+                  <small class="text-red-500">{{ subsidiarySignerError() }}</small>
+                }
+                @if (contractForm.get('subsidiaryPublicId')?.invalid && contractForm.get('subsidiaryPublicId')?.touched && !subsidiarySignerError()) {
+                  <small class="text-red-500">Fundo requerido</small>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="area" class="text-sm font-medium text-gray-700">Área *</label>
+                <p-select id="area" formControlName="areaPublicId"
+                         [options]="areas()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione un área" styleClass="w-full"></p-select>
+                @if (contractForm.get('areaPublicId')?.invalid && contractForm.get('areaPublicId')?.touched) {
+                  <small class="text-red-500">Área requerida</small>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="position" class="text-sm font-medium text-gray-700">Cargo *</label>
+                <p-select id="position" formControlName="positionPublicId"
+                         [options]="positions()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione un cargo"
+                         [disabled]="!contractForm.get('areaPublicId')?.value"
+                         styleClass="w-full"></p-select>
+                @if (contractForm.get('positionPublicId')?.invalid && contractForm.get('positionPublicId')?.touched) {
+                  <small class="text-red-500">Cargo requerido</small>
+                }
+                @if (!contractForm.get('areaPublicId')?.value) {
+                  <small class="text-gray-500">Primero seleccione un área</small>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="retirementConcept" class="text-sm font-medium text-gray-700">Concepto de Jubilación</label>
+                <p-select id="retirementConcept" formControlName="retirementConceptPublicId"
+                         [options]="retirementConcepts()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione un concepto de jubilación"
+                         [loading]="loadingConcepts()"
+                         styleClass="w-full"></p-select>
+                <small class="text-gray-500">Seleccione el concepto de jubilación (AFP, ONP, etc.)</small>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="healthInsuranceConcept" class="text-sm font-medium text-gray-700">Concepto de Seguro</label>
+                <p-select id="healthInsuranceConcept" formControlName="healthInsuranceConceptPublicId"
+                         [options]="healthInsuranceConcepts()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione un concepto de seguro"
+                         [loading]="loadingConcepts()"
+                         styleClass="w-full"></p-select>
+                <small class="text-gray-500">Seleccione el concepto de seguro de salud (ESSALUD, etc.)</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="text-md font-semibold mb-4 text-gray-700">Plantilla y Variables</h3>
+
+            <div class="flex flex-col gap-4 mb-6">
+              <div class="flex flex-col gap-2">
+                <label for="contractType" class="text-sm font-medium text-gray-700">Tipo de Contrato *</label>
+                <p-select id="contractType" formControlName="contractTypePublicId"
+                         [options]="contractTypes()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione un tipo" styleClass="w-full"></p-select>
+                @if (contractForm.get('contractTypePublicId')?.invalid && contractForm.get('contractTypePublicId')?.touched) {
+                  <small class="text-red-500">Tipo de contrato requerido</small>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="template" class="text-sm font-medium text-gray-700">Plantilla *</label>
+                <p-select id="template" formControlName="templatePublicId"
+                         [options]="templates()" optionLabel="name" optionValue="publicId"
+                         placeholder="Seleccione una plantilla"
+                         [disabled]="!contractForm.get('contractTypePublicId')?.value"
+                         styleClass="w-full"></p-select>
+                @if (contractForm.get('templatePublicId')?.invalid && contractForm.get('templatePublicId')?.touched) {
+                  <small class="text-red-500">Plantilla requerida</small>
+                }
+              </div>
+            </div>
+
+            @if (templateVariables().length > 0) {
+              <div formGroupName="variables">
+                <h4 class="text-sm font-semibold mb-3 text-gray-600">Variables de la Plantilla</h4>
+                <div class="flex flex-col gap-4">
+                  @for (variable of templateVariables(); track variable.code) {
+                    <div class="flex flex-col gap-2">
+                      <label [for]="variable.code" class="text-sm font-medium text-gray-700">
+                        {{ variable.name }}
+                        @if (variable.isRequired) {
+                          <span class="text-red-500">*</span>
+                        }
+                      </label>
+                      <input pInputText [id]="variable.code" [formControlName]="variable.code"
+                             [placeholder]="variable.defaultValue || 'Ingrese ' + variable.name.toLowerCase()"
+                             class="text-sm" />
+
+                      @if (contractForm.get('variables')?.get(variable.code)?.invalid && contractForm.get('variables')?.get(variable.code)?.touched) {
+                        <div>
+                          @if (contractForm.get('variables')?.get(variable.code)?.hasError('required')) {
+                            <small class="text-red-500">{{ variable.name }} es requerido</small>
+                          }
+
+                          @if (contractForm.get('variables')?.get(variable.code)?.hasError('pattern')) {
+                            <small class="text-red-500">
+                              {{ variable.validation.errorMessage || 'Formato inválido para ' + variable.name }}
+                            </small>
+                          }
+                        </div>
+                      }
+
+                      @if (variable.validation.hasValidation && variable.validation.appliedMethods.length > 0) {
+                        <small class="text-gray-500 text-xs">
+                          {{ getValidationDescription(variable) }}
+                        </small>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (templateVariables().length === 0 && contractForm.get('templatePublicId')?.value) {
+              <div class="text-center p-4 bg-gray-50 rounded-lg">
+                <p class="text-gray-600">Esta plantilla no tiene variables configuradas.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (!createdContractForSigning()) {
+        <div class="flex justify-end gap-3 pt-6 mt-6 border-t">
+          <button pButton type="button" label="Cancelar" icon="pi pi-times"
+                  class="p-button-secondary" (click)="cancel()" [disabled]="submitting()"></button>
+          <button pButton type="submit" [label]="isEditMode() ? 'Actualizar Contrato' : 'Crear Contrato'" icon="pi pi-check"
+                  class="p-button-success" [loading]="submitting() || loadingContract()" [disabled]="contractForm.invalid || loadingContract()"></button>
+        </div>
+      }
+
+    </form>
+  </div>
+</div>

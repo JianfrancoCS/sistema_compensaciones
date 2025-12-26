@@ -1,0 +1,126 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Elemento"
+  (onHide)="hideModal()"
+  (onSubmit)="createElement()"
+  [isSubmitDisabled]="elementForm.invalid"
+>
+  <form [formGroup]="elementForm">
+    <div class="flex flex-col gap-4 mb-4">
+      <div>
+        <label for="name" class="font-semibold text-sm">Nombre (identificador único)</label>
+        <input pInputText id="name" formControlName="name" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: subsidiaries" [invalid]="elementForm.get('name')?.invalid && (elementForm.get('name')?.dirty || elementForm.get('name')?.touched)" />
+        @if (elementForm.get('name')?.invalid && (elementForm.get('name')?.dirty || elementForm.get('name')?.touched)) {
+          @if (elementForm.get('name')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre es requerido.</p-message>
+          }
+          @if (elementForm.get('name')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El nombre no puede exceder 100 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="displayName" class="font-semibold text-sm">Nombre para Mostrar</label>
+        <input pInputText id="displayName" formControlName="displayName" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: Fundos" [invalid]="elementForm.get('displayName')?.invalid && (elementForm.get('displayName')?.dirty || elementForm.get('displayName')?.touched)" />
+        @if (elementForm.get('displayName')?.invalid && (elementForm.get('displayName')?.dirty || elementForm.get('displayName')?.touched)) {
+          @if (elementForm.get('displayName')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El nombre para mostrar es requerido.</p-message>
+          }
+          @if (elementForm.get('displayName')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El nombre para mostrar no puede exceder 150 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="route" class="font-semibold text-sm">Ruta</label>
+        <input pInputText id="route" formControlName="route" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: /system/subsidiaries" [invalid]="elementForm.get('route')?.invalid && (elementForm.get('route')?.dirty || elementForm.get('route')?.touched)" />
+        @if (elementForm.get('route')?.invalid && (elementForm.get('route')?.dirty || elementForm.get('route')?.touched)) {
+          @if (elementForm.get('route')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">La ruta no puede exceder 255 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label for="icon" class="font-semibold text-sm">Icono (PrimeNG) - Opcional si subes una imagen</label>
+        <input pInputText id="icon" formControlName="icon" class="flex-auto text-sm w-full" autocomplete="off" placeholder="Ej: pi pi-warehouse" [invalid]="elementForm.get('icon')?.invalid && (elementForm.get('icon')?.dirty || elementForm.get('icon')?.touched)" />
+        @if (elementForm.get('icon')?.invalid && (elementForm.get('icon')?.dirty || elementForm.get('icon')?.touched)) {
+          @if (elementForm.get('icon')?.errors?.['maxlength']) {
+            <p-message severity="error" variant="simple" size="small">El icono no puede exceder 100 caracteres.</p-message>
+          }
+        }
+      </div>
+
+      <div>
+        <label class="font-semibold text-sm">Icono (Imagen) - Se subirá a Cloudinary</label>
+        <p-fileUpload
+          mode="basic"
+          [accept]="'image/*'"
+          [maxFileSize]="5000000"
+          (onSelect)="onFileSelect($event)"
+          chooseLabel="Seleccionar imagen"
+          [auto]="false"
+          [showUploadButton]="false"
+          [showCancelButton]="false"
+          class="w-full">
+        </p-fileUpload>
+        @if (previewUrl()) {
+          <div class="mt-2 flex items-center gap-2">
+            <img [src]="previewUrl()!" alt="Preview" class="w-16 h-16 object-contain border border-gray-300 rounded" />
+            <button type="button" (click)="removeFile()" class="text-red-600 hover:text-red-800 text-sm">Eliminar</button>
+          </div>
+        }
+        <p class="text-xs text-gray-500 mt-1">Si no subes una imagen, se usará el icono de PrimeNG o un icono por defecto.</p>
+      </div>
+
+      <div>
+        <label for="containerPublicId" class="font-semibold text-sm">Contenedor</label>
+        <p-select 
+          id="containerPublicId"
+          formControlName="containerPublicId"
+          [options]="containerOptions()" 
+          optionLabel="displayName" 
+          optionValue="publicId"
+          placeholder="Seleccionar contenedor (opcional)"
+          [showClear]="true"
+          class="w-full">
+        </p-select>
+      </div>
+
+      <div>
+        <label for="orderIndex" class="font-semibold text-sm">Orden de Aparición</label>
+        <p-inputNumber id="orderIndex" formControlName="orderIndex" [showButtons]="true" [min]="0" class="w-full"></p-inputNumber>
+        @if (elementForm.get('orderIndex')?.invalid && (elementForm.get('orderIndex')?.dirty || elementForm.get('orderIndex')?.touched)) {
+          @if (elementForm.get('orderIndex')?.errors?.['required']) {
+            <p-message severity="error" variant="simple" size="small">El orden es requerido.</p-message>
+          }
+          @if (elementForm.get('orderIndex')?.errors?.['min']) {
+            <p-message severity="error" variant="simple" size="small">El orden debe ser mayor o igual a 0.</p-message>
+          }
+        }
+      </div>
+
+      <div class="flex flex-col gap-3 mt-4 p-4 bg-gray-50 rounded-lg">
+        <label class="font-semibold text-sm mb-2">Plataformas Disponibles</label>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center">
+            <p-checkbox formControlName="isWeb" inputId="isWeb" [binary]="true"></p-checkbox>
+            <label for="isWeb" class="ml-2 text-sm">Disponible en Web</label>
+          </div>
+          <div class="flex items-center">
+            <p-checkbox formControlName="isMobile" inputId="isMobile" [binary]="true"></p-checkbox>
+            <label for="isMobile" class="ml-2 text-sm">Disponible en Móvil</label>
+          </div>
+          <div class="flex items-center">
+            <p-checkbox formControlName="isDesktop" inputId="isDesktop" [binary]="true"></p-checkbox>
+            <label for="isDesktop" class="ml-2 text-sm">Disponible en Escritorio</label>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">Selecciona en qué plataformas estará disponible este elemento.</p>
+      </div>
+    </div>
+  </form>
+</app-modal-template>
+

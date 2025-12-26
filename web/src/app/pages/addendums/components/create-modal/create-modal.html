@@ -1,0 +1,43 @@
+<app-modal-template
+  [visible]="visible"
+  headerText="Crear Adenda"
+  (onHide)="hideModal()"
+  (onSubmit)="createAddendum()"
+  [isSubmitDisabled]="addendumForm.invalid"
+>
+  <form [formGroup]="addendumForm" class="flex flex-col gap-4">
+
+    <div class="flex flex-col gap-2">
+      <label for="contract" class="font-semibold text-sm">Contrato</label>
+      <p-select id="contract" formControlName="contractPublicId" [options]="contracts()" optionLabel="name" optionValue="publicId" placeholder="Seleccione un contrato" styleClass="w-full" [filter]="true" filterBy="name"></p-select>
+      <small *ngIf="addendumForm.get('contractPublicId')?.invalid && addendumForm.get('contractPublicId')?.touched" class="p-error">El contrato es requerido.</small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="addendumType" class="font-semibold text-sm">Tipo de Adenda</label>
+      <p-select id="addendumType" formControlName="addendumTypePublicId" [options]="addendumTypes()" optionLabel="name" optionValue="publicId" placeholder="Seleccione un tipo de adenda" styleClass="w-full"></p-select>
+      <small *ngIf="addendumForm.get('addendumTypePublicId')?.invalid && addendumForm.get('addendumTypePublicId')?.touched" class="p-error">El tipo de adenda es requerido.</small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="addendumTemplate" class="font-semibold text-sm">Plantilla de Adenda</label>
+      <p-select id="addendumTemplate" formControlName="templatePublicId" [options]="addendumTemplates()" optionLabel="name" optionValue="publicId" placeholder="Seleccione una plantilla" styleClass="w-full" [disabled]="!addendumForm.get('addendumTypePublicId')?.value"></p-select>
+      <small *ngIf="addendumForm.get('templatePublicId')?.invalid && addendumForm.get('templatePublicId')?.touched" class="p-error">La plantilla es requerida.</small>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="startDate" class="font-semibold text-sm">Fecha de Inicio</label>
+            <p-calendar id="startDate" formControlName="startDate" dateFormat="dd/mm/yy" styleClass="w-full"></p-calendar>
+            <small *ngIf="addendumForm.get('startDate')?.invalid && addendumForm.get('startDate')?.touched" class="p-error">La fecha de inicio es requerida.</small>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="endDate" class="font-semibold text-sm">Fecha de Fin</label>
+            <p-calendar id="endDate" formControlName="endDate" dateFormat="dd/mm/yy" styleClass="w-full"></p-calendar>
+        </div>
+    </div>
+
+    <!-- TODO: Add form for variables based on selected template -->
+
+  </form>
+</app-modal-template>

@@ -1,0 +1,217 @@
+<p-dialog
+  header="Editar Información de la Empresa"
+  [modal]="true"
+  [visible]="visible"
+  (visibleChange)="onHide()"
+  [style]="{ width: '900px' }"
+  [closable]="!companyStore.loading() && !companyStore.externalLookupLoading()"
+  [draggable]="false"
+  [closeOnEscape]="!companyStore.loading() && !companyStore.externalLookupLoading()">
+
+  @if (company) {
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="p-fluid" [ngStyle]="{
+      'padding': '1.5rem 1.5rem 2rem 1.5rem'
+    }">
+      <!-- Sección: Información Legal -->
+      <div [ngStyle]="{
+        'margin-bottom': '2rem'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1.25rem'
+        }">
+          <i class="pi pi-shield" [ngStyle]="{
+            'font-size': '1.125rem',
+            'color': '#4faf5a'
+          }"></i>
+          <h3 [ngStyle]="{
+            'font-size': '1.125rem',
+            'font-weight': '600',
+            'color': '#131613',
+            'margin': '0'
+          }">Información Legal</h3>
+        </div>
+
+        <div [ngStyle]="{
+          'display': 'grid',
+          'gap': '1.25rem'
+        }">
+          <!-- RUC -->
+          <div>
+            <div class="p-inputgroup">
+              <p-floatlabel class="flex-1">
+                <input pInputText id="editRuc" formControlName="ruc" class="font-mono" (input)="onRucInput()" />
+                <label for="editRuc">RUC</label>
+              </p-floatlabel>
+              <span class="p-inputgroup-addon">
+                @if (companyStore.externalLookupLoading()) {
+                  <i class="pi pi-spin pi-spinner"></i>
+                }
+              </span>
+            </div>
+            @if (editForm.get('ruc')?.invalid && editForm.get('ruc')?.touched) {
+              <div class="pl-2 mt-2">
+                @if (editForm.get('ruc')?.errors?.['required']) {
+                  <p-message severity="error" variant="simple" size="small">El RUC es requerido.</p-message>
+                }
+                @if (editForm.get('ruc')?.errors?.['pattern']) {
+                  <p-message severity="error" variant="simple" size="small">El RUC debe contener 11 dígitos numéricos.</p-message>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Razón Social, Nombre Comercial, Tipo de Empresa -->
+          <p-floatlabel>
+            <input pInputText id="editLegalName" formControlName="legalName" [readonly]="true" />
+            <label for="editLegalName">Razón Social</label>
+          </p-floatlabel>
+          <p-floatlabel>
+            <input pInputText id="editTradeName" formControlName="tradeName" [readonly]="true" />
+            <label for="editTradeName">Nombre Comercial</label>
+          </p-floatlabel>
+          <p-floatlabel>
+            <input pInputText id="editCompanyType" formControlName="companyType" [readonly]="true" />
+            <label for="editCompanyType">Tipo de Empresa</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <!-- Sección: Configuración de Nómina -->
+      <div [ngStyle]="{
+        'margin-bottom': '1.5rem'
+      }">
+        <div [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.75rem',
+          'margin-bottom': '1.25rem'
+        }">
+          <i class="pi pi-cog" [ngStyle]="{
+            'font-size': '1.125rem',
+            'color': '#4faf5a'
+          }"></i>
+          <h3 [ngStyle]="{
+            'font-size': '1.125rem',
+            'font-weight': '600',
+            'color': '#131613',
+            'margin': '0'
+          }">Configuración de Nómina</h3>
+        </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+        <!-- Días de Intervalo de Pago -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="paymentIntervalDays" formControlName="paymentIntervalDays" [min]="1"></p-inputNumber>
+            <label for="paymentIntervalDays">Intervalo de Pago (días)</label>
+          </p-floatlabel>
+          @if (editForm.get('paymentIntervalDays')?.invalid && editForm.get('paymentIntervalDays')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Requerido.</p-message>
+          }
+        </div>
+
+        <!-- Horas Máximas Mensuales -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="maxMonthlyWorkingHours" formControlName="maxMonthlyWorkingHours" [min]="1"></p-inputNumber>
+            <label for="maxMonthlyWorkingHours">Horas Máximas/Mes</label>
+          </p-floatlabel>
+          @if (editForm.get('maxMonthlyWorkingHours')?.invalid && editForm.get('maxMonthlyWorkingHours')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Debe ser mayor a 0.</p-message>
+          }
+        </div>
+
+        <!-- Día de Declaración de Planilla -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="payrollDeclarationDay" formControlName="payrollDeclarationDay" [min]="1" [max]="28"></p-inputNumber>
+            <label for="payrollDeclarationDay">Día Declaración Planilla</label>
+          </p-floatlabel>
+          @if (editForm.get('payrollDeclarationDay')?.invalid && editForm.get('payrollDeclarationDay')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Entre 1 y 28.</p-message>
+          }
+        </div>
+
+        <!-- Días de Anticipación de Planilla -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="payrollAnticipationDays" formControlName="payrollAnticipationDays" [min]="0"></p-inputNumber>
+            <label for="payrollAnticipationDays">Días Anticipo Planilla</label>
+          </p-floatlabel>
+           @if (editForm.get('payrollAnticipationDays')?.invalid && editForm.get('payrollAnticipationDays')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Requerido.</p-message>
+          }
+        </div>
+
+        <!-- Tasa de Horas Extra -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="overtimeRate" formControlName="overtimeRate" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" [max]="1" suffix="%"></p-inputNumber>
+            <label for="overtimeRate">Tasa Horas Extra</label>
+          </p-floatlabel>
+           @if (editForm.get('overtimeRate')?.invalid && editForm.get('overtimeRate')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Entre 0 y 1.</p-message>
+          }
+        </div>
+
+        <!-- Horas Normales Diarias -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="dailyNormalHours" formControlName="dailyNormalHours" mode="decimal" [minFractionDigits]="1" [maxFractionDigits]="2" [min]="1"></p-inputNumber>
+            <label for="dailyNormalHours">Horas Normales/Día</label>
+          </p-floatlabel>
+           @if (editForm.get('dailyNormalHours')?.invalid && editForm.get('dailyNormalHours')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Mínimo 1.</p-message>
+          }
+        </div>
+
+        <!-- Días de Cálculo del Mes -->
+        <div class="flex flex-col">
+          <p-floatlabel>
+            <p-inputNumber inputId="monthCalculationDays" formControlName="monthCalculationDays" [min]="28" [max]="31"></p-inputNumber>
+            <label for="monthCalculationDays">Días Cálculo Mes</label>
+          </p-floatlabel>
+           @if (editForm.get('monthCalculationDays')?.invalid && editForm.get('monthCalculationDays')?.touched) {
+            <p-message severity="error" variant="simple" size="small">Entre 28 y 31.</p-message>
+          }
+        </div>
+      </div>
+      </div>
+
+      <!-- Botones -->
+      <div [ngStyle]="{
+        'display': 'flex',
+        'justify-content': 'flex-end',
+        'gap': '0.75rem',
+        'padding-top': '1.5rem',
+        'margin-top': '1.5rem',
+        'border-top': '1px solid #e0e0e0'
+      }">
+        <button
+          type="button"
+          pButton
+          label="Cancelar"
+          class="p-button-text"
+          (click)="onHide()"
+          [disabled]="companyStore.loading() || companyStore.externalLookupLoading()">
+        </button>
+        <button
+          type="submit"
+          pButton
+          label="Guardar Cambios"
+          icon="pi pi-check"
+          class="p-button-success"
+          [loading]="companyStore.loading()"
+          [disabled]="editForm.invalid || companyStore.loading() || companyStore.externalLookupLoading()">
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="flex items-center justify-center p-8">
+      <p-progressSpinner strokeWidth="3" animationDuration=".5s" styleClass="w-12 h-12"></p-progressSpinner>
+    </div>
+  }
+</p-dialog>

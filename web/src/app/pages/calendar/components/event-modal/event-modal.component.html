@@ -1,0 +1,110 @@
+<app-modal-template
+  [visible]="visible"
+  (onHide)="hideModal()"
+  [headerText]="'Eventos del ' + (store.selectedDay()?.date | date:'longDate')"
+  [width]="'900px'">
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+    <!-- Left Column: Create Event Form -->
+    <div class="flex flex-col space-y-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i class="pi pi-plus-circle text-blue-500 text-lg"></i>
+        <h3 class="text-lg font-bold text-gray-700">Añadir Nuevo Evento</h3>
+      </div>
+
+      <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <!-- Event Type Select -->
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-gray-600">Tipo de Evento</label>
+          <p-select
+            [options]="store.eventTypeOptions()"
+            formControlName="eventTypePublicId"
+            optionLabel="name"
+            optionValue="publicId"
+            placeholder="Seleccionar tipo de evento"
+            styleClass="w-full">
+          </p-select>
+          @if (eventForm.get('eventTypePublicId')?.invalid && (eventForm.get('eventTypePublicId')?.dirty || eventForm.get('eventTypePublicId')?.touched)) {
+            <small class="text-red-500 flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-xs"></i>
+              El tipo de evento es requerido
+            </small>
+          }
+        </div>
+
+        <!-- Description Input -->
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-gray-600">Descripción</label>
+          <input pInputText formControlName="description" placeholder="Describe el evento..." class="w-full" />
+          @if (eventForm.get('description')?.invalid && (eventForm.get('description')?.dirty || eventForm.get('description')?.touched)) {
+            <small class="text-red-500 flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-xs"></i>
+              @if (eventForm.get('description')?.errors?.['required']) {
+                La descripción es requerida
+              }
+              @if (eventForm.get('description')?.errors?.['pattern']) {
+                Solo letras, números y espacios
+              }
+            </small>
+          }
+        </div>
+      </form>
+
+      <div class="border-t border-gray-200 pt-5 mt-5">
+        <!-- Working Day Toggle -->
+        <div class="flex items-center justify-between p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg border border-gray-200">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-calendar text-gray-600"></i>
+            <label for="isWorkingDay" class="font-semibold text-gray-700">Día Laborable</label>
+          </div>
+          <p-toggleswitch
+            inputId="isWorkingDay"
+            [ngModel]="isDayWorking()"
+            (ngModelChange)="onWorkingDayToggle($event)"
+            [disabled]="anyLoading">
+          </p-toggleswitch>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: List of Events -->
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="pi pi-list text-blue-500 text-lg"></i>
+        <h3 class="text-lg font-bold text-gray-700">Eventos del Día</h3>
+      </div>
+
+      @if (store.loadingEvents()) {
+        <div class="flex items-center justify-center h-full">
+          <p-progressSpinner></p-progressSpinner>
+        </div>
+      } @else {
+        <div class="space-y-2 overflow-y-auto max-h-[400px] pr-2">
+          @for (event of store.dayEvents(); track event.publicId) {
+            <div class="group flex items-center justify-between p-4 bg-gradient-to-br from-blue-50 to-blue-100/30 rounded-lg border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all">
+              <div class="flex flex-col gap-1">
+                <span class="font-semibold text-gray-800">{{ event.description }}</span>
+                <div class="flex items-center gap-1.5">
+                  <i class="pi pi-tag text-xs text-blue-600"></i>
+                  <span class="text-sm text-blue-600 font-medium">{{ event.eventTypeName }}</span>
+                </div>
+              </div>
+              <button
+                pButton
+                icon="pi pi-trash"
+                (click)="deleteEvent(event.publicId)"
+                class="p-button-danger p-button-text p-button-rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                [disabled]="anyLoading">
+              </button>
+            </div>
+          } @empty {
+            <div class="flex flex-col items-center justify-center h-48 text-gray-400">
+              <i class="pi pi-inbox text-5xl mb-3"></i>
+              <p class="text-gray-500 font-medium">No hay eventos para este día</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</app-modal-template>
